@@ -1,10 +1,10 @@
 from flask import render_template, request, redirect, url_for, jsonify
-
+from src.helper.tools_labeling import *
+from src.helper.tools_common import is_signed_in, lock_artifact_by
 from src import app
 from src.database.models import Note
 from src.helper.consts import *
-from src.helper.tools_common import is_signed_in, lock_artifact_by
-from src.helper.tools_labeling import *
+import json
 
 
 @app.route("/labeling", methods=['GET', 'POST'])
@@ -35,16 +35,25 @@ def labeling_with_artifact(target_artifact_id):
     if request.method != 'POST':
         if is_signed_in():
             target_artifact_id = int(target_artifact_id)
-
             artifact_data = Artifact.query.filter_by(id=target_artifact_id).first()
+            #print(artifact_data)
             all_labels = {row[0] for row in LabelingData.query.with_entities(LabelingData.labeling).all()}
             all_taggers = {row[0] for row in
                            LabelingData.query.with_entities(LabelingData.username).filter_by(artifact_id=target_artifact_id).all()}
             lock_artifact_by(who_is_signed_in(), target_artifact_id)
 
+            #wget here the java file from the repo if it does not exist already!
+
+            with open(artifact_data.linkToFileJava) as f:
+                javaClassText = f.read()
+
+            methodsList = eval(artifact_data.methodsList)
+
             return render_template('labeling_pages/artifact.html',
                                    artifact_id=target_artifact_id,
                                    artifact_data=artifact_data,
+                                   artifact_class=javaClassText,
+                                   artifact_methodList = methodsList,
                                    overall_labeling_status=get_overall_labeling_progress(),
                                    user_info=get_labeling_status(who_is_signed_in()),
                                    existing_labeling_data=all_labels,

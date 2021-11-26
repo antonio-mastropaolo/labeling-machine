@@ -55,6 +55,13 @@ a[target="_blank"]:after
 
 .headerPadding {
     padding-top: 3rem;
+    padding-left: 100px;
+    position:absolute;
+}
+
+.headerPaddingRight {
+    padding-top: 3rem;
+    padding-right: 100px;
 }
 
 table{
@@ -63,3 +70,4 @@ table{
     margin-left: auto;
     margin-right: auto;
 }
+

@@ -51,6 +51,8 @@ class LockedArtifact(db.Model):
 class Artifact(db.Model):
     __tablename__ = 'Artifact'
     id = db.Column(db.Integer, primary_key=True)
+    linkToFileJava = db.Column(db.Text)
+    methodsList = db.Column(db.Text)
 
 
 class LabelingData(db.Model):

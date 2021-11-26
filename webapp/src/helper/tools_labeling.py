@@ -7,6 +7,11 @@ from src.database.models import LabelingData, Artifact, FlaggedArtifact
 from src.helper.consts import N_API_NEEDS_LABELING
 from src.helper.tools_common import who_is_signed_in, get_locked_artifacts, get_false_positive_artifacts
 
+#A stub for the moment
+def get_next_class():
+    with open('/stub.java', 'r') as fread:
+        return fread.read()
+
 
 def get_labeling_status(username):  # OLD: get_user_labeling_status
     if username is None:

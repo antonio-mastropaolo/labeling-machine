@@ -26,3 +26,6 @@ db = SQLAlchemy(app)
 
 from src import routes
 from src.database import models, initdb
+import jinja2_highlight
+jinja_options = dict(Flask.jinja_options)
+jinja_options.setdefault('extensions',[]).append('jinja2_highlight.HighlightExtension')

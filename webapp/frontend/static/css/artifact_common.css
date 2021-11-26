@@ -6,7 +6,7 @@
     align-items: center;
 
     color: white;
-	background-color: black;
+    background-color: black;
     padding: 0.3rem;
 
 
@@ -23,3 +23,38 @@
     border-top-width: 2px;
     padding:5px 10px;
 }
+
+.no-gutters {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.eighty {
+  height:80%;
+}
+
+.fullHeight {
+  height:150%;
+}
+
+body {
+    height:100%;
+    margin:0;
+    overflow: hidden;
+}
+
+.scrollableColumn {
+    position: absolute;
+    overflow-y: scroll;
+}
+
+::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+* {
+  -ms-overflow-style: none !important;
+}
+
+

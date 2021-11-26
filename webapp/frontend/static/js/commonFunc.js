@@ -20,3 +20,4 @@ function ChangeSkipToNext() {
     $("#next-skip-btn").removeClass("btn-outline-success");
     $("#next-skip-btn").addClass("btn-success");
 }
+

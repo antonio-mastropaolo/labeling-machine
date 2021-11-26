@@ -2,100 +2,247 @@
 
 {% block headerStuff %}
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
-    {#    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"#}
-    {#          integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">#}
-    {#    <link href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.2.0/animate.min.css" rel="stylesheet">#}
-    {#    <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js"></script>#}
-    {#    <script src="https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js"></script>#}
-    {#    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/animations/shift-away.css"/>#}
-    <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/code.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet"
+          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
+
+    {#    High priority css classes#}
+    <style>
+        .buttonWrapper{
+            padding-bottom:7px;
+            border-radius: 25px;
+            padding-right: 5px;
+            padding-left: 3px;
+        }
+
+        .animationLabel{
+            animation:color-me-in 5s;
+        }
+
+       @keyframes color-me-in {
+          /* You could think of as "step 1" */
+          0% {
+            background: red;
+          }
+          /* You could think of as "step 2" */
+          100% {
+            background: black;
+          }
+       }
+
+    </style>
+
 {% endblock %}
 
+<!-- Bootstrap container -->
+ <div class="container">
 
-{% block content %}
-    <div class="header">
-        <div style="">
-            <button class="btn btn-sm btn-outline-danger"
-                    type="submit"
-                    id="fpBtn"
-                    onclick="ToggleFlagBtn({{ artifact_id }})"
-                    title="This artifact is irrelevant to our aim"
-                    style="">Flag (?)
-            </button>
+        {% block content %}
 
-            <button class="btn btn-sm btn-outline-info"
-                    type="submit"
-                    id="interestingBtn"
-                    onclick="ToggleInterestingBtn({{ artifact_id }})"
-                    title="This artifact seems a good example to be discussed in the paper"
-                    style="">Interesting (?)
-            </button>
-        </div>
-        <div style="width: 25%">
-            <div style="text-align: center; font-size: small;">
-                {{ overall_labeling_status['n_artifacts_labeled'] }}
-                out of
-                {{ overall_labeling_status['n_artifacts_to_be_labeled'] }} | <em>{{ overall_labeling_status['source_name'] }}</em>
-            </div>
-            <div class="progress">
-                <div id="top-progress-bar-status" class="progress-bar" role="progressbar" style="width: 0%;"
-                     aria-valuenow="0"
-                     aria-valuemin="0"
-                     aria-valuemax="100">
+            <div class="row no-gutters" style="background-color: black; padding-top: 10px;">
+
+                     <div class="col-lg-4">
+                        <div class="text-left">
+                            <button class="btn btn-outline-info"
+                                    type="submit"
+                                    id="interestingBtn"#}
+                                    onclick="ToggleInterestingBtn({{ artifact_id }})"
+                                    style="width: 100%;"> Interesting (?)
+                            </button>
+                        </div>
+
+                     </div>
+
+                <div class="col-lg-4">
+                    <div style="text-align: center; font-size: medium; color: white;">
+                        {{ overall_labeling_status['n_artifacts_labeled'] }}
+                        out of
+                        {{ overall_labeling_status['n_artifacts_to_be_labeled'] }} | <em>{{ overall_labeling_status['source_name'] }}</em>
+                    </div>
+                    <div class="justify-content-center" style="display: flex;">
+                        <div class="progress" style="width:50%;">
+                            <div id="top-progress-bar-status" class="progress-bar" role="progressbar" style="width: 0%; "
+                                 aria-valuenow="0"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="col-lg-4">
+                    <div class="text-right">
+                        <button class="btn btn-outline-success"
+                                type="submit"
+                                id="next-skip-btn"
+                                onclick="skip_next_artifact()"
+                                style="width: 100%;"> Skip
+                        </button>
+                    </div>
+
+                </div>
+
             </div>
-        </div>
 
-        <button class="btn btn-outline-success"
-                type="submit"
-                id="next-skip-btn"
-                onclick="skip_next_artifact()"
-                style="width: 15%"> Skip
-        </button>
+            <div class="row no-gutters" style="background-color: black; height: 15px;">
 
-    </div> <!--End of Header -->
+                <div class="col-lg-12">
+                    <div class="" style="position: relative; padding-left: 20px;"></div>
+                </div>
 
-    <div class="headerPadding">
-        {% block artifact_content %}
+            </div>
+
+
+            <div class="row no-gutters">
+
+                  <div class="col-lg-2 vh-100" style="background-color: black;">
+
+                      <div class="buttonWrapper">
+                          <button class="btn btn btn-dark"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick=""
+                            style="width: 100%" > Code Summary
+                          </button>
+                      </div>
+
+                      <div class="buttonWrapper">
+                          <button class="btn btn btn-dark"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick=""
+                            style="width: 100%" > Code Summary
+                          </button>
+                      </div>
+
+                      <div class="buttonWrapper">
+                          <button class="btn btn btn-dark"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick=""
+                            style="width: 100%" > Code Summary
+                          </button>
+                      </div>
+
+                      <div class="buttonWrapper">
+                          <button class="btn btn btn-dark"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick=""
+                            style="width: 100%" > Code Summary
+                          </button>
+                      </div>
+
+                      <div class="buttonWrapper">
+                          <button class="btn btn btn-dark"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick=""
+                            style="width: 100%" > Code Summary
+                          </button>
+                      </div>
+
+                      <div class="buttonWrapper">
+                          <button class="btn btn btn-dark"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick=""
+                            style="width: 100%" > Code Summary
+                          </button>
+                      </div>
+
+                  </div>
+
+                <div class="col-lg-8 overflow-auto" id="codeColumn" style="overflow-y: scroll; height: 90vh";>
+
+                    {% highlight 'java', lineno='inline' %}
+                        {{ artifact_class }}
+                    {% endhighlight %}
+
+                </div>
+
+                <div class="col-lg-2 no-float" id="methodsLabel" style="background-color: black;">
+
+
+{#                   <!-- This Div is dyamically filled -->#}
+
+                </div>
+
+            </div>
+
         {% endblock %}
-    </div>
+ </div>
 
-    <div class="lower-panel fixed-bottom ">
-        <form class="form-inline" style="justify-content: center;" id="form1">
-            <div class="form-group mx-sm-3 mb-2">
-                <select class="js-example-basic-single" name="labeling_data" id="label_selector" style="width: 400px">
-                    <option value='' selected="selected"></option>
-                    {% for item in existing_labeling_data %}
-                        <option value="{{ item }}" title="{{ item }}">{{ item }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="button" id="submit_btn" form="form1" class="btn btn-primary mb-2" disabled>Submit</button>
-        </form>
-    </div>
-{% endblock %}
 
 {% block scriptsStuff %}
 
     <script>
 
-        $(document).ready(function () {
-            window.startTime = (new Date()).getTime();
-            document.getElementById('navbar-labeling').classList.add('active');
-            document.getElementById('navbar-labeling').setAttribute('href', '#');
-            InitProgressbar({{ overall_labeling_status['n_artifacts_labeled'] }},
-                {{ overall_labeling_status['n_artifacts_to_be_labeled'] }});
-            InitFlagBtn({{ artifact_id }});
-            InitInterestingBtn({{ artifact_id }});
+        // -------------------------Start-------------------------
 
-            // Implement Here
-            $('#label_selector').select2(
-                    {   tags: true,
-                        width: 'resolve',
-                        placeholder: "Select a label",
-                        allowClear: true
-                    }
-            );
+        //Newly defined functions
+
+        function highlightRow(selector){
+
+             $(selector).prop('style').removeProperty('animation');
+        }
+
+        function moveToSelectedMethod(startingLine, endingLine) {
+            console.log(startingLine + ' ------ ' + endingLine);
+            var selector = 'span:contains(' + startingLine + ')';
+            $(selector)[0].scrollIntoViewIfNeeded();
+
+            $(selector).addClass('animationLabel').delay(1500).queue(function(){
+                $(this).removeClass('animationLabel').dequeue();
+            });
+
+
+        }
+
+
+        // -------------------------End-------------------------
+
+        $(document).ready(function () {
+
+
+            // Dynamically adding button on the right panel
+            const methodList = JSON.parse('{{ artifact_methodList | tojson }}');
+
+            for (let i = 0; i < methodList.length; i++) {
+              var buttonID = "method-button-"+i;
+              var startingLine = methodList[i].split("-")[0];
+              var endingLine = methodList[i].split("-")[1];
+              var buttonText = "Method_"+i+" " +startingLine + '---' + endingLine;
+              var scorllCall = 'moveToSelectedMethod(' + startingLine +',' + endingLine +')';
+              var newButton = '<div class="buttonWrapper"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%">' + buttonText + '</button> </div>';
+              //console.log(newButton);
+              $( "#methodsLabel" ).append( $(newButton) );
+
+            }
+
+            ////////////////////////////////////////////////////
+
+
+            function getSelectedText() {
+                if (window.getSelection) {
+                    txt = window.getSelection();
+                } else if (window.document.getSelection) {
+                    txt =window.document.getSelection();
+                } else if (window.document.selection) {
+                    txt = window.document.selection.createRange().text;
+                }
+                console.log(txt);
+            }
+
+            $("h1").css('color','white');
+
+            $("h2").css('color','white');
+
+
+            {#Change rows label color to white#}
+            $(".linenos").css('color','white');
+
 
             $(document.body).on("change","#label_selector",function(){
                 if(this.value == "")
@@ -121,6 +268,5 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
     <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/commonFunc.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/bootstrap-confirmation.min.js') }}"></script>
 {% endblock %}
