@@ -31,6 +31,19 @@
           }
        }
 
+       .button-corner-down {
+          position: absolute;
+          bottom: 10%;
+          left: 94.5%;
+        }
+
+        .button-corner-up {
+          position: absolute;
+          bottom: 80%;
+          left: 94.5%;
+        }
+
+
     </style>
 
 {% endblock %}
@@ -154,13 +167,25 @@
 
                   </div>
 
-                <div class="col-lg-8 overflow-auto" id="codeColumn" style="overflow-y: scroll; height: 90vh";>
+                <div class="col-lg-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
 
-                    {% highlight 'java', lineno='inline' %}
-                        {{ artifact_class }}
-                    {% endhighlight %}
+                    <div style="overflow-y: scroll;">
+                        {% highlight 'java', lineno='inline' %}
+                            {{ artifact_class }}
+                        {% endhighlight %}
+                    </div>
+
+                    <div id="selectedText" style="left: 0; bottom:0; width:100%; position: sticky;">
+                         <textarea id="textAreaSelectedText" rows="5" cols="50" style="width: 100%; margin-top: -15px; padding-bottom:5px; overflow-y: scroll;"></textarea>
+                         <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="resetHighlightedText()">Clear</button>
+                         <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization()">Save</button>
+
+                    </div>
+
 
                 </div>
+
+
 
                 <div class="col-lg-2 no-float" id="methodsLabel" style="background-color: black;">
 
@@ -171,7 +196,10 @@
 
             </div>
 
+
         {% endblock %}
+
+
  </div>
 
 
@@ -180,13 +208,13 @@
     <script>
 
         // -------------------------Start-------------------------
-
+        //console.log(window.getSelection().toString());
         //Newly defined functions
 
-        function highlightRow(selector){
-
-             $(selector).prop('style').removeProperty('animation');
+        function resetHighlightedText(){
+            $("#textAreaSelectedText").text("");
         }
+
 
         function moveToSelectedMethod(startingLine, endingLine) {
             console.log(startingLine + ' ------ ' + endingLine);
@@ -199,13 +227,81 @@
 
 
         }
+        var mappingDict = {};
+        var tags = document.getElementsByTagName("span");
+        var key = -1;
+        var flagChange = true;
+        var elementsPerRow = [];
+        //var finalLine = "";
+        for (var i = 8; i < tags.length; i++) {
+
+            if (tags[i].classList.contains("linenos")){
+
+                key = tags[i].innerHTML;
+                mappingDict[key] = "";
+                flagChange = false;
+                continue;
+            }
+            if (!flagChange){
+                mappingDict[key] = mappingDict[key] + " " + tags[i].innerHTML;
+
+            }
+
+        }
+
+        //console.log(mappingDict);
 
 
         // -------------------------End-------------------------
 
         $(document).ready(function () {
 
+            //$().prop("disabled", (1 === 2)/*some condition*/);
 
+            $("#textAreaSelectedText").keydown(function(e) {
+               e.preventDefault();
+               return false;
+            });
+
+            document.addEventListener('mouseup', event => {
+            if(window.getSelection().toString().length){
+                let selectedText = window.getSelection().toString();
+                console.log(selectedText);
+                let previousSelection = $("#textAreaSelectedText").val();
+                if (previousSelection==""){
+                    $("#textAreaSelectedText").text(previousSelection + selectedText);
+                }
+                else{
+                    $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
+                }
+                document.getSelection().removeAllRanges();
+
+            }
+            });
+
+            var classification = JSON.parse('{{ artifact_classification|tojson }}');
+            console.log(classification);
+
+            jQuery.each(classification, function(i, val) {
+                const lines = val.toString().split(",");
+                for (var k=0;k<lines.length; k++){
+                    var lineSelector = ".linenos:contains( " + lines[k] + ")";
+                    $(lineSelector).css("background", "red");
+                    //console.log("key: " +i + " ------ " + val);
+                }
+            });
+
+
+            {#var allSpans = document.getElementsByClassName("linenos");#}
+            {#for(var i = 0, max = allSpans.length-1; i < max; i++) {#}
+            {#    console.log(allSpans[i].innerHTML);#}
+            {#    var startingElement = ".linenos:contains(" + allSpans[i].innerHTML + ")";#}
+            {#    var endingElement = ".linenos:contains(" + allSpans[i+1].innerHTML + ")";#}
+            {#    $(startingElement)#}
+            {#        .nextUntil(endingElement)#}
+            {#        .css("background", "red");#}
+            {##}
+            //{
             // Dynamically adding button on the right panel
             const methodList = JSON.parse('{{ artifact_methodList | tojson }}');
 
@@ -223,18 +319,6 @@
 
             ////////////////////////////////////////////////////
 
-
-            function getSelectedText() {
-                if (window.getSelection) {
-                    txt = window.getSelection();
-                } else if (window.document.getSelection) {
-                    txt =window.document.getSelection();
-                } else if (window.document.selection) {
-                    txt = window.document.selection.createRange().text;
-                }
-                console.log(txt);
-            }
-
             $("h1").css('color','white');
 
             $("h2").css('color','white');
@@ -242,6 +326,9 @@
 
             {#Change rows label color to white#}
             $(".linenos").css('color','white');
+            $(".linenos").addClass('noselect');
+
+
 
 
             $(document.body).on("change","#label_selector",function(){

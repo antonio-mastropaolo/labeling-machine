@@ -49,10 +49,13 @@ def labeling_with_artifact(target_artifact_id):
 
             methodsList = eval(artifact_data.methodsList)
 
+            jsonClassification = eval(artifact_data.classification)
+
             return render_template('labeling_pages/artifact.html',
                                    artifact_id=target_artifact_id,
                                    artifact_data=artifact_data,
                                    artifact_class=javaClassText,
+                                   artifact_classification=jsonClassification,
                                    artifact_methodList = methodsList,
                                    overall_labeling_status=get_overall_labeling_progress(),
                                    user_info=get_labeling_status(who_is_signed_in()),
