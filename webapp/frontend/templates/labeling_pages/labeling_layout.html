@@ -9,6 +9,8 @@
 
     {#    High priority css classes#}
     <style>
+        .category-button{}
+
         .buttonWrapper{
             padding-bottom:7px;
             border-radius: 25px;
@@ -32,16 +34,28 @@
        }
 
        .button-corner-down {
-          position: absolute;
-          bottom: 10%;
-          left: 94.5%;
+            position: absolute;
+            bottom: 10%;
+            left: 94.5%;
+            width: 5%;
+            text-align: justify;
         }
 
         .button-corner-up {
-          position: absolute;
-          bottom: 80%;
-          left: 94.5%;
+            position: absolute;
+            bottom: 80%;
+            left: 94.5%;
+            width: 5%;
+            text-align: justify;
         }
+
+        .force-select {
+          -webkit-user-select: all;  /* Chrome 49+ */
+          -moz-user-select: all;     /* Firefox 43+ */
+          -ms-user-select: all;      /* No support yet */
+          user-select: all;          /* Likely future */
+        }
+
 
 
     </style>
@@ -112,56 +126,92 @@
                   <div class="col-lg-2 vh-100" style="background-color: black;">
 
                       <div class="buttonWrapper">
-                          <button class="btn btn btn-dark"
+                          <button class="btn btn btn-dark category-button"
                             type="submit"
-                            id="next-skip-btn"
-                            onclick=""
+                            id="code-summary-button"
+                            onclick="addNewCommentToBeLinked(this);"
                             style="width: 100%" > Code Summary
                           </button>
                       </div>
 
                       <div class="buttonWrapper">
-                          <button class="btn btn btn-dark"
+                          <button class="btn btn btn-dark category-button"
                             type="submit"
-                            id="next-skip-btn"
-                            onclick=""
-                            style="width: 100%" > Code Summary
+                            id="expand-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > Expand
                           </button>
                       </div>
 
                       <div class="buttonWrapper">
-                          <button class="btn btn btn-dark"
+                          <button class="btn btn btn-dark category-button"
                             type="submit"
-                            id="next-skip-btn"
-                            onclick=""
-                            style="width: 100%" > Code Summary
+                            id="rationale-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > Rationale
                           </button>
                       </div>
 
                       <div class="buttonWrapper">
-                          <button class="btn btn btn-dark"
+                          <button class="btn btn btn-dark category-button"
                             type="submit"
-                            id="next-skip-btn"
-                            onclick=""
-                            style="width: 100%" > Code Summary
+                            id="deprecation-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > Deprecation
                           </button>
                       </div>
 
                       <div class="buttonWrapper">
-                          <button class="btn btn btn-dark"
+                          <button class="btn btn btn-dark category-button"
                             type="submit"
-                            id="next-skip-btn"
-                            onclick=""
-                            style="width: 100%" > Code Summary
+                            id="usage-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > Usage
                           </button>
                       </div>
 
                       <div class="buttonWrapper">
-                          <button class="btn btn btn-dark"
+                          <button class="btn btn btn-dark category-button"
                             type="submit"
-                            id="next-skip-btn"
-                            onclick=""
-                            style="width: 100%" > Code Summary
+                            id="exception-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > Exception
+                          </button>
+                      </div>
+
+                       <div class="buttonWrapper">
+                          <button class="btn btn btn-dark category-button"
+                            type="submit"
+                            id="todo-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > TO-DO
+                          </button>
+                      </div>
+
+                       <div class="buttonWrapper">
+                          <button class="btn btn btn-dark category-button"
+                            type="submit"
+                            id="comment-code-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > Commented Code
+                          </button>
+                      </div>
+
+                      <div class="buttonWrapper">
+                          <button class="btn btn btn-dark category-button"
+                            type="submit"
+                            id="incomplete-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > Incomplete
+                          </button>
+                      </div>
+
+                      <div class="buttonWrapper">
+                          <button class="btn btn btn-dark category-button"
+                            type="submit"
+                            id="new-category-button"
+                            onclick="addNewCommentToBeLinked(this);"
+                            style="width: 100%" > Define new category
                           </button>
                       </div>
 
@@ -211,13 +261,58 @@
         //console.log(window.getSelection().toString());
         //Newly defined functions
 
+        var labelCategories = ["new-category-button",
+                                'expand-button',
+                                'rationale-button',
+                                'deprecation-button',
+                                'usage-button',
+                                'exception-button',
+                                'todo-button',
+                                'code-summary-button',
+                                'comment-code-button',
+                                'incomplete-button',
+        ]
+
+        var selectedLines = [];
+
+        var selectedCateory = "";
+        var selectedCodeText = "";
+        var selectedCommentText = "";
+        var elementsToHighlight = [];
+
+
+        var selectableSpanElements = document.getElementsByTagName("span");
+        for (var i=8; i<selectableSpanElements.length; i++){
+            if (!selectableSpanElements[i].classList.contains("linenos")){
+                $(selectableSpanElements[i]).addClass('.force-select');
+                //$(selectableSpanElements[i]).css('line-height','0');
+            }
+        }
+
         function resetHighlightedText(){
+
+            for(var i=0; i<elementsToHighlight.length; i++){
+                console.log('reset');
+                $(elementsToHighlight[i]).css('background-color','');
+                //$(siblings[j]).css('background-color','blue');
+            }
+
             $("#textAreaSelectedText").text("");
+            $('.category-button').css("background-color",'');
+            $("#new-category-button").text("Define New Category");
+            selectedLines = [];
+            selectedCateory = "";
+            selectedCodeText = "";
+            selectedCommentText = "";
+            elementsToHighlight = [];
+
+
         }
 
 
+
         function moveToSelectedMethod(startingLine, endingLine) {
-            console.log(startingLine + ' ------ ' + endingLine);
+            //console.log(startingLine + ' ------ ' + endingLine);
             var selector = 'span:contains(' + startingLine + ')';
             $(selector)[0].scrollIntoViewIfNeeded();
 
@@ -227,6 +322,7 @@
 
 
         }
+
         var mappingDict = {};
         var tags = document.getElementsByTagName("span");
         var key = -1;
@@ -249,14 +345,129 @@
 
         }
 
-        //console.log(mappingDict);
+        function checkForButtonValidity(){
+            let textBoxVal = $("#textAreaSelectedText").val();
+            if(textBoxVal=="") {
+                alert("Select a comment first!");
+                return false;
+            }
+            return true;
+        }
+
+         function popUP() {
+            var newCategory = prompt("","Text");
+            $("#new-category-button").text(newCategory);
+        }
+
+        function checkForChangedCategory(element){
+            function arrayRemove(arr, value) {
+
+                    return arr.filter(function(ele){
+                        return ele != value;
+                    });
+                }
+            var refinedCategories = arrayRemove(labelCategories, element.id.toString());
+
+            for(var i=0;i<refinedCategories.length;i++){
+                var selector="#"+refinedCategories[i];
+                $(selector).css('background-color','');
+            }
+
+        }
+
+        function addNewCommentToBeLinked(element){
+            var retCode=checkForButtonValidity();
+            if (!retCode) { return false;}
+            checkForChangedCategory(element);
+            if(element.id.toString()=="new-category-button"){
+                popUP();
+            }
+            $(element).css('background-color','green');
+            selectedCateory = element.id.toString();
+            selectedCommentText = $("#textAreaSelectedText").val();
+        }
+
+        function getLinkedSnippet(){
+            if(selectedCateory==""){
+                alert("First link the given comment to the snippet!");
+                return false;
+            }
+
+        }
+
+
+        function saveCategorization(){
+            if (!getLinkedSnippet()){
+                //save snippet
+                var allSelection = $("#textAreaSelectedText").val().toString();
+                selectedCodeText = allSelection.replace(selectedCommentText,'');
+
+                //console.log(selectedCommentText);
+                //console.log(selectedCodeText);
+
+                getLineNumbers();
+
+                // save this classification into the database
+
+                $("#textAreaSelectedText").text("");
+                for(var i=0;i<labelCategories.length;i++){
+                    var selector="#"+labelCategories[i];
+                    $(selector).css('background-color','');
+                }
+            }
+
+        }
+
+        function getFirstLineofSelection() {
+            var node,selection;
+            if (window.getSelection) {
+              selection = getSelection();
+              node = selection.anchorNode;
+            }
+            if (!node && document.selection) {
+                selection = document.selection
+                var range = selection.getRangeAt ? selection.getRangeAt(0) : selection.createRange();
+                node = range.commonAncestorContainer ? range.commonAncestorContainer :
+                       range.parentElement ? range.parentElement() : range.item(0);
+            }
+
+            return node.parentNode.previousSibling.previousSibling.textContent
+        }
+
+        function highlightSelection(lines,isReviewer=false){
+
+            for(var i=0; i<lines.length;i++){
+
+                var lineTarget = Number(lines[i]);
+                var lineSelector = ".linenos:contains(" + (lineTarget) + ")";
+
+                var siblings = $(lineSelector).nextAll();
+
+                for(var j=0;j<siblings.length;j++){
+                    if (siblings[j].innerHTML==lineTarget+1){
+                        break;
+                    }
+                    else{
+                        $(siblings[j]).css('background-color','blue');
+                        if(!isReviewer){
+                            elementsToHighlight.push(siblings[j]);
+                        }
+                    }
+                }
+            }
+        }
+
+
 
 
         // -------------------------End-------------------------
 
         $(document).ready(function () {
 
-            //$().prop("disabled", (1 === 2)/*some condition*/);
+            //$(".linenos").css('user-select','none');
+            $(".linenos").on('mouseup', function(e) {
+                e.preventDefault();
+            });
 
             $("#textAreaSelectedText").keydown(function(e) {
                e.preventDefault();
@@ -264,18 +475,32 @@
             });
 
             document.addEventListener('mouseup', event => {
-            if(window.getSelection().toString().length){
-                let selectedText = window.getSelection().toString();
-                console.log(selectedText);
-                let previousSelection = $("#textAreaSelectedText").val();
-                if (previousSelection==""){
-                    $("#textAreaSelectedText").text(previousSelection + selectedText);
-                }
-                else{
-                    $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
-                }
-                document.getSelection().removeAllRanges();
 
+                if(window.getSelection().toString().length){
+                    var selection = window.getSelection()
+                    var firstLineOfSelection = getFirstLineofSelection();
+                    var selectedText = selection.toString().replace(/^\s*\d+\s/gm,"");
+                    var lines = selectedText.split('\n');
+
+                    console.log('--> ' + firstLineOfSelection);
+
+                    selectedLines.push(Number(firstLineOfSelection));
+
+                    for(var i=1;i<lines.length;i++){
+                       selectedLines.push(Number(firstLineOfSelection)+i);
+                    }
+
+                     highlightSelection(selectedLines);
+
+                    let previousSelection = $("#textAreaSelectedText").val();
+                    if(previousSelection==""){
+                        $("#textAreaSelectedText").text(previousSelection + selectedText);
+                    }
+                    else{
+                        $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
+                    }
+                    document.getSelection().removeAllRanges();
+                    console.log(selectedLines);
             }
             });
 
@@ -284,24 +509,9 @@
 
             jQuery.each(classification, function(i, val) {
                 const lines = val.toString().split(",");
-                for (var k=0;k<lines.length; k++){
-                    var lineSelector = ".linenos:contains( " + lines[k] + ")";
-                    $(lineSelector).css("background", "red");
-                    //console.log("key: " +i + " ------ " + val);
-                }
+                highlightSelection(lines,isReviewer=true);
             });
 
-
-            {#var allSpans = document.getElementsByClassName("linenos");#}
-            {#for(var i = 0, max = allSpans.length-1; i < max; i++) {#}
-            {#    console.log(allSpans[i].innerHTML);#}
-            {#    var startingElement = ".linenos:contains(" + allSpans[i].innerHTML + ")";#}
-            {#    var endingElement = ".linenos:contains(" + allSpans[i+1].innerHTML + ")";#}
-            {#    $(startingElement)#}
-            {#        .nextUntil(endingElement)#}
-            {#        .css("background", "red");#}
-            {##}
-            //{
             // Dynamically adding button on the right panel
             const methodList = JSON.parse('{{ artifact_methodList | tojson }}');
 
@@ -326,9 +536,6 @@
 
             {#Change rows label color to white#}
             $(".linenos").css('color','white');
-            $(".linenos").addClass('noselect');
-
-
 
 
             $(document.body).on("change","#label_selector",function(){
