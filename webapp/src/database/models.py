@@ -54,6 +54,7 @@ class Artifact(db.Model):
     linkToFileJava = db.Column(db.Text)
     methodsList = db.Column(db.Text)
     classification = db.Column(db.Text)
+    methodsName = db.Column(db.Text)
 
 
 class LabelingData(db.Model):

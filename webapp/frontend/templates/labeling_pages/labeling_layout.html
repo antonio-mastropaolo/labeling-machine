@@ -4,6 +4,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
     <link href="{{ url_for('static', filename='css/code.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet" type="text/css">
+     <link href="{{ url_for('static', filename='css/icofont.min.css') }}" rel="stylesheet" type="text/css">
     <link rel="stylesheet"
           href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
 
@@ -11,6 +12,16 @@
     <style>
         .category-button{}
 
+
+
+        .counter{
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            color: white;
+            text-align: center;
+
+        }
         .buttonWrapper{
             padding-bottom:7px;
             border-radius: 25px;
@@ -33,28 +44,68 @@
           }
        }
 
-       .button-corner-down {
-            position: absolute;
-            bottom: 10%;
-            left: 94.5%;
-            width: 5%;
-            text-align: justify;
-        }
-
-        .button-corner-up {
-            position: absolute;
-            bottom: 80%;
-            left: 94.5%;
-            width: 5%;
-            text-align: justify;
-        }
-
         .force-select {
           -webkit-user-select: all;  /* Chrome 49+ */
           -moz-user-select: all;     /* Firefox 43+ */
           -ms-user-select: all;      /* No support yet */
           user-select: all;          /* Likely future */
         }
+
+
+       .button-corner-down {
+            position: fixed;
+            bottom: 0.2%;
+            left: 78%;
+            width: 5%;
+            text-align: center;
+        }
+
+        .button-corner-up {
+            position: fixed;
+            bottom: 4.5%;
+            left: 78%;
+            width: 5%;
+            text-align: center;
+        }
+
+        .textarea {
+            width:66.7%;
+            overflow: hidden;
+            overflow-y: scroll;
+            bottom:0.1%;
+            height:8%;
+            position:fixed;
+            margin-bottom: -2px;
+        }
+
+        .code{
+            overflow-y: scroll;
+        }
+
+        .mitico{}
+
+
+        @media screen and (max-height: 1250px) {
+          .textarea{
+            bottom:0.2%;
+            height:8%;
+          }
+
+            .button-corner-down{
+                bottom: 0;
+            }
+
+            .button-corner-up{
+                bottom: 4%;
+            }
+
+            .code{
+                margin-bottom: 20px;
+            }
+        }
+
+
+
 
 
 
@@ -69,7 +120,7 @@
 
             <div class="row no-gutters" style="background-color: black; padding-top: 10px;">
 
-                     <div class="col-lg-4">
+                     <div class="mitico col-md-4">
                         <div class="text-left">
                             <button class="btn btn-outline-info"
                                     type="submit"
@@ -81,7 +132,7 @@
 
                      </div>
 
-                <div class="col-lg-4">
+                <div class="mitico col-md-4">
                     <div style="text-align: center; font-size: medium; color: white;">
                         {{ overall_labeling_status['n_artifacts_labeled'] }}
                         out of
@@ -98,7 +149,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-4">
+                <div class="mitico col-md-4">
                     <div class="text-right">
                         <button class="btn btn-outline-success"
                                 type="submit"
@@ -114,7 +165,7 @@
 
             <div class="row no-gutters" style="background-color: black; height: 15px;">
 
-                <div class="col-lg-12">
+                <div class="mitico col-md-12">
                     <div class="" style="position: relative; padding-left: 20px;"></div>
                 </div>
 
@@ -123,7 +174,7 @@
 
             <div class="row no-gutters">
 
-                  <div class="col-lg-2 vh-100" style="background-color: black;">
+                  <div class="mitico col-md-2 vh-100" style="background-color: black;">
 
                       <div class="buttonWrapper">
                           <button class="btn btn btn-dark category-button"
@@ -215,39 +266,64 @@
                           </button>
                       </div>
 
+                       <div class="buttonWrapper" style="background-color: white; height: 2%; margin-top: 200%;">
+                           <i class="icofont-paperclip">kitte</i>
+                      </div>
+
+
+
+
+
+{#                      <div class="counter">#}
+{#                          <h1>Example heading <div class="badge badge-secondary">New</div></h1>#}
+{#                      </div>#}
+
                   </div>
 
-                <div class="col-lg-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
+                <div class="mitico col-md-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
 
-                    <div style="overflow-y: scroll;">
+                    <div class="code">
                         {% highlight 'java', lineno='inline' %}
                             {{ artifact_class }}
                         {% endhighlight %}
-                    </div>
 
-                    <div id="selectedText" style="left: 0; bottom:0; width:100%; position: sticky;">
-                         <textarea id="textAreaSelectedText" rows="5" cols="50" style="width: 100%; margin-top: -15px; padding-bottom:5px; overflow-y: scroll;"></textarea>
-                         <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="resetHighlightedText()">Clear</button>
-                         <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization()">Save</button>
 
                     </div>
-
 
                 </div>
 
 
 
-                <div class="col-lg-2 no-float" id="methodsLabel" style="background-color: black;">
-
+                <div class="mitico col-md-2 no-float " id="methodsLabel" style="background-color: black;">
 
 {#                   <!-- This Div is dyamically filled -->#}
 
                 </div>
 
+
+
+            </div>
+
+            <div class="row no-gutters">
+                <div class="mitico col-md-2">
+
+                </div>
+                <div class="mitico col-md-8">
+                    <textarea id="textAreaSelectedText" rows="4" cols="50" class="textarea"></textarea>
+                    <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="reset()">Clear</button>
+                    <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization()">Save</button>
+
+                </div>
+                <div class="mitico col-md-2">
+                </div>
             </div>
 
 
+
+
         {% endblock %}
+
+
 
 
  </div>
@@ -258,8 +334,12 @@
     <script>
 
         // -------------------------Start-------------------------
-        //console.log(window.getSelection().toString());
-        //Newly defined functions
+
+
+        // Dynamically adding button on the right panel
+        const methodsList = JSON.parse('{{ artifact_methodsList | tojson }}');
+        const methodsListNames =  JSON.parse('{{ artificat_methodsName | tojson }}');
+        console.log(methodsListNames)
 
         var labelCategories = ["new-category-button",
                                 'expand-button',
@@ -279,6 +359,7 @@
         var selectedCodeText = "";
         var selectedCommentText = "";
         var elementsToHighlight = [];
+        var jsonToSave = {};
 
 
         var selectableSpanElements = document.getElementsByTagName("span");
@@ -289,30 +370,42 @@
             }
         }
 
-        function resetHighlightedText(){
-
-            for(var i=0; i<elementsToHighlight.length; i++){
-                console.log('reset');
-                $(elementsToHighlight[i]).css('background-color','');
-                //$(siblings[j]).css('background-color','blue');
-            }
+        function reset(save=false){
 
             $("#textAreaSelectedText").text("");
             $('.category-button').css("background-color",'');
             $("#new-category-button").text("Define New Category");
-            selectedLines = [];
+
+            if(selectedLines.length==0) {
+            }
+
+            selectedLines = []
             selectedCateory = "";
             selectedCodeText = "";
             selectedCommentText = "";
-            elementsToHighlight = [];
+
+            if(!save) {
+                resetHighlightedText(resetSelection = true);
+            }
+
+            elementsToHighlight=[];
+
 
 
         }
 
+        function resetHighlightedText(resetSelection=true){
+
+            if(resetSelection) {
+                for (var i = 0; i < elementsToHighlight.length; i++) {
+                    $(elementsToHighlight[i]).css('background-color', '');
+                }
+            }
 
 
-        function moveToSelectedMethod(startingLine, endingLine) {
-            //console.log(startingLine + ' ------ ' + endingLine);
+        }
+
+        function moveToSelectedMethod(startingLine) {
             var selector = 'span:contains(' + startingLine + ')';
             $(selector)[0].scrollIntoViewIfNeeded();
 
@@ -390,6 +483,7 @@
         function getLinkedSnippet(){
             if(selectedCateory==""){
                 alert("First link the given comment to the snippet!");
+                resetHighlightedText(resetSelection=true);
                 return false;
             }
 
@@ -397,26 +491,36 @@
 
 
         function saveCategorization(){
+
             if (!getLinkedSnippet()){
                 //save snippet
                 var allSelection = $("#textAreaSelectedText").val().toString();
                 selectedCodeText = allSelection.replace(selectedCommentText,'');
 
-                //console.log(selectedCommentText);
-                //console.log(selectedCodeText);
-
-                getLineNumbers();
-
-                // save this classification into the database
+                console.log(selectedCommentText);
+                console.log(selectedCodeText);
+                console.log(selectedLines);
 
                 $("#textAreaSelectedText").text("");
                 for(var i=0;i<labelCategories.length;i++){
                     var selector="#"+labelCategories[i];
                     $(selector).css('background-color','');
                 }
+
+                const target_method = getMethodNameFromLineNumber(selectedLines[0]);
+                // save this classification into the database
+                // format {"method1":[82,83,84], ........ }
+                jsonToSave[target_method]=selectedLines;
+                console.log(jsonToSave);
+                reset(save=true);
+
+
+
             }
 
+
         }
+
 
         function getFirstLineofSelection() {
             var node,selection;
@@ -434,7 +538,7 @@
             return node.parentNode.previousSibling.previousSibling.textContent
         }
 
-        function highlightSelection(lines,isReviewer=false){
+        function highlightSelection(lines,isReviewer=false,colorHighlighting="blue"){
 
             for(var i=0; i<lines.length;i++){
 
@@ -448,13 +552,32 @@
                         break;
                     }
                     else{
-                        $(siblings[j]).css('background-color','blue');
+                        $(siblings[j]).css('background-color',colorHighlighting);
                         if(!isReviewer){
                             elementsToHighlight.push(siblings[j]);
                         }
                     }
                 }
             }
+        }
+
+        function getMethodNameFromLineNumber(lineNumber){
+
+            function inRange(x, min, max) {
+                return ((x-min)*(x-max) <= 0);
+            }
+
+            for(var i=0;i<methodsList.length;i++){
+                var lowerBound = methodsList[i].split('-')[0];
+                var upperBound = methodsList[i].split('-')[1];
+                if(inRange(lineNumber,lowerBound,upperBound)){
+                    return methodsListNames[i];
+                }
+            }
+
+            return -1;
+
+
         }
 
 
@@ -465,61 +588,60 @@
         $(document).ready(function () {
 
             //$(".linenos").css('user-select','none');
-            $(".linenos").on('mouseup', function(e) {
+            $(".linenos").on('mouseup', function (e) {
                 e.preventDefault();
             });
 
-            $("#textAreaSelectedText").keydown(function(e) {
-               e.preventDefault();
-               return false;
+            $("#textAreaSelectedText").keydown(function (e) {
+                e.preventDefault();
+                return false;
             });
 
             document.addEventListener('mouseup', event => {
 
-                if(window.getSelection().toString().length){
+                if (window.getSelection().toString().length) {
                     var selection = window.getSelection()
                     var firstLineOfSelection = getFirstLineofSelection();
-                    var selectedText = selection.toString().replace(/^\s*\d+\s/gm,"");
+                    var selectedText = selection.toString().replace(/^\s*\d+\s/gm, "");
                     var lines = selectedText.split('\n');
 
                     console.log('--> ' + firstLineOfSelection);
 
                     selectedLines.push(Number(firstLineOfSelection));
 
-                    for(var i=1;i<lines.length;i++){
-                       selectedLines.push(Number(firstLineOfSelection)+i);
+                    for (var i = 1; i < lines.length; i++) {
+                        selectedLines.push(Number(firstLineOfSelection) + i);
                     }
 
-                     highlightSelection(selectedLines);
+                    highlightSelection(selectedLines);
 
                     let previousSelection = $("#textAreaSelectedText").val();
-                    if(previousSelection==""){
+                    if (previousSelection == "") {
                         $("#textAreaSelectedText").text(previousSelection + selectedText);
-                    }
-                    else{
+                    } else {
                         $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
                     }
                     document.getSelection().removeAllRanges();
                     console.log(selectedLines);
-            }
+                }
             });
 
             var classification = JSON.parse('{{ artifact_classification|tojson }}');
-            console.log(classification);
 
-            jQuery.each(classification, function(i, val) {
-                const lines = val.toString().split(",");
-                highlightSelection(lines,isReviewer=true);
-            });
+            if (!jQuery.isEmptyObject(classification)) {
+                jQuery.each(classification, function (i, val) {
+                    const lines = val.toString().split(",");
+                    highlightSelection(lines, isReviewer = true, colorHighlighting = 'red');
+                });
+            }
 
-            // Dynamically adding button on the right panel
-            const methodList = JSON.parse('{{ artifact_methodList | tojson }}');
 
-            for (let i = 0; i < methodList.length; i++) {
-              var buttonID = "method-button-"+i;
-              var startingLine = methodList[i].split("-")[0];
-              var endingLine = methodList[i].split("-")[1];
-              var buttonText = "Method_"+i+" " +startingLine + '---' + endingLine;
+
+            for (let i = 0; i < methodsList.length; i++) {
+              var buttonID = methodsListNames[i] + "-button";
+              var startingLine = methodsList[i].split("-")[0];
+              var endingLine = methodsList[i].split("-")[1];
+              var buttonText = methodsListNames[i] + " " +startingLine + '---' + endingLine;
               var scorllCall = 'moveToSelectedMethod(' + startingLine +',' + endingLine +')';
               var newButton = '<div class="buttonWrapper"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%">' + buttonText + '</button> </div>';
               //console.log(newButton);
@@ -560,6 +682,7 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
     <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/bootstrap-confirmation.min.js') }}"></script>
