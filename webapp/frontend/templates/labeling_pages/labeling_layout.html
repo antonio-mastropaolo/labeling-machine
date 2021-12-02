@@ -4,7 +4,6 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
     <link href="{{ url_for('static', filename='css/code.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet" type="text/css">
-     <link href="{{ url_for('static', filename='css/icofont.min.css') }}" rel="stylesheet" type="text/css">
     <link rel="stylesheet"
           href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
 
@@ -106,7 +105,15 @@
 
 
 
+        hr.rounded {
+            border-top: 8px solid #bbb;
+            border-radius: 5px;
+            {#color: white;#}
+        }
 
+        hr.solid {
+            border-top: 3px solid #bbb;
+        }
 
 
     </style>
@@ -266,17 +273,7 @@
                           </button>
                       </div>
 
-                       <div class="buttonWrapper" style="background-color: white; height: 2%; margin-top: 200%;">
-                           <i class="icofont-paperclip">kitte</i>
-                      </div>
 
-
-
-
-
-{#                      <div class="counter">#}
-{#                          <h1>Example heading <div class="badge badge-secondary">New</div></h1>#}
-{#                      </div>#}
 
                   </div>
 
@@ -294,9 +291,16 @@
 
 
 
-                <div class="mitico col-md-2 no-float " id="methodsLabel" style="background-color: black;">
+                <div class="mitico col-md-2 no-float overflow-auto" id="methodsLabel" style="background-color: black;">
 
-{#                   <!-- This Div is dyamically filled -->#}
+                    <div id="upperSide" style="height: 50%;">
+                        <!-- This Div is dyamically filled -->
+                    </div>
+
+                     <div id="lowerSide" style="height: 50%;">
+                        <hr class="solid">
+                    </div>
+
 
                 </div>
 
@@ -307,6 +311,9 @@
             <div class="row no-gutters">
                 <div class="mitico col-md-2">
 
+                    <h4  style='color:white; top:95%; position:fixed;  left:3%;'> #Associations:<span id="badgeCounter" class="badge badge-secondary position-fixed" style="top:95.2%; left:12%; font-size: 17px;">0</span></h4>
+
+
                 </div>
                 <div class="mitico col-md-8">
                     <textarea id="textAreaSelectedText" rows="4" cols="50" class="textarea"></textarea>
@@ -315,6 +322,7 @@
 
                 </div>
                 <div class="mitico col-md-2">
+
                 </div>
             </div>
 
@@ -360,6 +368,7 @@
         var selectedCommentText = "";
         var elementsToHighlight = [];
         var jsonToSave = {};
+        var counterAssociations = 0;
 
 
         var selectableSpanElements = document.getElementsByTagName("span");
@@ -376,8 +385,6 @@
             $('.category-button').css("background-color",'');
             $("#new-category-button").text("Define New Category");
 
-            if(selectedLines.length==0) {
-            }
 
             selectedLines = []
             selectedCateory = "";
@@ -485,6 +492,8 @@
                 alert("First link the given comment to the snippet!");
                 resetHighlightedText(resetSelection=true);
                 return false;
+            }else{
+                return true;
             }
 
         }
@@ -492,14 +501,14 @@
 
         function saveCategorization(){
 
-            if (!getLinkedSnippet()){
+            if (getLinkedSnippet()){
                 //save snippet
                 var allSelection = $("#textAreaSelectedText").val().toString();
                 selectedCodeText = allSelection.replace(selectedCommentText,'');
 
-                console.log(selectedCommentText);
-                console.log(selectedCodeText);
-                console.log(selectedLines);
+                //console.log(selectedCommentText);
+                //console.log(selectedCodeText);
+                //console.log(selectedLines);
 
                 $("#textAreaSelectedText").text("");
                 for(var i=0;i<labelCategories.length;i++){
@@ -507,12 +516,29 @@
                     $(selector).css('background-color','');
                 }
 
+
                 const target_method = getMethodNameFromLineNumber(selectedLines[0]);
                 // save this classification into the database
                 // format {"method1":[82,83,84], ........ }
+
+
+                //Add new association button
+                var buttonID = "association" + counterAssociations + "-" + target_method;
+                var buttonText = "Association: " + counterAssociations+ " -->" + target_method;
+                var scorllCall = 'moveToSelectedMethod(' + selectedLines[0]+')';
+                var newButton = '<div class="buttonWrapper"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%">' + buttonText + '</button> </div>';
+                $( "#lowerSide" ).append( $(newButton) );
+
+
+
+
                 jsonToSave[target_method]=selectedLines;
                 console.log(jsonToSave);
                 reset(save=true);
+
+                counterAssociations  = counterAssociations + 1;
+                console.log("----> " +counterAssociations);
+                $("#badgeCounter").text(counterAssociations);
 
 
 
@@ -642,10 +668,11 @@
               var startingLine = methodsList[i].split("-")[0];
               var endingLine = methodsList[i].split("-")[1];
               var buttonText = methodsListNames[i] + " " +startingLine + '---' + endingLine;
-              var scorllCall = 'moveToSelectedMethod(' + startingLine +',' + endingLine +')';
+              var scorllCall = 'moveToSelectedMethod(' + startingLine+')';
               var newButton = '<div class="buttonWrapper"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%">' + buttonText + '</button> </div>';
               //console.log(newButton);
-              $( "#methodsLabel" ).append( $(newButton) );
+              $( "#upperSide" ).append( $(newButton) );
+
 
             }
 
