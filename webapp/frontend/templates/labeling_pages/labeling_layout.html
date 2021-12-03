@@ -2,25 +2,17 @@
 
 {% block headerStuff %}
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
     <link href="{{ url_for('static', filename='css/code.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet" type="text/css">
     <link rel="stylesheet"
           href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
 
+
     {#    High priority css classes#}
     <style>
         .category-button{}
 
-
-
-        .counter{
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            color: white;
-            text-align: center;
-
-        }
         .buttonWrapper{
             padding-bottom:7px;
             border-radius: 25px;
@@ -72,7 +64,7 @@
             overflow: hidden;
             overflow-y: scroll;
             bottom:0.1%;
-            height:8%;
+            height:8.6%;
             position:fixed;
             margin-bottom: -2px;
         }
@@ -298,7 +290,12 @@
                     </div>
 
                      <div id="lowerSide" style="height: 50%;">
+
                         <hr class="solid">
+                         <div style="text-align: center; color: white;">
+                             <h4>ASSOCIATIONS</h4>
+                         </div>
+                         <hr class="solid">
                     </div>
 
 
@@ -347,7 +344,8 @@
         // Dynamically adding button on the right panel
         const methodsList = JSON.parse('{{ artifact_methodsList | tojson }}');
         const methodsListNames =  JSON.parse('{{ artificat_methodsName | tojson }}');
-        console.log(methodsListNames)
+
+
 
         var labelCategories = ["new-category-button",
                                 'expand-button',
@@ -369,6 +367,13 @@
         var elementsToHighlight = [];
         var jsonToSave = {};
         var counterAssociations = 0;
+        var dictHighlightedElements = {};
+
+        let defaultColorHighlight='red';
+
+        for(var j=0; j<5000; j++){
+            dictHighlightedElements[j]=[];
+        }
 
 
         var selectableSpanElements = document.getElementsByTagName("span");
@@ -392,24 +397,24 @@
             selectedCommentText = "";
 
             if(!save) {
-                resetHighlightedText(resetSelection = true);
+                resetHighlightedText(dictHighlightedElements[counterAssociations]);
             }
-
-            elementsToHighlight=[];
-
-
 
         }
 
-        function resetHighlightedText(resetSelection=true){
+        //Custon List can be elementsToHighlight
+        function resetHighlightedText(customList){
 
-            if(resetSelection) {
-                for (var i = 0; i < elementsToHighlight.length; i++) {
-                    $(elementsToHighlight[i]).css('background-color', '');
+            for (var i = 0; i < customList.length; i++) {
+                if ( customList[i].classList.contains("c1") || customList[i].classList.contains("cm") ) {
+                    $(customList[i]).css('background-color', defaultColorHighlight);
                 }
+                else{
+                    //Piece of code
+                    $(customList[i]).css('background-color', '');
+                }
+
             }
-
-
         }
 
         function moveToSelectedMethod(startingLine) {
@@ -447,14 +452,14 @@
 
         function checkForButtonValidity(){
             let textBoxVal = $("#textAreaSelectedText").val();
-            if(textBoxVal=="") {
+            if(textBoxVal==""|| (!textBoxVal.trim().startsWith("//") && !textBoxVal.trim().startsWith("/*") && !textBoxVal.trim().startsWith('/**')  )) {
                 alert("Select a comment first!");
                 return false;
             }
             return true;
         }
 
-         function popUP() {
+         function createNewCategory() {
             var newCategory = prompt("","Text");
             $("#new-category-button").text(newCategory);
         }
@@ -480,19 +485,25 @@
             if (!retCode) { return false;}
             checkForChangedCategory(element);
             if(element.id.toString()=="new-category-button"){
-                popUP();
+                createNewCategory();
             }
             $(element).css('background-color','green');
             selectedCateory = element.id.toString();
-            selectedCommentText = $("#textAreaSelectedText").val();
+            selectedCommentText =  $("#textAreaSelectedText").val().toString(); //at this stage we must have only the code comment/s
+            console.log(selectedCommentText);
         }
 
-        function getLinkedSnippet(){
+        function popUpLinkedCommentToSnippet(){
+            alert("First link the given comment to the snippet!");
+        }
+
+        function isSelectedCategory(){
             if(selectedCateory==""){
-                alert("First link the given comment to the snippet!");
-                resetHighlightedText(resetSelection=true);
+                popUpLinkedCommentToSnippet()
+                resetHighlightedText(dictHighlightedElements[counterAssociations]);
                 return false;
             }else{
+                console.log('--> ' + selectedCodeText);
                 return true;
             }
 
@@ -501,10 +512,17 @@
 
         function saveCategorization(){
 
-            if (getLinkedSnippet()){
+            if (isSelectedCategory()){
                 //save snippet
                 var allSelection = $("#textAreaSelectedText").val().toString();
                 selectedCodeText = allSelection.replace(selectedCommentText,'');
+                console.log('Debug: ' + selectedCodeText + '--------- ' + selectedCommentText);
+                if(selectedCodeText==""){
+                    popUpLinkedCommentToSnippet();
+                    resetHighlightedText(dictHighlightedElements[counterAssociations]);
+                    $("#"+selectedCateory).css('background-color','');
+                    return false;
+                }
 
                 //console.log(selectedCommentText);
                 //console.log(selectedCodeText);
@@ -521,29 +539,33 @@
                 // save this classification into the database
                 // format {"method1":[82,83,84], ........ }
 
-
                 //Add new association button
+                var divID = "div-association" + counterAssociations + "-" + target_method;
                 var buttonID = "association" + counterAssociations + "-" + target_method;
-                var buttonText = "Association: " + counterAssociations+ " -->" + target_method;
+                var buttonText = "#" + counterAssociations+ " -->" + target_method;
                 var scorllCall = 'moveToSelectedMethod(' + selectedLines[0]+')';
-                var newButton = '<div class="buttonWrapper"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%">' + buttonText + '</button> </div>';
+                var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%; display: inline-flex; align-items: center;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:fixed; left:98%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
+
                 $( "#lowerSide" ).append( $(newButton) );
 
 
-
-
                 jsonToSave[target_method]=selectedLines;
-                console.log(jsonToSave);
-                reset(save=true);
-
                 counterAssociations  = counterAssociations + 1;
-                console.log("----> " +counterAssociations);
                 $("#badgeCounter").text(counterAssociations);
 
-
+                reset(save=true);
 
             }
 
+
+        }
+
+        function removeAssociation(divID){
+            targetAssociation = divID.split('-')[1].match(/\d+/)[0];
+            $('#'+divID).fadeOut(300, function(){ $(this).remove();});
+            counterAssociations = counterAssociations -1;
+            $("#badgeCounter").text(counterAssociations);
+            resetHighlightedText(dictHighlightedElements[targetAssociation]);
 
         }
 
@@ -580,18 +602,22 @@
                     else{
                         $(siblings[j]).css('background-color',colorHighlighting);
                         if(!isReviewer){
-                            elementsToHighlight.push(siblings[j]);
+                            dictHighlightedElements[counterAssociations].push(siblings[j]);
+                            //elementsToHighlight.push(siblings[j]);
                         }
                     }
                 }
             }
         }
 
-        function getMethodNameFromLineNumber(lineNumber){
-
-            function inRange(x, min, max) {
+        function inRange(x, min, max) {
+                x=Number(x);
+                min=Number(min);
+                max=Number(max);
                 return ((x-min)*(x-max) <= 0);
             }
+
+        function getMethodNameFromLineNumber(lineNumber){
 
             for(var i=0;i<methodsList.length;i++){
                 var lowerBound = methodsList[i].split('-')[0];
@@ -606,6 +632,34 @@
 
         }
 
+        function unselectAll(){
+
+            if (document.selection && document.selection.empty)
+            {
+                document.selection.empty();
+            }
+            else if (window.getSelection)
+            {
+                var sel= window.getSelection();
+                if(sel && sel.removeAllRanges)
+                    sel.removeAllRanges();
+            }
+        }
+
+        function highlightTargetComments(elements){
+            for(var i=0;i<methodsList.length;i++){
+                var lowerBound = methodsList[i].split('-')[0];
+                var upperBound = methodsList[i].split('-')[1];
+                for(var j = 0; j<elements.length; j++){
+                    let line = elements[j].previousSibling.previousSibling.innerHTML;
+                    if (inRange(line, lowerBound, upperBound)) {
+                        console.log('Line: '+line);
+                        $(elements[j]).css('background-color', 'red');
+                    }
+                }
+
+            }
+        }
 
 
 
@@ -613,7 +667,6 @@
 
         $(document).ready(function () {
 
-            //$(".linenos").css('user-select','none');
             $(".linenos").on('mouseup', function (e) {
                 e.preventDefault();
             });
@@ -623,15 +676,20 @@
                 return false;
             });
 
-            document.addEventListener('mouseup', event => {
+            $('.highlight').on('mouseup', event => {
+
+                /*if(selectedCommentText!='' && ( !selectedCommentText.startsWith("//") && !selectedCommentText.startsWith("/*") ) ){//&& selectedCateory=='' && selectedCodeText==''){
+                    alert("Select first the target category for the highlighted comment!");
+                    console.log(selectedCommentText);
+                    unselectAll();
+                    return false;
+                }*/
 
                 if (window.getSelection().toString().length) {
                     var selection = window.getSelection()
                     var firstLineOfSelection = getFirstLineofSelection();
                     var selectedText = selection.toString().replace(/^\s*\d+\s/gm, "");
                     var lines = selectedText.split('\n');
-
-                    console.log('--> ' + firstLineOfSelection);
 
                     selectedLines.push(Number(firstLineOfSelection));
 
@@ -648,7 +706,8 @@
                         $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
                     }
                     document.getSelection().removeAllRanges();
-                    console.log(selectedLines);
+
+                    //selectedCommentText = $("#textAreaSelectedText").val();
                 }
             });
 
@@ -675,12 +734,18 @@
 
 
             }
-
             ////////////////////////////////////////////////////
 
             $("h1").css('color','white');
 
             $("h2").css('color','white');
+
+            //Highlight target comments
+            var inlineComments = document.getElementsByClassName('c1');
+            var multiLineComments = document.getElementsByClassName('cm');
+            highlightTargetComments(inlineComments);
+            highlightTargetComments(multiLineComments);
+            ///////////////////////////////////
 
 
             {#Change rows label color to white#}
