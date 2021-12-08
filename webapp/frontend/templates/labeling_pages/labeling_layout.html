@@ -5,13 +5,33 @@
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
     <link href="{{ url_for('static', filename='css/code.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet" type="text/css">
-    <link rel="stylesheet"
-          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
+    <link href="{{ url_for('static', filename='css/prism.css') }}" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
+
+    <script src="{{ url_for('static', filename='js/jquery-textrange.js') }}"></script>
+{#    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>#}
+{#    <script src="//cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2.8.0/dist/highlightjs-line-numbers.min.js"></script>#}
 
 
     {#    High priority css classes#}
     <style>
+
         .category-button{}
+
+        .formatting::after {
+          content:' ';
+        }
+
+        .loc{
+            position:static;
+            width: 100%;
+            display: inline-block;
+            {#white-space: pre-wrap;#}
+
+        }
+
+
 
         .buttonWrapper{
             padding-bottom:7px;
@@ -36,10 +56,10 @@
        }
 
         .force-select {
-          -webkit-user-select: all;  /* Chrome 49+ */
-          -moz-user-select: all;     /* Firefox 43+ */
-          -ms-user-select: all;      /* No support yet */
-          user-select: all;          /* Likely future */
+          /*-webkit-user-select: all;
+          -moz-user-select: all;
+          -ms-user-select: all;
+          user-select: all;       */
         }
 
 
@@ -95,13 +115,11 @@
             }
         }
 
-
-
-        hr.rounded {
+        /*hr.rounded {
             border-top: 8px solid #bbb;
             border-radius: 5px;
             {#color: white;#}
-        }
+        }*/
 
         hr.solid {
             border-top: 3px solid #bbb;
@@ -271,13 +289,16 @@
 
                 <div class="mitico col-md-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
 
-                    <div class="code">
+{#                    <div class="code">#}
+{#                        <pre>#}
+{#                            <code class="language-java line-numbers">{{ artifact_class }}</code>#}
+{#                        </pre>#}
+
                         {% highlight 'java', lineno='inline' %}
                             {{ artifact_class }}
                         {% endhighlight %}
 
-
-                    </div>
+{#                    </div>#}
 
                 </div>
 
@@ -323,9 +344,6 @@
                 </div>
             </div>
 
-
-
-
         {% endblock %}
 
 
@@ -340,6 +358,8 @@
 
         // -------------------------Start-------------------------
 
+        //hljs.highlightAll();
+        //hljs.initLineNumbersOnLoad();
 
         // Dynamically adding button on the right panel
         const methodsList = JSON.parse('{{ artifact_methodsList | tojson }}');
@@ -371,18 +391,13 @@
 
         let defaultColorHighlight='red';
 
-        for(var j=0; j<5000; j++){
+        for(var j=0; j<50000; j++){
             dictHighlightedElements[j]=[];
         }
 
 
-        var selectableSpanElements = document.getElementsByTagName("span");
-        for (var i=8; i<selectableSpanElements.length; i++){
-            if (!selectableSpanElements[i].classList.contains("linenos")){
-                $(selectableSpanElements[i]).addClass('.force-select');
-                //$(selectableSpanElements[i]).css('line-height','0');
-            }
-        }
+
+
 
         function reset(save=false){
 
@@ -572,6 +587,7 @@
 
         function getFirstLineofSelection() {
             var node,selection;
+            console.log(getSelection().getRangeAt(0));
             if (window.getSelection) {
               selection = getSelection();
               node = selection.anchorNode;
@@ -583,6 +599,8 @@
                        range.parentElement ? range.parentElement() : range.item(0);
             }
 
+            //console.log('kittemuro: '+node.parentNode.innerHTML);
+            //return node.parentNode.textContent;
             return node.parentNode.previousSibling.previousSibling.textContent
         }
 
@@ -603,7 +621,6 @@
                         $(siblings[j]).css('background-color',colorHighlighting);
                         if(!isReviewer){
                             dictHighlightedElements[counterAssociations].push(siblings[j]);
-                            //elementsToHighlight.push(siblings[j]);
                         }
                     }
                 }
@@ -648,17 +665,29 @@
 
         function highlightTargetComments(elements){
             for(var i=0;i<methodsList.length;i++){
+
                 var lowerBound = methodsList[i].split('-')[0];
                 var upperBound = methodsList[i].split('-')[1];
+
+                 console.log(lowerBound + '------' + upperBound);
+
                 for(var j = 0; j<elements.length; j++){
-                    let line = elements[j].previousSibling.previousSibling.innerHTML;
+
+                    var line = elements[j].previousSibling.innerText;
+                    console.log(line);
+
+                    if(isNaN(line)){
+                        line = elements[j].previousSibling.previousSibling.innerText;
+                    }
+
                     if (inRange(line, lowerBound, upperBound)) {
-                        console.log('Line: '+line);
+
                         $(elements[j]).css('background-color', 'red');
                     }
                 }
 
             }
+
         }
 
 
@@ -666,6 +695,7 @@
         // -------------------------End-------------------------
 
         $(document).ready(function () {
+
 
             $(".linenos").on('mouseup', function (e) {
                 e.preventDefault();
@@ -676,14 +706,11 @@
                 return false;
             });
 
-            $('.highlight').on('mouseup', event => {
+            $('.highlight:not(.cm .c1)').on('mouseup',event =>{
 
-                /*if(selectedCommentText!='' && ( !selectedCommentText.startsWith("//") && !selectedCommentText.startsWith("/*") ) ){//&& selectedCateory=='' && selectedCodeText==''){
-                    alert("Select first the target category for the highlighted comment!");
-                    console.log(selectedCommentText);
-                    unselectAll();
-                    return false;
-                }*/
+                {#var rangeNew = lightrange.saveSelection();#}
+                {#lightrange.restoreSelection(rangeNew);#}
+                {#console.log(lightrange.getSelectionInfo());#}
 
                 if (window.getSelection().toString().length) {
                     var selection = window.getSelection()
@@ -701,15 +728,36 @@
 
                     let previousSelection = $("#textAreaSelectedText").val();
                     if (previousSelection == "") {
-                        $("#textAreaSelectedText").text(previousSelection + selectedText);
+                        //$("#textAreaSelectedText").text(previousSelection + selectedText);
                     } else {
                         $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
                     }
                     document.getSelection().removeAllRanges();
 
-                    //selectedCommentText = $("#textAreaSelectedText").val();
                 }
             });
+
+            var selectableSpanElements = document.getElementsByTagName("span");
+            var spanElements = [];
+
+            for (var i=8; i<selectableSpanElements.length; i++){
+                if (!selectableSpanElements[i].classList.contains("linenos")){
+                    $(selectableSpanElements[i]).addClass('formatting');
+                    spanElements.push(selectableSpanElements[i]);
+
+
+                }else {
+                    //wrap
+                    if (selectableSpanElements[i].classList.contains("linenos")) {
+                        $(selectableSpanElements[i]).wrapAll('<div class="line-number" style="display: inline-block;">');
+                        $(spanElements).wrapAll('<div class="loc>');
+                        spanElements = [];
+
+                    }
+
+                }
+
+            }
 
             var classification = JSON.parse('{{ artifact_classification|tojson }}');
 
@@ -740,9 +788,14 @@
 
             $("h2").css('color','white');
 
+            //$(".c1").addClass('force-select');
+
+            //$(".cm").addClass('force-select');
+
             //Highlight target comments
             var inlineComments = document.getElementsByClassName('c1');
             var multiLineComments = document.getElementsByClassName('cm');
+
             highlightTargetComments(inlineComments);
             highlightTargetComments(multiLineComments);
             ///////////////////////////////////
@@ -750,6 +803,18 @@
 
             {#Change rows label color to white#}
             $(".linenos").css('color','white');
+
+            $( ".c1").dblclick(function() {
+                var selectedText =  this.innerText;
+                let previousSelection = $("#textAreaSelectedText").val();
+                if (previousSelection == "") {
+                    $("#textAreaSelectedText").text(previousSelection + selectedText);
+                } else {
+                    $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
+                }
+                console.log(selectedText);
+            });
+
 
 
             $(document.body).on("change","#label_selector",function(){

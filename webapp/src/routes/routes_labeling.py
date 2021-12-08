@@ -5,6 +5,9 @@ from src import app
 from src.database.models import Note
 from src.helper.consts import *
 import json
+from pygments.lexers.jvm import *
+
+
 
 
 @app.route("/labeling", methods=['GET', 'POST'])
@@ -50,6 +53,10 @@ def labeling_with_artifact(target_artifact_id):
             methodsList = eval(artifact_data.methodsList)
             methodsName = eval(artifact_data.methodsName)
 
+            lexer = JavaLexer()
+            tokens = lexer.get_tokens(javaClassText)
+            for item in tokens:
+                print(item)
 
 
             jsonClassification = eval(artifact_data.classification)
