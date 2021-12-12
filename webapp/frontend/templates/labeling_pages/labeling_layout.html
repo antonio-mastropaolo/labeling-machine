@@ -5,13 +5,12 @@
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
     <link href="{{ url_for('static', filename='css/code.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet" type="text/css">
-    <link href="{{ url_for('static', filename='css/prism.css') }}" rel="stylesheet" type="text/css">
-
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
 
-    <script src="{{ url_for('static', filename='js/jquery-textrange.js') }}"></script>
-{#    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>#}
-{#    <script src="//cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2.8.0/dist/highlightjs-line-numbers.min.js"></script>#}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <script src="{{ url_for('static', filename='js/LightRange.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/commonFunc.js') }}"></script>
+
 
 
     {#    High priority css classes#}
@@ -19,19 +18,9 @@
 
         .category-button{}
 
-        .formatting::after {
-          content:' ';
+        .commentHighlighting{
+            background-color: yellow;
         }
-
-        .loc{
-            position:static;
-            width: 100%;
-            display: inline-block;
-            {#white-space: pre-wrap;#}
-
-        }
-
-
 
         .buttonWrapper{
             padding-bottom:7px;
@@ -41,7 +30,7 @@
         }
 
         .animationLabel{
-            animation:color-me-in 5s;
+            animation:color-me-in 4s;
         }
 
        @keyframes color-me-in {
@@ -55,17 +44,11 @@
           }
        }
 
-        .force-select {
-          /*-webkit-user-select: all;
-          -moz-user-select: all;
-          -ms-user-select: all;
-          user-select: all;       */
-        }
 
 
        .button-corner-down {
             position: fixed;
-            bottom: 0.2%;
+            bottom: 0.5%;
             left: 78%;
             width: 5%;
             text-align: center;
@@ -73,7 +56,7 @@
 
         .button-corner-up {
             position: fixed;
-            bottom: 4.5%;
+            bottom: 8.5%;
             left: 78%;
             width: 5%;
             text-align: center;
@@ -84,42 +67,41 @@
             overflow: hidden;
             overflow-y: scroll;
             bottom:0.1%;
-            height:8.6%;
+            height:12%;
             position:fixed;
             margin-bottom: -2px;
         }
 
-        .code{
+        /*.code{
             overflow-y: scroll;
-        }
+        }*/
 
         .mitico{}
 
+        #code{
+            margin-top:-2.44%;
+        }
 
         @media screen and (max-height: 1250px) {
-          .textarea{
-            bottom:0.2%;
-            height:8%;
-          }
+            #code{
+              margin-top:-3.47%;
+            }
+
+            .textarea{
+                bottom:0.2%;
+                height:11%;
+            }
+
 
             .button-corner-down{
-                bottom: 0;
+                bottom: 0.5%;
             }
 
             .button-corner-up{
-                bottom: 4%;
+                bottom: 6.5%;
             }
 
-            .code{
-                margin-bottom: 20px;
-            }
         }
-
-        /*hr.rounded {
-            border-top: 8px solid #bbb;
-            border-radius: 5px;
-            {#color: white;#}
-        }*/
 
         hr.solid {
             border-top: 3px solid #bbb;
@@ -283,22 +265,25 @@
                           </button>
                       </div>
 
-
-
                   </div>
+
 
                 <div class="mitico col-md-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
 
-{#                    <div class="code">#}
-{#                        <pre>#}
-{#                            <code class="language-java line-numbers">{{ artifact_class }}</code>#}
-{#                        </pre>#}
+                    <div class="row-column">
 
-                        {% highlight 'java', lineno='inline' %}
-                            {{ artifact_class }}
-                        {% endhighlight %}
+                        <pre id="rows-wrapper" class="rows">
+                            <code id="rows" class="lang-java" style="display:inline; float:left; overflow: scroll;"></code>
+                            <code id="code" class="lang-java">{{ artifact_class }}</code>
+                        </pre>
 
-{#                    </div>#}
+                    </div>
+
+
+{#                        {% highlight 'java', lineno='inline' %}#}
+{#                            {{ artifact_class }}#}
+{#                        {% endhighlight %}#}
+
 
                 </div>
 
@@ -358,13 +343,11 @@
 
         // -------------------------Start-------------------------
 
-        //hljs.highlightAll();
-        //hljs.initLineNumbersOnLoad();
+        hljs.highlightAll();
 
-        // Dynamically adding button on the right panel
         const methodsList = JSON.parse('{{ artifact_methodsList | tojson }}');
         const methodsListNames =  JSON.parse('{{ artificat_methodsName | tojson }}');
-
+        const linesList = JSON.parse(('{{ artifact_linesList }}'));
 
 
         var labelCategories = ["new-category-button",
@@ -380,7 +363,6 @@
         ]
 
         var selectedLines = [];
-
         var selectedCateory = "";
         var selectedCodeText = "";
         var selectedCommentText = "";
@@ -388,6 +370,7 @@
         var jsonToSave = {};
         var counterAssociations = 0;
         var dictHighlightedElements = {};
+        var commentsToHilight = [];
 
         let defaultColorHighlight='red';
 
@@ -395,8 +378,99 @@
             dictHighlightedElements[j]=[];
         }
 
+        function highlightTargetComments(elements,className){
+
+            function look4Javadoc(comment){
+                var commentLines = comment.split('\n');
+                for(var i=0;i<commentLines.length;i++){
+                    if(commentLines[i].trim().startsWith('*') && !commentLines[i].trim().startsWith('*/')){
+                        return true
+                    }
+                }
+                return false;
+            }
+
+            for(var i=0;i<elements.length;i++){
+                if(elements[i].innerHTML.startsWith('/**') || elements[i].innerHTML.startsWith('/* *') || look4Javadoc(elements[i].innerHTML)){
+                    //console.log('hit javadoc');
+                    continue
+                }
+                else{
+                     $(elements[i]).addClass(className);
+                }
+            }
+
+        }
+
+        function getSelectionParentElement() {
+            var parentEl = null, sel;
+            if (window.getSelection) {
+                sel = window.getSelection();
+                if (sel.rangeCount) {
+                    parentEl = sel.getRangeAt(0).commonAncestorContainer;
+                    if (parentEl.nodeType != 1) {
+                        parentEl = parentEl.parentNode;
+                    }
+                }
+            } else if ( (sel = document.selection) && sel.type != "Control") {
+                parentEl = sel.createRange().parentElement();
+            }
+            return parentEl;
+        }
+
+        function getSelectionCharOffsetsWithin(element) {
+            var start = 0, end = 0, text = "";
+            var sel, range, priorRange;
+            if (typeof window.getSelection != "undefined") { // Non-IE
+                if (window.getSelection().toString() != "") {
+                    range = window.getSelection().getRangeAt(0);
+                    priorRange = range.cloneRange();
+                    priorRange.selectNodeContents(element);
+                    priorRange.setEnd(range.startContainer, range.startOffset);
+                    start = priorRange.toString().length;
+                    end = start + range.toString().length;
+                    // Get text
+                    text = range.toString();
+                }
+            } else if (typeof document.selection != "undefined" && (sel = document.selection).type != "Control") {  // IE
+                range = sel.createRange();
+                priorRange = document.body.createTextRange();
+                priorRange.moveToElementText(element);
+                priorRange.setEndPoint("EndToStart", range);
+                start = priorRange.text.length;
+                end = start + range.text.length;
+                // Try with IE
+                text = range.text;
+            }
+
+            //console.log('1) --> ' + getSelectionParentElement().innerText);
+            //handling click event on the right side of the text area
+            try{
+                targetTag = range.commonAncestorContainer.previousSibling;
+                //console.log("target tag sibling: " + targetTag);
+            }catch(e){
+                targetTag = getSelectionParentElement();
+                //console.log("target tag parents: " + targetTag);
+            }
 
 
+            return {
+                start: start,
+                end: end,
+                text: text,
+                targetTag: targetTag
+            };
+        }
+
+
+    function highlightRange(range) {
+        var newNode = document.createElement("div");
+        newNode.setAttribute(
+           "style",
+           "background-color: green; display: inline;"
+        );
+        range.surroundContents(newNode);
+    }
 
 
         function reset(save=false){
@@ -412,58 +486,32 @@
             selectedCommentText = "";
 
             if(!save) {
-                resetHighlightedText(dictHighlightedElements[counterAssociations]);
+                resetHighlightedText(elementsToHighlight);
             }
+
+            elementsToHighlight = [];
 
         }
 
         //Custon List can be elementsToHighlight
         function resetHighlightedText(customList){
 
+            console.log(customList);
+
             for (var i = 0; i < customList.length; i++) {
-                if ( customList[i].classList.contains("c1") || customList[i].classList.contains("cm") ) {
-                    $(customList[i]).css('background-color', defaultColorHighlight);
+
+                if ( customList[i][0].classList.contains("hljs-comment")) {
+                    $(customList[i][0]).css('color', '');
                 }
                 else{
                     //Piece of code
-                    $(customList[i]).css('background-color', '');
+                    $(customList[i]).css('color', '');
                 }
 
             }
         }
 
-        function moveToSelectedMethod(startingLine) {
-            var selector = 'span:contains(' + startingLine + ')';
-            $(selector)[0].scrollIntoViewIfNeeded();
 
-            $(selector).addClass('animationLabel').delay(1500).queue(function(){
-                $(this).removeClass('animationLabel').dequeue();
-            });
-
-
-        }
-
-        var mappingDict = {};
-        var tags = document.getElementsByTagName("span");
-        var key = -1;
-        var flagChange = true;
-        var elementsPerRow = [];
-        //var finalLine = "";
-        for (var i = 8; i < tags.length; i++) {
-
-            if (tags[i].classList.contains("linenos")){
-
-                key = tags[i].innerHTML;
-                mappingDict[key] = "";
-                flagChange = false;
-                continue;
-            }
-            if (!flagChange){
-                mappingDict[key] = mappingDict[key] + " " + tags[i].innerHTML;
-
-            }
-
-        }
 
         function checkForButtonValidity(){
             let textBoxVal = $("#textAreaSelectedText").val();
@@ -474,10 +522,7 @@
             return true;
         }
 
-         function createNewCategory() {
-            var newCategory = prompt("","Text");
-            $("#new-category-button").text(newCategory);
-        }
+
 
         function checkForChangedCategory(element){
             function arrayRemove(arr, value) {
@@ -518,13 +563,13 @@
                 resetHighlightedText(dictHighlightedElements[counterAssociations]);
                 return false;
             }else{
-                console.log('--> ' + selectedCodeText);
+                //console.log('A' + selectedCodeText);
                 return true;
             }
 
         }
 
-
+        // TO-DO: REVISE
         function saveCategorization(){
 
             if (isSelectedCategory()){
@@ -558,7 +603,7 @@
                 var divID = "div-association" + counterAssociations + "-" + target_method;
                 var buttonID = "association" + counterAssociations + "-" + target_method;
                 var buttonText = "#" + counterAssociations+ " -->" + target_method;
-                var scorllCall = 'moveToSelectedMethod(' + selectedLines[0]+')';
+                var scorllCall = 'moveToSelectedMethod('+ selectedLines[0]+')';
                 var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%; display: inline-flex; align-items: center;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:fixed; left:98%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
 
                 $( "#lowerSide" ).append( $(newButton) );
@@ -575,6 +620,17 @@
 
         }
 
+        function updateTextArea(textToDisplay){
+            var previousSelection = $("#textAreaSelectedText").val().toString();
+            if(previousSelection==""){
+                $("#textAreaSelectedText").text(textToDisplay);
+            }else{
+                $("#textAreaSelectedText").text(previousSelection + "\n" + textToDisplay);
+
+            }
+
+        }
+
         function removeAssociation(divID){
             targetAssociation = divID.split('-')[1].match(/\d+/)[0];
             $('#'+divID).fadeOut(300, function(){ $(this).remove();});
@@ -583,56 +639,6 @@
             resetHighlightedText(dictHighlightedElements[targetAssociation]);
 
         }
-
-
-        function getFirstLineofSelection() {
-            var node,selection;
-            console.log(getSelection().getRangeAt(0));
-            if (window.getSelection) {
-              selection = getSelection();
-              node = selection.anchorNode;
-            }
-            if (!node && document.selection) {
-                selection = document.selection
-                var range = selection.getRangeAt ? selection.getRangeAt(0) : selection.createRange();
-                node = range.commonAncestorContainer ? range.commonAncestorContainer :
-                       range.parentElement ? range.parentElement() : range.item(0);
-            }
-
-            //console.log('kittemuro: '+node.parentNode.innerHTML);
-            //return node.parentNode.textContent;
-            return node.parentNode.previousSibling.previousSibling.textContent
-        }
-
-        function highlightSelection(lines,isReviewer=false,colorHighlighting="blue"){
-
-            for(var i=0; i<lines.length;i++){
-
-                var lineTarget = Number(lines[i]);
-                var lineSelector = ".linenos:contains(" + (lineTarget) + ")";
-
-                var siblings = $(lineSelector).nextAll();
-
-                for(var j=0;j<siblings.length;j++){
-                    if (siblings[j].innerHTML==lineTarget+1){
-                        break;
-                    }
-                    else{
-                        $(siblings[j]).css('background-color',colorHighlighting);
-                        if(!isReviewer){
-                            dictHighlightedElements[counterAssociations].push(siblings[j]);
-                        }
-                    }
-                }
-            }
-        }
-
-        function inRange(x, min, max) {
-                x=Number(x);
-                min=Number(min);
-                max=Number(max);
-                return ((x-min)*(x-max) <= 0);
-            }
 
         function getMethodNameFromLineNumber(lineNumber){
 
@@ -645,8 +651,6 @@
             }
 
             return -1;
-
-
         }
 
         function unselectAll(){
@@ -663,111 +667,143 @@
             }
         }
 
-        function highlightTargetComments(elements){
-            for(var i=0;i<methodsList.length;i++){
-
-                var lowerBound = methodsList[i].split('-')[0];
-                var upperBound = methodsList[i].split('-')[1];
-
-                 console.log(lowerBound + '------' + upperBound);
-
-                for(var j = 0; j<elements.length; j++){
-
-                    var line = elements[j].previousSibling.innerText;
-                    console.log(line);
-
-                    if(isNaN(line)){
-                        line = elements[j].previousSibling.previousSibling.innerText;
-                    }
-
-                    if (inRange(line, lowerBound, upperBound)) {
-
-                        $(elements[j]).css('background-color', 'red');
-                    }
-                }
-
-            }
-
-        }
-
-
 
         // -------------------------End-------------------------
 
         $(document).ready(function () {
 
+            $("h1").css('color','white');
+            $("h2").css('color','white');
+            $('.hljs-comment').css('user-select','none');
 
-            $(".linenos").on('mouseup', function (e) {
-                e.preventDefault();
-            });
+            // Filling up lines column
+            for (var i=0;i<linesList.length;i++){
+                linesList[i] = linesList[i]+1
+                var newButton = '<div style="width:100%;" class="row-line">'+linesList[i]+'</div>';
+                $( "#rows" ).append( $(newButton) );
+            }
 
-            $("#textAreaSelectedText").keydown(function (e) {
+            //Highlight target comments
+
+            var comments = document.getElementsByClassName("hljs-comment");
+            highlightTargetComments(comments,'commentHighlighting');
+
+            /*$("#textAreaSelectedText").keydown(function (e) {
                 e.preventDefault();
                 return false;
-            });
+            });*/
 
-            $('.highlight:not(.cm .c1)').on('mouseup',event =>{
+            /*      If we find multi line comments written as single line
+                    (E.G)
+                    // read this item
+                    // after send it
+                    // to the server
+             */
+            $(".commentHighlighting").dblclick(function() {
 
-                {#var rangeNew = lightrange.saveSelection();#}
-                {#lightrange.restoreSelection(rangeNew);#}
-                {#console.log(lightrange.getSelectionInfo());#}
+                var prevElement = $(this).prev();
+                var nextElement = $(this).next();
 
-                if (window.getSelection().toString().length) {
-                    var selection = window.getSelection()
-                    var firstLineOfSelection = getFirstLineofSelection();
-                    var selectedText = selection.toString().replace(/^\s*\d+\s/gm, "");
-                    var lines = selectedText.split('\n');
+                var previousElements = [];
+                var nextElements = [];
 
-                    selectedLines.push(Number(firstLineOfSelection));
+                var upperPartCommentSelection = '';
+                var lowerPartCommentSelection = '';
 
-                    for (var i = 1; i < lines.length; i++) {
-                        selectedLines.push(Number(firstLineOfSelection) + i);
+                console.log(elementsToHighlight);
+
+                while(prevElement.hasClass('hljs-comment')){
+                    if(!elementsToHighlight.includes(prevElement)) {
+                        previousElements.push(prevElement);
+                    }else{
+                        console.log('susott');
                     }
-
-                    highlightSelection(selectedLines);
-
-                    let previousSelection = $("#textAreaSelectedText").val();
-                    if (previousSelection == "") {
-                        //$("#textAreaSelectedText").text(previousSelection + selectedText);
-                    } else {
-                        $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
-                    }
-                    document.getSelection().removeAllRanges();
-
-                }
-            });
-
-            var selectableSpanElements = document.getElementsByTagName("span");
-            var spanElements = [];
-
-            for (var i=8; i<selectableSpanElements.length; i++){
-                if (!selectableSpanElements[i].classList.contains("linenos")){
-                    $(selectableSpanElements[i]).addClass('formatting');
-                    spanElements.push(selectableSpanElements[i]);
-
-
-                }else {
-                    //wrap
-                    if (selectableSpanElements[i].classList.contains("linenos")) {
-                        $(selectableSpanElements[i]).wrapAll('<div class="line-number" style="display: inline-block;">');
-                        $(spanElements).wrapAll('<div class="loc>');
-                        spanElements = [];
-
-                    }
-
+                    prevElement = $(prevElement).prev();
                 }
 
-            }
+                //Adding current element selected by the user if it's not in the list already
+                if(!elementsToHighlight.includes($(this))){
+                    nextElements.push($(this));
+                }
+
+                while(nextElement.hasClass("hljs-comment")){
+                    if(!elementsToHighlight.includes(nextElement)) {
+                        nextElements.push(nextElement);
+                    }
+                    nextElement = $(nextElement).next();
+                }
+
+                for(var i=previousElements.length-1; i>=0;i--){
+                    upperPartCommentSelection = upperPartCommentSelection + previousElements[i][0].innerText + "\n";
+                }
+
+                for(var i=0;i<nextElements.length;i++){
+                    lowerPartCommentSelection = lowerPartCommentSelection + nextElements[i][0].innerText + "\n";
+                }
+
+                //extending elementsToHighlight
+                var tmpArray = previousElements.reverse().concat(nextElements);
+                for(var i=0;i<tmpArray.length;i++){
+                    elementsToHighlight.push(tmpArray[i]);
+                }
+
+                console.log('--> ' + elementsToHighlight);
+
+                for(var i=0;i<elementsToHighlight.length;i++){
+                    $(elementsToHighlight[i]).css('color','red');
+                }
+
+                selectedCommentText = upperPartCommentSelection  + lowerPartCommentSelection;
+                updateTextArea(selectedCommentText);
+
+                unselectAll();
+            });
+
+
+            // Bind code are to "text select" events
+            $('#code').bind('updateInfo keyup mousedown mousemove mouseup', function(event) {
+
+                var code = document.getElementById("code");
+                var sel = getSelectionCharOffsetsWithin(code);
+                var start_point, stop_point, text_point, targetTag;
+
+                if (sel.start === sel.end){
+                    start_point = 0;
+                    stop_point = 0;
+                    text_point = "";
+                    targetTag = null;
+                } else{
+                    start_point = sel.start;
+                    stop_point = sel.end;
+                    text_point = sel.text;
+                    targetTag = sel.targetTag;
+                }
+
+                //console.log(elementsToHighlight);
+
+                if(typeof(targetTag) != "undefined" && $(targetTag).hasClass('hljs-comment')){
+
+                    if(!elementsToHighlight.includes($(targetTag))) {
+                        elementsToHighlight.push($(targetTag));
+                    }
+
+                    selectedCommentText = $(targetTag).text();
+                    $(targetTag).css('color','red');
+                    updateTextArea(selectedCommentText)
+                }
+
+                unselectAll();
+		    });
+
 
             var classification = JSON.parse('{{ artifact_classification|tojson }}');
 
-            if (!jQuery.isEmptyObject(classification)) {
+            /*if (!jQuery.isEmptyObject(classification)) {
                 jQuery.each(classification, function (i, val) {
                     const lines = val.toString().split(",");
                     highlightSelection(lines, isReviewer = true, colorHighlighting = 'red');
                 });
-            }
-
+            }*/
 
 
             for (let i = 0; i < methodsList.length; i++) {
@@ -784,36 +820,6 @@
             }
             ////////////////////////////////////////////////////
 
-            $("h1").css('color','white');
-
-            $("h2").css('color','white');
-
-            //$(".c1").addClass('force-select');
-
-            //$(".cm").addClass('force-select');
-
-            //Highlight target comments
-            var inlineComments = document.getElementsByClassName('c1');
-            var multiLineComments = document.getElementsByClassName('cm');
-
-            highlightTargetComments(inlineComments);
-            highlightTargetComments(multiLineComments);
-            ///////////////////////////////////
-
-
-            {#Change rows label color to white#}
-            $(".linenos").css('color','white');
-
-            $( ".c1").dblclick(function() {
-                var selectedText =  this.innerText;
-                let previousSelection = $("#textAreaSelectedText").val();
-                if (previousSelection == "") {
-                    $("#textAreaSelectedText").text(previousSelection + selectedText);
-                } else {
-                    $("#textAreaSelectedText").text(previousSelection + "\n" + selectedText);
-                }
-                console.log(selectedText);
-            });
 
 
 
@@ -839,7 +845,6 @@
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
-
     <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
     <script src="{{ url_for('static', filename='js/header.js') }}"></script>
     <script src="{{ url_for('static', filename='js/vendor/bootstrap-confirmation.min.js') }}"></script>

@@ -9,7 +9,7 @@ from src.helper.tools_common import who_is_signed_in, get_locked_artifacts, get_
 
 #A stub for the moment
 def get_next_class():
-    with open('/stub.java', 'r') as fread:
+    with open('/stub_old.java', 'r') as fread:
         return fread.read()
 
 

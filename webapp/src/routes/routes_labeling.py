@@ -53,15 +53,17 @@ def labeling_with_artifact(target_artifact_id):
             methodsList = eval(artifact_data.methodsList)
             methodsName = eval(artifact_data.methodsName)
 
-            lexer = JavaLexer()
-            tokens = lexer.get_tokens(javaClassText)
-            for item in tokens:
-                print(item)
-
+            # lexer = JavaLexer()
+            # tokens = lexer.get_tokens(javaClassText)
+            # for item in tokens:
+            #     print(item)
+            linesList = []
+            for (line_index, line) in enumerate(javaClassText.splitlines()):
+                linesList.append(line_index)
 
             jsonClassification = eval(artifact_data.classification)
 
-            print(jsonClassification)
+
 
             return render_template('labeling_pages/artifact.html',
                                    artifact_id=target_artifact_id,
@@ -69,6 +71,7 @@ def labeling_with_artifact(target_artifact_id):
                                    artifact_class=javaClassText,
                                    artifact_classification=jsonClassification,
                                    artificat_methodsName = methodsName,
+                                   artifact_linesList = linesList,
                                    artifact_methodsList = methodsList,
                                    overall_labeling_status=get_overall_labeling_progress(),
                                    user_info=get_labeling_status(who_is_signed_in()),
