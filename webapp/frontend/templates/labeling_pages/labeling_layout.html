@@ -1,14 +1,14 @@
 {% extends "common_pages/common_layout.html" %}
 
 {% block headerStuff %}
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/highlightjs-themes@1.0.0/androidstudio.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
-    <link href="{{ url_for('static', filename='css/code.css') }}" rel="stylesheet" type="text/css">
     <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/default.min.css">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs-themes@1.0.0/github.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
-    <script src="{{ url_for('static', filename='js/LightRange.min.js') }}"></script>
+{#    <link href="{{ url_for('static', filename='css/default.css') }}" rel="stylesheet" type="text/css">#}
+
     <script src="{{ url_for('static', filename='js/commonFunc.js') }}"></script>
 
 
@@ -76,8 +76,6 @@
             overflow-y: scroll;
         }*/
 
-        .mitico{}
-
         #code{
             margin-top:-2.44%;
         }
@@ -119,7 +117,7 @@
 
             <div class="row no-gutters" style="background-color: black; padding-top: 10px;">
 
-                     <div class="mitico col-md-4">
+                     <div class=" col-md-4">
                         <div class="text-left">
                             <button class="btn btn-outline-info"
                                     type="submit"
@@ -131,7 +129,7 @@
 
                      </div>
 
-                <div class="mitico col-md-4">
+                <div class=" col-md-4">
                     <div style="text-align: center; font-size: medium; color: white;">
                         {{ overall_labeling_status['n_artifacts_labeled'] }}
                         out of
@@ -148,7 +146,7 @@
                     </div>
                 </div>
 
-                <div class="mitico col-md-4">
+                <div class=" col-md-4">
                     <div class="text-right">
                         <button class="btn btn-outline-success"
                                 type="submit"
@@ -164,7 +162,7 @@
 
             <div class="row no-gutters" style="background-color: black; height: 15px;">
 
-                <div class="mitico col-md-12">
+                <div class=" col-md-12">
                     <div class="" style="position: relative; padding-left: 20px;"></div>
                 </div>
 
@@ -173,7 +171,7 @@
 
             <div class="row no-gutters">
 
-                  <div class="mitico col-md-2 vh-100" style="background-color: black;">
+                  <div class=" col-md-2 vh-100" style="background-color: black;">
 
                       <div class="buttonWrapper">
                           <button class="btn btn btn-dark category-button"
@@ -268,7 +266,7 @@
                   </div>
 
 
-                <div class="mitico col-md-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
+                <div class=" col-md-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
 
                     <div class="row-column">
 
@@ -279,17 +277,11 @@
 
                     </div>
 
-
-{#                        {% highlight 'java', lineno='inline' %}#}
-{#                            {{ artifact_class }}#}
-{#                        {% endhighlight %}#}
-
-
                 </div>
 
 
 
-                <div class="mitico col-md-2 no-float overflow-auto" id="methodsLabel" style="background-color: black;">
+                <div class=" col-md-2 no-float overflow-auto" id="methodsLabel" style="background-color: black;">
 
                     <div id="upperSide" style="height: 50%;">
                         <!-- This Div is dyamically filled -->
@@ -312,19 +304,19 @@
             </div>
 
             <div class="row no-gutters">
-                <div class="mitico col-md-2">
+                <div class=" col-md-2">
 
                     <h4  style='color:white; top:95%; position:fixed;  left:3%;'> #Associations:<span id="badgeCounter" class="badge badge-secondary position-fixed" style="top:95.2%; left:12%; font-size: 17px;">0</span></h4>
 
 
                 </div>
-                <div class="mitico col-md-8">
+                <div class=" col-md-8">
                     <textarea id="textAreaSelectedText" rows="4" cols="50" class="textarea"></textarea>
                     <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="reset()">Clear</button>
                     <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization()">Save</button>
 
                 </div>
-                <div class="mitico col-md-2">
+                <div class=" col-md-2">
 
                 </div>
             </div>
@@ -363,7 +355,7 @@
         ]
 
         var selectedLines = [];
-        var selectedCateory = "";
+        var selectedCategory = "none";
         var selectedCodeText = "";
         var selectedCommentText = "";
         var elementsToHighlight = [];
@@ -446,31 +438,34 @@
             //console.log('1) --> ' + getSelectionParentElement().innerText);
             //handling click event on the right side of the text area
             try{
-                targetTag = range.commonAncestorContainer.previousSibling;
+                targetTag = range.commonAncestorContainer;
                 //console.log("target tag sibling: " + targetTag);
             }catch(e){
-                targetTag = getSelectionParentElement();
-                //console.log("target tag parents: " + targetTag);
+                targetTag = null;
+
             }
+
+            //console.log('Ancestor '+range.textContent);
 
 
             return {
                 start: start,
                 end: end,
                 text: text,
-                targetTag: targetTag
+                targetTag: targetTag,
+                range: range
             };
         }
 
 
-    function highlightRange(range) {
-        var newNode = document.createElement("div");
-        newNode.setAttribute(
-           "style",
-           "background-color: green; display: inline;"
-        );
-        range.surroundContents(newNode);
-    }
+        function highlightRange(range) {
+            var newNode = document.createElement("div");
+            newNode.setAttribute(
+               "style",
+               "background-color: green; display: inline;"
+            );
+            range.surroundContents(newNode);
+        }
 
 
         function reset(save=false){
@@ -479,9 +474,8 @@
             $('.category-button').css("background-color",'');
             $("#new-category-button").text("Define New Category");
 
-
             selectedLines = []
-            selectedCateory = "";
+            selectedCategory = "none";
             selectedCodeText = "";
             selectedCommentText = "";
 
@@ -510,8 +504,6 @@
 
             }
         }
-
-
 
         function checkForButtonValidity(){
             let textBoxVal = $("#textAreaSelectedText").val();
@@ -548,19 +540,16 @@
                 createNewCategory();
             }
             $(element).css('background-color','green');
-            selectedCateory = element.id.toString();
+            selectedCategory = element.id.toString();
             selectedCommentText =  $("#textAreaSelectedText").val().toString(); //at this stage we must have only the code comment/s
             console.log(selectedCommentText);
         }
 
-        function popUpLinkedCommentToSnippet(){
-            alert("First link the given comment to the snippet!");
-        }
 
         function isSelectedCategory(){
-            if(selectedCateory==""){
-                popUpLinkedCommentToSnippet()
-                resetHighlightedText(dictHighlightedElements[counterAssociations]);
+            if(selectedCategory=="none"){
+                alert("First link the given comment to the snippet!");
+                //resetHighlightedText(dictHighlightedElements[counterAssociations]);
                 return false;
             }else{
                 //console.log('A' + selectedCodeText);
@@ -580,7 +569,7 @@
                 if(selectedCodeText==""){
                     popUpLinkedCommentToSnippet();
                     resetHighlightedText(dictHighlightedElements[counterAssociations]);
-                    $("#"+selectedCateory).css('background-color','');
+                    $("#"+selectedCategory).css('background-color','');
                     return false;
                 }
 
@@ -607,17 +596,14 @@
                 var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%; display: inline-flex; align-items: center;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:fixed; left:98%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
 
                 $( "#lowerSide" ).append( $(newButton) );
-
-
+                
                 jsonToSave[target_method]=selectedLines;
                 counterAssociations  = counterAssociations + 1;
                 $("#badgeCounter").text(counterAssociations);
 
                 reset(save=true);
-
             }
-
-
+            
         }
 
         function updateTextArea(textToDisplay){
@@ -628,7 +614,6 @@
                 $("#textAreaSelectedText").text(previousSelection + "\n" + textToDisplay);
 
             }
-
         }
 
         function removeAssociation(divID){
@@ -701,6 +686,9 @@
              */
             $(".commentHighlighting").dblclick(function() {
 
+                var code = document.getElementById("code");
+                var sel = getSelectionCharOffsetsWithin(code);
+
                 var prevElement = $(this).prev();
                 var nextElement = $(this).next();
 
@@ -710,7 +698,7 @@
                 var upperPartCommentSelection = '';
                 var lowerPartCommentSelection = '';
 
-                console.log(elementsToHighlight);
+                //console.log(elementsToHighlight);
 
                 while(prevElement.hasClass('hljs-comment')){
                     if(!elementsToHighlight.includes(prevElement)) {
@@ -747,7 +735,7 @@
                     elementsToHighlight.push(tmpArray[i]);
                 }
 
-                console.log('--> ' + elementsToHighlight);
+                //console.log('--> ' + elementsToHighlight);
 
                 for(var i=0;i<elementsToHighlight.length;i++){
                     $(elementsToHighlight[i]).css('color','red');
@@ -757,11 +745,14 @@
                 updateTextArea(selectedCommentText);
 
                 unselectAll();
+
+                console.log(sel.start);
+                console.log(sel.end);
             });
 
 
             // Bind code are to "text select" events
-            $('#code').bind('updateInfo keyup mousedown mousemove mouseup', function(event) {
+            $('#code').bind('mouseup', function(event) {
 
                 var code = document.getElementById("code");
                 var sel = getSelectionCharOffsetsWithin(code);
@@ -781,7 +772,16 @@
 
                 //console.log(elementsToHighlight);
 
-                if(typeof(targetTag) != "undefined" && $(targetTag).hasClass('hljs-comment')){
+                //console.log(start_point);
+                //console.log(stop_point);
+                //console.log(text_point);
+
+
+                try{
+                    targetTag = targetTag.previousSibling;
+                }catch(e){}
+
+                if(typeof(targetTag) != null && $(targetTag).hasClass('hljs-comment')){
 
                     if(!elementsToHighlight.includes($(targetTag))) {
                         elementsToHighlight.push($(targetTag));
@@ -789,12 +789,31 @@
 
                     selectedCommentText = $(targetTag).text();
                     $(targetTag).css('color','red');
-                    updateTextArea(selectedCommentText)
+                    updateTextArea(selectedCommentText);
+
+                    unselectAll();
+                }else{
+
+                    //Adding highlighting with span token
+                    if(selectedCategory !=='none' || $("textAreaSelectedText").innerText === "" || elementsToHighlight.length==0) {
+                        console.log( '--> ' + $("textAreaSelectedText").text());
+                        var newNode = document.createElement("span");
+                        newNode.setAttribute("style", "background-color: #FFE5CC");
+                        //Add ID for the given selection that is gonna be useful when we want to remove the highlighted text
+                        //newNode.classList.add()
+                        newNode.appendChild(sel.range.extractContents());
+                        sel.range.insertNode(newNode);
+                        updateTextArea(sel.text);
+                        unselectAll();
+                    }else{
+
+                            alert("Please select the category for the comment first!");
+
+                    }
+
                 }
 
-                unselectAll();
 		    });
-
 
             var classification = JSON.parse('{{ artifact_classification|tojson }}');
 
@@ -828,21 +847,21 @@
                     $("#submit_btn").attr('disabled', "");
                 else
                     $("#submit_btn").removeAttr('disabled');
-            });
-
-            $("#submit_btn").click(function () {
-                let data_json = {     artifact_id: {{  artifact_id }},
-                                                labeling_data: $('#label_selector').val(),
-                                                duration: get_elapsed_seconds()};
-                {#let data = JSON.stringify(data_json);#}
-                $.post("/label", data_json, function (response, status) {
-                    let response_json = $.parseJSON(response.toString())
-                    ShowNotification(response_json['status'], "success");
-                    ChangeSkipToNext();
                 });
-            });
 
-        });
+                $("#submit_btn").click(function () {
+                    let data_json = {     artifact_id: {{  artifact_id }},
+                                                    labeling_data: $('#label_selector').val(),
+                                                    duration: get_elapsed_seconds()};
+                    {#let data = JSON.stringify(data_json);#}
+                    $.post("/label", data_json, function (response, status) {
+                        let response_json = $.parseJSON(response.toString())
+                        ShowNotification(response_json['status'], "success");
+                        ChangeSkipToNext();
+                    });
+                });
+
+            });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
     <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
