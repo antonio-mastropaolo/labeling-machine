@@ -278,11 +278,11 @@
 
             <div class=" col-md-2 no-float" id="methodsLabel" style="background-color: black;">
 
-                <div id="upperSide" style="height: 50%; overflow-y: scroll; position: sticky; width:100%; float:left;">
+                <div id="upperSide" style="height: 50%; overflow-y: scroll; position: absolute; width:100%; float:left;">
                     <!-- This Div is dyamically filled -->
                 </div>
 
-                 <div id="lowerSide" style="height: 50%; overflow-y: scroll; position:sticky; top:58%; width:100%;">
+                 <div id="lowerSide" style="height: 50%; overflow-y: scroll; position:sticky; top:58.5%; width:100%;">
 
                     <hr class="solid">
                      <div style="text-align: center; color: white;">
@@ -526,9 +526,9 @@
               var buttonID = methodsListNames[i] + "-button";
               var startingLine = methodsList[i].split("-")[0];
               var endingLine = methodsList[i].split("-")[1];
-              var buttonText = methodsListNames[i] + " " +startingLine + '---' + endingLine;
+              var buttonText = methodsListNames[i];// + " " +startingLine + '---' + endingLine;
               var scorllCall = 'moveToSelectedMethod(' + startingLine+')';
-              var newButton = '<div class="buttonWrapper"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%">' + buttonText + '</button> </div>';
+              var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%; display:inline-flex; text-align: left;">'+ buttonText + '</button> </div>';
               //console.log(newButton);
               $( "#upperSide" ).append( $(newButton) );
 

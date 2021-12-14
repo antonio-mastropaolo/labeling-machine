@@ -251,7 +251,7 @@ function saveCategorization(){
         var buttonID = "association" + '-' + counterAssociations;// + "-" + target_method;
         var buttonText = "#" + counterAssociations+ " -->";// + target_method;
         //var scorllCall = 'moveToSelectedMethod('+ selectedLines[0]+')';
-        var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: center;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:fixed; left:98%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
+        var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
 
         $( "#lowerSide" ).append( $(newButton) );
 
