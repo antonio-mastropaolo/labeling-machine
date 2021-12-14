@@ -61,14 +61,11 @@ def labeling_with_artifact(target_artifact_id):
             for (line_index, line) in enumerate(javaClassText.splitlines()):
                 linesList.append(line_index)
 
-            jsonClassification = eval(artifact_data.classification)
-
 
             return render_template('labeling_pages/artifact.html',
                                    artifact_id=target_artifact_id,
                                    artifact_data=artifact_data,
                                    artifact_class=javaClassText,
-                                   artifact_classification=jsonClassification,
                                    artificat_methodsName = methodsName,
                                    artifact_linesList = linesList,
                                    artifact_methodsListLines = methodsListLines,

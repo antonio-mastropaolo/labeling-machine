@@ -12,7 +12,6 @@
     <script src="{{ url_for('static', filename='js/common-function.js') }}"></script>
 
 
-
     {#    High priority css classes#}
     <style>
 
@@ -57,7 +56,7 @@
 
         .button-corner-up {
             position: fixed;
-            bottom: 8.5%;
+            bottom: 7%;
             left: 78%;
             width: 5%;
             text-align: center;
@@ -67,8 +66,8 @@
             width:66.7%;
             overflow: hidden;
             overflow-y: scroll;
-            bottom:0.1%;
-            height:12%;
+            bottom:0;
+            height:11%;
             position:fixed;
             margin-bottom: -2px;
         }
@@ -83,8 +82,8 @@
             }
 
             .textarea{
-                bottom:0.2%;
-                height:11%;
+                bottom:0;
+                height:10%;
             }
 
 
@@ -93,7 +92,7 @@
             }
 
             .button-corner-up{
-                bottom: 6.5%;
+                bottom: 5.5%;
             }
 
         }
@@ -110,204 +109,203 @@
 <!-- Bootstrap container -->
  <div class="container">
 
-        {% block content %}
+    {% block content %}
 
-            <div class="row no-gutters" style="background-color: black; padding-top: 10px;">
+        <div class="row no-gutters" style="background-color: black; padding-top: 10px;">
 
-                     <div class=" col-md-4">
-                        <div class="text-left">
-                            <button class="btn btn-outline-info"
-                                type="submit"
-                                id="next-skip-btn"
-                                onclick="skip_next_artifact()"
-                                style="width: 100%;"> Skip
-                        </button>
-                        </div>
-
-                     </div>
-
-                <div class=" col-md-4">
-                    <div style="text-align: center; font-size: medium; color: white;">
-                        {{ overall_labeling_status['n_artifacts_labeled'] }}
-                        out of
-                        {{ overall_labeling_status['n_artifacts_to_be_labeled'] }} | <em>{{ overall_labeling_status['source_name'] }}</em>
+                 <div class=" col-md-4">
+                    <div class="text-left">
+                        <button class="btn btn-outline-info"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick="skip_next_artifact()"
+                            style="width: 100%;"> Skip
+                    </button>
                     </div>
-                    <div class="justify-content-center" style="display: flex;">
-                        <div class="progress" style="width:50%;">
-                            <div id="top-progress-bar-status" class="progress-bar" role="progressbar" style="width: 0%; "
-                                 aria-valuenow="0"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100">
-                            </div>
+
+                 </div>
+
+            <div class=" col-md-4">
+                <div style="text-align: center; font-size: medium; color: white;">
+                    {{ overall_labeling_status['n_artifacts_labeled'] }}
+                    out of
+                    {{ overall_labeling_status['n_artifacts_to_be_labeled'] }} | <em>{{ overall_labeling_status['source_name'] }}</em>
+                </div>
+                <div class="justify-content-center" style="display: flex;">
+                    <div class="progress" style="width:50%;">
+                        <div id="top-progress-bar-status" class="progress-bar" role="progressbar" style="width: 0%; "
+                             aria-valuenow="0"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class=" col-md-4">
-                    <div class="text-right">
-                        <button class="btn btn-outline-success"
-                                type="submit"
-                                id="next-skip-btn"
-                                onclick="submitClassifaction();"
-                                style="width: 100%;"> Submit Classification
-                        </button>
-                    </div>
-
+            <div class=" col-md-4">
+                <div class="text-right">
+                    <button class="btn btn-outline-success"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick="submitClassifaction();"
+                            style="width: 100%;"> Submit Classification
+                    </button>
                 </div>
 
             </div>
 
-            <div class="row no-gutters" style="background-color: black; height: 15px;">
+        </div>
 
-                <div class=" col-md-12">
-                    <div class="" style="position: relative; padding-left: 20px;"></div>
-                </div>
+        <div class="row no-gutters" style="background-color: black; height: 15px;">
 
+            <div class=" col-md-12">
+                <div class="" style="position: relative; padding-left: 20px;"></div>
             </div>
 
+        </div>
 
-            <div class="row no-gutters">
 
-                  <div class=" col-md-2 vh-100" style="background-color: black;">
+        <div class="row no-gutters">
 
-                      <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="code-summary-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Code Summary
-                          </button>
-                      </div>
+              <div class=" col-md-2 vh-100" style="background-color: black;">
 
-                      <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="expand-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Expand
-                          </button>
-                      </div>
-
-                      <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="rationale-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Rationale
-                          </button>
-                      </div>
-
-                      <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="deprecation-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Deprecation
-                          </button>
-                      </div>
-
-                      <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="usage-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Usage
-                          </button>
-                      </div>
-
-                      <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="exception-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Exception
-                          </button>
-                      </div>
-
-                       <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="todo-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > TO-DO
-                          </button>
-                      </div>
-
-                       <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="comment-code-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Commented Code
-                          </button>
-                      </div>
-
-                      <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="incomplete-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Incomplete
-                          </button>
-                      </div>
-
-                      <div class="buttonWrapper">
-                          <button class="btn btn btn-dark category-button"
-                            type="submit"
-                            id="new-category-button"
-                            onclick="addNewCommentToBeLinked(this);"
-                            style="width: 100%" > Define new category
-                          </button>
-                      </div>
-
+                  <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="code-summary-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Code Summary
+                      </button>
                   </div>
 
+                  <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="expand-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Expand
+                      </button>
+                  </div>
 
-                <div class=" col-md-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
+                  <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="rationale-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Rationale
+                      </button>
+                  </div>
 
-                    <div class="row-column">
+                  <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="deprecation-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Deprecation
+                      </button>
+                  </div>
 
-                        <pre id="rows-wrapper" class="rows">
-                            <code id="rows" class="lang-java" style="display:inline; float:left; overflow: scroll;"></code>
-                            <code id="code" class="lang-java">{{ artifact_class }}</code>
-                        </pre>
+                  <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="usage-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Usage
+                      </button>
+                  </div>
 
-                    </div>
+                  <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="exception-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Exception
+                      </button>
+                  </div>
 
-                </div>
+                   <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="todo-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > TO-DO
+                      </button>
+                  </div>
+
+                   <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="comment-code-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Commented Code
+                      </button>
+                  </div>
+
+                  <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="incomplete-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Incomplete
+                      </button>
+                  </div>
+
+                  <div class="buttonWrapper">
+                      <button class="btn btn btn-dark category-button"
+                        type="submit"
+                        id="new-category-button"
+                        onclick="addNewCommentToBeLinked(this);"
+                        style="width: 100%" > Define new category
+                      </button>
+                  </div>
+
+              </div>
 
 
-                <div class=" col-md-2 no-float overflow-auto" id="methodsLabel" style="background-color: black;">
+            <div class=" col-md-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
 
-                    <div id="upperSide" style="height: 50%;">
-                        <!-- This Div is dyamically filled -->
-                    </div>
+                <div class="row-column">
 
-                     <div id="lowerSide" style="height: 50%;">
+                    <pre id="rows-wrapper" class="rows">
+                        <code id="rows" class="lang-java" style="display:inline; float:left; overflow: scroll;"></code>
+                        <code id="code" class="lang-java">{{ artifact_class }}</code>
+                    </pre>
 
-                        <hr class="solid">
-                         <div style="text-align: center; color: white;">
-                             <h4>ASSOCIATIONS</h4>
-                             <span id="badgeCounter" class="badge badge-secondary" style="font-size:20px;">0</span>
-                         </div>
-                         <hr class="solid">
-                    </div>
                 </div>
 
             </div>
 
-            <div class="row no-gutters">
-                <div class=" col-md-2"></div>
-                <div class=" col-md-8">
-                    <textarea id="textAreaSelectedText" rows="4" cols="50" class="textarea"></textarea>
-                    <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="reset()">Clear</button>
-                    <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization()">Save</button>
+
+            <div class=" col-md-2 no-float" id="methodsLabel" style="background-color: black;">
+
+                <div id="upperSide" style="height: 50%; overflow-y: scroll; position: sticky; width:100%; float:left;">
+                    <!-- This Div is dyamically filled -->
                 </div>
-                <div class=" col-md-2"></div>
+
+                 <div id="lowerSide" style="height: 50%; overflow-y: scroll; position:sticky; top:58%; width:100%;">
+
+                    <hr class="solid">
+                     <div style="text-align: center; color: white;">
+                         <h4 style="width:100%; position:relative;">ASSOCIATIONS</h4>
+                         <span id="badgeCounter" class="badge badge-secondary" style="font-size:20px;">0</span>
+                     </div>
+                     <hr class="solid">
+                </div>
             </div>
 
-        {% endblock %}
+        </div>
 
+        <div class="row no-gutters">
+            <div class=" col-md-2"></div>
+            <div class=" col-md-8">
+                <textarea id="textAreaSelectedText" rows="4" cols="50" class="textarea"></textarea>
+                <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="reset()">Clear</button>
+                <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization()">Save</button>
+            </div>
+            <div class=" col-md-2"></div>
+        </div>
+
+    {% endblock %}
 
 
 
@@ -323,11 +321,9 @@
         hljs.highlightAll();
 
 
-
-
-        const methodsList = JSON.parse('{{ artifact_methodsListLines | tojson }}');
-        const methodsListNames =  JSON.parse('{{ artificat_methodsName | tojson }}');
-        const linesList = JSON.parse(('{{ artifact_linesList }}'));
+        const methodsList = {{ artifact_methodsListLines | tojson }};
+        const methodsListNames = {{ artificat_methodsName | safe }};
+        const linesList = {{ artifact_linesList }};
         var startTime = new Date().getTime();
 
         var labelCategories = ["new-category-button",
@@ -364,261 +360,7 @@
             dictHighlightedComments[j]=[]
         }
 
-        function highlightTargetComments(elements,className){
 
-            function look4Javadoc(comment){
-                var commentLines = comment.split('\n');
-                for(var i=0;i<commentLines.length;i++){
-                    if(commentLines[i].trim().startsWith('*') && !commentLines[i].trim().startsWith('*/')){
-                        return true
-                    }
-                }
-                return false;
-            }
-
-            for(var i=0;i<elements.length;i++){
-                if(elements[i].innerHTML.startsWith('/**') || elements[i].innerHTML.startsWith('/* *') || look4Javadoc(elements[i].innerHTML)){
-                    //console.log('hit javadoc');
-                    continue
-                }
-                else{
-                     $(elements[i]).addClass(className);
-                     //elements[i].setAttribute('onclick','selectText(this)')
-                }
-            }
-
-        }
-
-        function getSelectionParentElement() {
-            var parentEl = null, sel;
-            if (window.getSelection) {
-                sel = window.getSelection();
-                if (sel.rangeCount) {
-                    parentEl = sel.getRangeAt(0).commonAncestorContainer;
-                    if (parentEl.nodeType != 1) {
-                        parentEl = parentEl.parentNode;
-                    }
-                }
-            } else if ( (sel = document.selection) && sel.type != "Control") {
-                parentEl = sel.createRange().parentElement();
-            }
-            return parentEl;
-        }
-
-        function getSelectionCharOffsetsWithin(element) {
-            var start = 0, end = 0, text = "";
-            var sel, range, priorRange;
-            if (typeof window.getSelection != "undefined") { // Non-IE
-                if (window.getSelection().toString() != "") {
-                    range = window.getSelection().getRangeAt(0);
-                    priorRange = range.cloneRange();
-                    priorRange.selectNodeContents(element);
-                    priorRange.setEnd(range.startContainer, range.startOffset);
-                    start = priorRange.toString().length;
-                    end = start + range.toString().length;
-                    // Get text
-                    text = range.toString();
-                }
-            } else if (typeof document.selection != "undefined" && (sel = document.selection).type != "Control") {  // IE
-                range = sel.createRange();
-                priorRange = document.body.createTextRange();
-                priorRange.moveToElementText(element);
-                priorRange.setEndPoint("EndToStart", range);
-                start = priorRange.text.length;
-                end = start + range.text.length;
-                // Try with IE
-                text = range.text;
-            }
-
-            //handling click event on the right side of the text area
-            try{
-                targetTag = range.commonAncestorContainer;
-            }catch(e){
-                targetTag = null;
-
-            }
-
-            return {
-                start: start,
-                end: end,
-                text: text,
-                targetTag: targetTag,
-                range: range
-            };
-        }
-
-
-        function highlightRange(range) {
-            var newNode = document.createElement("div");
-            newNode.setAttribute(
-               "style",
-               "background-color: green; display: inline;"
-            );
-            range.surroundContents(newNode);
-        }
-
-
-        function reset(save=false){
-
-            $("#textAreaSelectedText").text("");
-            $('.category-button').css("background-color",'');
-            $("#new-category-button").text("Define New Category");
-
-            selectedLines = []
-            selectedCategory = "";
-            selectedCodeText = "";
-            selectedCommentText = "";
-
-            if(!save) {
-                resetHighlightedComment(dictHighlightedComments[counterAssociations]);
-                $(dictHighlightedCode[counterAssociations]).css('background-color','');
-            }
-
-            elementsToHighlight = [];
-            dictHighlightedComments[counterAssociations] = []
-        }
-
-        function resetHighlightedComment(customList){
-            for (var i = 0; i < customList.length; i++) {
-                 $(customList[i][0]).css('color', '');
-            }
-        }
-
-        function checkForButtonValidity(){
-            let textBoxVal = $("#textAreaSelectedText").val();
-            if(textBoxVal==""|| (!textBoxVal.trim().startsWith("//") && !textBoxVal.trim().startsWith("/*") && !textBoxVal.trim().startsWith('/**')  )) {
-                alert("Select a comment first!");
-                return false;
-            }
-            return true;
-        }
-
-         function updateTextArea(textToDisplay){
-            var previousSelection = $("#textAreaSelectedText").val().toString();
-            if(previousSelection==""){
-                $("#textAreaSelectedText").text(textToDisplay);
-            }else{
-                $("#textAreaSelectedText").text(previousSelection + "\n" + textToDisplay);
-
-            }
-        }
-
-
-        function checkForChangedCategory(element){
-
-            function arrayRemove(arr, value) {
-
-                    return arr.filter(function(ele){
-                        return ele != value;
-                    });
-                }
-
-            var refinedCategories = arrayRemove(labelCategories, element.id.toString());
-
-            for(var i=0;i<refinedCategories.length;i++){
-                var selector="#"+refinedCategories[i];
-                $(selector).css('background-color','');
-            }
-        }
-
-        function addNewCommentToBeLinked(element){
-            var retCode=checkForButtonValidity();
-            if (!retCode) { return false;}
-            checkForChangedCategory(element);
-            if(element.id.toString()=="new-category-button"){
-                createNewCategory();
-            }
-            $(element).css('background-color','green');
-            selectedCategory = element.id.toString();
-            selectedCommentText =  $("#textAreaSelectedText").val().toString(); //at this stage we must have only the code comment/s
-            
-        }
-
-
-        function isSelectedCategory(){
-            if(selectedCategory==""){
-                alert("First link the given comment to the snippet!");
-                resetHighlightedComment(dictHighlightedCode[counterAssociations]);
-                return false;
-            }else{
-                return true;
-            }
-
-        }
-
-        function saveCategorization(){
-
-            if (isSelectedCategory()){
-                //save snippet
-                var allSelection = $("#textAreaSelectedText").val().toString();
-                selectedCodeText = allSelection.replace(selectedCommentText,'');
-                if(selectedCodeText==""){
-                    alert("First link the given comment to the snippet!");
-                    resetHighlightedComment(dictHighlightedCode[counterAssociations]);
-                    $("#"+selectedCategory).css('background-color','');
-                    return false;
-                }
-
-                //console.log(selectedCommentText);
-                //console.log(selectedCodeText);
-                //console.log(selectedLines);
-
-                $("#textAreaSelectedText").text("");
-                for(var i=0;i<labelCategories.length;i++){
-                    var selector="#"+labelCategories[i];
-                    $(selector).css('background-color','');
-                }
-
-                //Add new association button
-                var divID = "div-association" + '-' + counterAssociations; //+ "-" + target_method;
-                var buttonID = "association" + '-' + counterAssociations;// + "-" + target_method;
-                var buttonText = "#" + counterAssociations+ " -->";// + target_method;
-                //var scorllCall = 'moveToSelectedMethod('+ selectedLines[0]+')';
-                var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: center;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:fixed; left:98%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
-
-                $( "#lowerSide" ).append( $(newButton) );
-                
-                //adding tag result to the lists we store in the DB
-                selectedComments.push(selectedCommentText);
-                selectedCode.push(selectedCodeText);
-                selectedCategories.push(selectedCategory);
-                selectedSpanCode.push()
-                
-                counterAssociations  = counterAssociations + 1;
-                $("#badgeCounter").text(counterAssociations);
-
-
-                reset(save=true);
-
-            }
-            
-        }
-
-        function removeAssociation(divID){
-            targetAssociation = divID.split('-')[2];
-            $('#'+divID).fadeOut(300, function(){ $(this).remove();});
-            counterAssociations = counterAssociations -1;
-            $("#badgeCounter").text(counterAssociations);
-
-            //removing highlighting for code and comment
-            $(dictHighlightedCode[targetAssociation]).css('background-color','')
-            resetHighlightedComment(dictHighlightedComments[targetAssociation]);
-        }
-        
-
-        function unselectAll(){
-
-            if (document.selection && document.selection.empty)
-            {
-                document.selection.empty();
-            }
-            else if (window.getSelection)
-            {
-                var sel= window.getSelection();
-                if(sel && sel.removeAllRanges)
-                    sel.removeAllRanges();
-            }
-        }
 
         // -------------------------End-------------------------
 
@@ -780,8 +522,6 @@
                 }
 		    });
 
-            //var classification = JSON.parse('{{ artifact_classification|tojson }}');
-
             for (let i = 0; i < methodsList.length; i++) {
               var buttonID = methodsListNames[i] + "-button";
               var startingLine = methodsList[i].split("-")[0];
@@ -793,32 +533,6 @@
               $( "#upperSide" ).append( $(newButton) );
 
             }
-            ////////////////////////////////////////////////////
-
-
-            /*$(document.body).on("change","#label_selector",function(){
-                if(this.value == "")
-                    $("#submit_btn").attr('disabled', "");
-                else
-                    $("#submit_btn").removeAttr('disabled');
-                });*/
-            /*$("#submit_btn").click(function () {
-                let data_json = {
-                        artifact_id: {{  artifact_id }},
-                        labeling_data: $('#label_selector').val(),
-                        code: selectedCode,
-                        comments: selectedComments,
-                        categories: selectedCategories,
-                        span:selectedSpanCode,
-                        duration: get_elapsed_seconds()
-                };
-                {#let data = JSON.stringify(data_json);#}
-                $.post("/label", data_json, function (response, status) {
-                    let response_json = $.parseJSON(response.toString())
-                    ShowNotification(response_json['status'], "success");
-                    ChangeSkipToNext();
-                });
-            });*/
 
         });
 
@@ -839,13 +553,11 @@
                         code: JSON.stringify(selectedCode),
                         comments: JSON.stringify(selectedComments),
                         categories: JSON.stringify(selectedCategories),
-                        span: JSON.stringify(selectedSpanCode),
+                        span:JSON.stringify(selectedSpanCode),
                         duration: get_elapsed_seconds()
-                        //labeling_data: $('#label_selector').val(),
                 };
-                console.log(data_json);
                 $.post("/label", data_json, function (response, status) {
-                    let response_json = $.parseJSON(response.toString());
+                    let response_json = $.parseJSON(response.toString())
                     ShowNotification(response_json['status'], "success");
                     ChangeSkipToNext();
                 });

@@ -53,7 +53,6 @@ class Artifact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     linkToFileJava = db.Column(db.Text)
     methodsListLines = db.Column(db.Text)
-    classification = db.Column(db.Text)
     methodsName = db.Column(db.Text)
 
 
