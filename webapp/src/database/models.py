@@ -52,7 +52,7 @@ class Artifact(db.Model):
     __tablename__ = 'Artifact'
     id = db.Column(db.Integer, primary_key=True)
     linkToFileJava = db.Column(db.Text)
-    methodsList = db.Column(db.Text)
+    methodsListLines = db.Column(db.Text)
     classification = db.Column(db.Text)
     methodsName = db.Column(db.Text)
 
@@ -65,6 +65,10 @@ class LabelingData(db.Model):
     # update the following two lines to store labeled data from users
     labeling = db.Column(db.Text)   # actual data provided by labelers
     remark = db.Column(db.Text)     # optional data provided by labelers
+    comments = db.Column(db.Text)
+    code = db.Column(db.Text)
+    categories = db.Column(db.Text)
+    span = db.Column(db.Text)
 
     username = db.Column(db.Text)
     duration_sec = db.Column(db.Integer)

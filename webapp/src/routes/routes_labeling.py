@@ -18,7 +18,7 @@ def labeling():
             # but since #tagged_by_two is less than two, app still propose artifacts to guy A
             n_api_tagged_by_two_or_more = get_n_artifacts_labeled_by_n_or_more(2)
             if n_api_tagged_by_two_or_more >= N_API_NEEDS_LABELING:
-                return "We are done. All {} APIs are tagged by 2+ taggers.".format(N_API_NEEDS_LABELING)
+                return "We are done. All {} Snippets are tagged by 2+ taggers.".format(N_API_NEEDS_LABELING)
             else:
                 selected_artifact_id = choose_next_random_api()
                 if selected_artifact_id < 0:
@@ -50,7 +50,7 @@ def labeling_with_artifact(target_artifact_id):
             with open(artifact_data.linkToFileJava) as f:
                 javaClassText = f.read()
 
-            methodsList = eval(artifact_data.methodsList)
+            methodsListLines = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
 
             # lexer = JavaLexer()
@@ -64,7 +64,6 @@ def labeling_with_artifact(target_artifact_id):
             jsonClassification = eval(artifact_data.classification)
 
 
-
             return render_template('labeling_pages/artifact.html',
                                    artifact_id=target_artifact_id,
                                    artifact_data=artifact_data,
@@ -72,7 +71,7 @@ def labeling_with_artifact(target_artifact_id):
                                    artifact_classification=jsonClassification,
                                    artificat_methodsName = methodsName,
                                    artifact_linesList = linesList,
-                                   artifact_methodsList = methodsList,
+                                   artifact_methodsListLines = methodsListLines,
                                    overall_labeling_status=get_overall_labeling_progress(),
                                    user_info=get_labeling_status(who_is_signed_in()),
                                    existing_labeling_data=all_labels,
@@ -168,12 +167,16 @@ def label():
         return jsonify('{ "error": "We are not labeling. Labeling data is in read-only mode." }')
 
     if request.method == 'POST':
-        if request.form['artifact_id'] == '' or request.form['duration'] == '' or request.form['labeling_data'] == '':
+        if request.form['artifact_id'] == '' or request.form['duration'] == '':
             return jsonify('{ "status": "Empty arguments" }')
 
         artifact_id = int(request.form['artifact_id'])
-        labeling_data = request.form['labeling_data'].strip()
+        #labeling_data = request.form['labeling_data'].strip()
         duration_sec = int(request.form['duration'])
+        code = request.form['code']
+        comments = request.form['comments']
+        categories = request.form['categories']
+        span = request.form['span']
 
         if duration_sec <= 1:
             return jsonify('{ "status": "Too fast?" }')
@@ -186,8 +189,10 @@ def label():
             db.session.commit()
             return jsonify('{ "status": "updated" }')
         else:
-            jr = LabelingData(artifact_id=artifact_id, labeling=labeling_data, remark='', username=who_is_signed_in(),
-                              duration_sec=duration_sec)
+            # jr = LabelingData(artifact_id=artifact_id, labeling=labeling_data, remark='', username=who_is_signed_in(),
+            #                   duration_sec=duration_sec, code=code, comments=comments, span=span, categories=categories)
+            jr = LabelingData(artifact_id=artifact_id, remark='', username=who_is_signed_in(),
+                              duration_sec=duration_sec, code=code, comments=comments, span=span, categories=categories)
             db.session.add(jr)
             db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
             db.session.commit()

@@ -15,6 +15,7 @@ function skip_next_artifact() {
     }
 }
 
+
 function ChangeSkipToNext() {
     $("#next-skip-btn").text("Next");
     $("#next-skip-btn").removeClass("btn-outline-success");
