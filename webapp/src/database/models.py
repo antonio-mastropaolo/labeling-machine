@@ -54,6 +54,9 @@ class Artifact(db.Model):
     linkToFileJava = db.Column(db.Text)
     methodsListLines = db.Column(db.Text)
     methodsName = db.Column(db.Text)
+    labeled = db.Column(db.Integer)
+    reviewed = db.Column(db.Integer)
+    counterAssociations = db.Column(db.Integer)
 
 
 class LabelingData(db.Model):
@@ -62,56 +65,16 @@ class LabelingData(db.Model):
     artifact_id = db.Column(db.Integer)
 
     # update the following two lines to store labeled data from users
-    labeling = db.Column(db.Text)   # actual data provided by labelers
+    #labeling = db.Column(db.Text)   # actual data provided by labelers
     remark = db.Column(db.Text)     # optional data provided by labelers
     comments = db.Column(db.Text)
     code = db.Column(db.Text)
     categories = db.Column(db.Text)
     span = db.Column(db.Text)
+    commentPosition = db.Column(db.Text)
+    rangeSelectedText = db.Column(db.Text)
+    moveSelectionButton = db.Column(db.Text)
 
     username = db.Column(db.Text)
     duration_sec = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=func.now())
-
-# class ReviewedParagraph(db.Model):
-#     __tablename__ = 'ReviewedParagraph'
-#     reviewId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     apiId = db.Column(db.Integer)
-#     charStart = db.Column(db.Integer)
-#     charEnd = db.Column(db.Integer)
-#     text = db.Column(db.Text)
-#     username = db.Column(db.Text)
-#     created_at = db.Column(db.DateTime, default=func.now())
-#
-#     def __init__(self, _api_id, _char_start, _char_end, _text, _username):
-#         self.apiId = _api_id
-#         self.charStart = _char_start
-#         self.charEnd = _char_end
-#         self.text = _text
-#         self.username = _username
-
-# class ApprovedParagraphDocTypes(db.Model):
-#     __tablename__ = 'ApprovedParagraphDocTypes'
-#     reviewId = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     apiId = db.Column(db.Integer)
-#     charStart = db.Column(db.Integer)
-#     charEnd = db.Column(db.Integer)
-#     text = db.Column(db.Text)
-#     parentLabelingIds = db.Column(db.Text)
-#     docType = db.Column(db.Text)
-#     rate = db.Column(db.Integer)
-#     username = db.Column(db.Text)
-#     created_at = db.Column(db.DateTime, default=func.now())
-#     remark = db.Column(db.Text)
-#
-#     def __init__(self, _api_id, _char_start, _char_end, _text, _parent_labling_ids, _docTypes, _username):
-#         self.apiId = _api_id
-#         self.charStart = _char_start
-#         self.charEnd = _char_end
-#         self.text = _text
-#         self.parentLabelingIds = _parent_labling_ids
-#         self.docType = _docTypes
-#         self.rate = None
-#         self.username = _username
-#         self.remark = ""
-#

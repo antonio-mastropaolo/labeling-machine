@@ -300,7 +300,7 @@
             <div class=" col-md-8">
                 <textarea id="textAreaSelectedText" rows="4" cols="50" class="textarea"></textarea>
                 <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="reset()">Clear</button>
-                <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization()">Save</button>
+                <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' style="text-align: center;" onclick="saveCategorization()">Save</button>
             </div>
             <div class=" col-md-2"></div>
         </div>
@@ -323,7 +323,18 @@
 
         const methodsList = {{ artifact_methodsListLines | tojson }};
         const methodsListNames = {{ artificat_methodsName | safe }};
-        const linesList = {{ artifact_linesList }};
+        const linesList = {{ artificat_lines | tojson }};
+        const isLabeled = {{ isLabeled }};
+        const isReviewed = {{ isReviewed }};
+        const workingMode = isLabeled;
+
+        console.log(isLabeled);
+        console.log(isReviewed);
+
+        /*if(isLabeled)==0{
+
+        }*/
+
         var startTime = new Date().getTime();
 
         var labelCategories = ["new-category-button",
@@ -338,28 +349,33 @@
                                 'incomplete-button',
         ]
 
-        var selectedLines = [];
         var selectedCategory = "";
         var selectedCodeText = "";
         var selectedCommentText = "";
-        var elementsToHighlight = [];
-        var jsonToSave = {};
         var counterAssociations = 0;
+        let defaultColorHighlight='red';
+        var flagSwitch=true;
+
+        var selectedLines = [];
+        var elementsToHighlight = [];
+
+
         var dictHighlightedCode = {};
         var dictHighlightedComments = {};
+        var dictHighlightedCommentsPosition = [];
+        var dictRangeHighlightedCode = {};
+
+        var comments = []; //In this list we store all the comments within a given class
         var selectedComments = [];
         var selectedCode = [];
         var selectedSpanCode = [];
         var selectedCategories = [];
         var commentsToHighlight = [];
+        var methodSelectionButton = [];
 
-        let defaultColorHighlight='red';
-
-        for(var j=0; j<50000; j++){
-            dictHighlightedCode[j]=[];
-            dictHighlightedComments[j]=[]
-        }
-
+        //global variables used mainly for the reviewing process
+        var commentPositionsRev = null;
+        var rangeHighlightedCodeRev = null;
 
 
         // -------------------------End-------------------------
@@ -377,11 +393,40 @@
                 $( "#rows" ).append( $(newButton) );
             }
 
+            comments = document.getElementsByClassName("hljs-comment");
+
+            /*$("#code")
+                .contents()
+                .filter(function() {
+                    // get only the text nodes
+                    return this.nodeType === 3;
+
+                }).wrap('<span class="text-content"></span>');
+            */
+
+            //This instance need to be reviewed, therefore we start preparing the needed lists and the layout
+            if(isLabeled==1 && isReviewed==0){
+
+                //Update the badgeCounter
+                counterAssociations = Number({{ counterAssociations }});
+                $("#badgeCounter").text(counterAssociations);
+
+                commentPositionsRev = {{ artifact_label_commentPositionList  }}
+                rangeHighlightedCodeRev = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});
+
+                const moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |safe }}
+                for(var i=0; i<moveSelectionButtonList.length; i++){
+                    $("#lowerSide").append( $(moveSelectionButtonList[i]) );
+                }
+
+
+                $("#savingClassification").removeClass("btn-dark").addClass("btn-success").text("Accept");
+                $("#clearText").removeClass("btn-dark").addClass("btn-warning").text("Change");
+
+            }
+
             //Highlight target comments
-
-            var comments = document.getElementsByClassName("hljs-comment");
             highlightTargetComments(comments,'commentHighlighting');
-
 
             /*      If we find multi line comments written as single line
                     (E.G)
@@ -389,7 +434,6 @@
                     // after send it
                     // to the server
              */
-
 
             $(".commentHighlighting").dblclick(function() {
 
@@ -401,8 +445,6 @@
 
                 var upperPartCommentSelection = '';
                 var lowerPartCommentSelection = '';
-
-                //console.log(elementsToHighlight);
 
                 while(prevElement.hasClass('hljs-comment')){
                     if(!elementsToHighlight.includes(prevElement)) {
@@ -433,6 +475,7 @@
 
                 //extending elementsToHighlight
                 var tmpArray = previousElements.reverse().concat(nextElements);
+                var highlightedLinesPosition = []
                 for(var i=0;i<tmpArray.length;i++){
                     elementsToHighlight.push(tmpArray[i]);
                 }
@@ -441,21 +484,27 @@
                     $(elementsToHighlight[i]).css('color','red');
                 }
 
+                //console.log(elementsToHighlight);
+                var arr = Array.from(comments);
+
+                var commentIndex = [];
+                for(var i=0;i<elementsToHighlight.length;i++){
+                    commentIndex.push(arr.indexOf(elementsToHighlight[i][0]));
+                }
                 selectedCommentText = upperPartCommentSelection  + lowerPartCommentSelection;
                 updateTextArea(selectedCommentText);
                 unselectAll();
 
-                //console.log(selectedCommentText);
-                //console.log(escape(javaClass));
 
                 dictHighlightedComments[counterAssociations]=elementsToHighlight;
+                dictHighlightedCommentsPosition[counterAssociations]=commentIndex;
 
 
             });
 
             // Bind code are to "text select" events
             $('#code').bind('mouseup', function(event) {
-
+                console.log('IN!');
                 var code = document.getElementById("code");
                 var sel = getSelectionCharOffsetsWithin(code);
                 var start_point, stop_point, text_point, targetTag;
@@ -472,11 +521,7 @@
                     targetTag = sel.targetTag;
                 }
 
-                //console.log(start_point);
-                //console.log(stop_point);
-                //console.log(text_point);
-
-
+                // If right side double selection is triggered
                 try{
                     targetTag = targetTag.previousSibling;
                 }catch(e){}
@@ -499,35 +544,39 @@
                         if (selectedCommentText !== '' && selectedCategory === '' && text_point !== '') {
                             alert('Please select the comment category!');
                         } else {
+                            console.log('spot!');
                             //Adding highlighting with span token
-                            var newNode = document.createElement("span");
-
-                            //Adding ID for the given selection that is gonna be useful when we want to remove the highlighted text
-                            newNode.setAttribute("id", "highlight-" + counterAssociations);
-                            newNode.setAttribute("style", "background-color: #FFE5CC");
-
-                            newNode.appendChild(sel.range.extractContents());
-                            sel.range.insertNode(newNode);
-                            updateTextArea(sel.text);
+                            var newNode = highlightCodeFromRange(sel.range);
+                            updateTextArea(sel.text.trim());
+                            unselectAll();
 
                             //Adding new element to the list
                             //console.log('Counter Association: ' +counterAssociations)
                             dictHighlightedCode[counterAssociations] = newNode;
+                            //console.log(sel.range);
+
+                            dictRangeHighlightedCode[counterAssociations] = {
+                                'startOffset': sel.range.startOffset-2,
+                                'endOffset':  (sel.range.startOffset + newNode.childNodes.length)-1
+                            }
+
+                            console.log(sel.range);
+
 
                             let spanSelection = '('+start_point+'-'+stop_point+')';
                             selectedSpanCode.push(spanSelection);
                         }
                     }
-                    unselectAll();
+
                 }
+                unselectAll();
 		    });
 
-            for (let i = 0; i < methodsList.length; i++) {
+            for (var i = 0; i < methodsList.length; i++) {
               var buttonID = methodsListNames[i] + "-button";
               var startingLine = methodsList[i].split("-")[0];
-              var endingLine = methodsList[i].split("-")[1];
               var buttonText = methodsListNames[i];// + " " +startingLine + '---' + endingLine;
-              var scorllCall = 'moveToSelectedMethod(' + startingLine+')';
+              var scorllCall = 'moveToSelectedMethodFromLine(' + startingLine+')';
               var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%; display:inline-flex; text-align: left;">'+ buttonText + '</button> </div>';
               //console.log(newButton);
               $( "#upperSide" ).append( $(newButton) );
@@ -536,31 +585,32 @@
 
         });
 
+        //Add here a for loop over counterAssociation
         function submitClassifaction(){
-            if (confirm('Are you sure?')) {
-                    for (var i=0;i<counterAssociations;i++){
-                        console.log('***********');
-                        console.log(selectedComments[i]);
-                        console.log(selectedCode[i]);
-                        console.log(selectedCategories[i]);
-                        console.log(selectedSpanCode[i]);
-                        console.log('***********\n');
+            if (confirm('Are you sure?')) { //implement control
 
-                    }
+                for (var i = 0; i < counterAssociations; i++) {
 
-                   let data_json = {
+                    let data_json = {
                         artifact_id: {{  artifact_id }},
                         code: JSON.stringify(selectedCode),
                         comments: JSON.stringify(selectedComments),
                         categories: JSON.stringify(selectedCategories),
-                        span:JSON.stringify(selectedSpanCode),
+                        span: JSON.stringify(selectedSpanCode),
+                        rangeSelectedText: JSON.stringify(dictRangeHighlightedCode[i]),
+                        workingMode: JSON.stringify(workingMode),
+                        moveToSelectedButtons: JSON.stringify(methodSelectionButton),
+                        commentPosition: JSON.stringify(dictHighlightedCommentsPosition),
+                        counterAssociations: counterAssociations,
                         duration: get_elapsed_seconds()
-                };
-                $.post("/label", data_json, function (response, status) {
-                    let response_json = $.parseJSON(response.toString())
-                    ShowNotification(response_json['status'], "success");
-                    ChangeSkipToNext();
-                });
+                    };
+                    $.post("/label", data_json, function (response, status) {
+                        let response_json = $.parseJSON(response.toString())
+                        ShowNotification(response_json['status'], "success");
+
+                    });
+                }
+                ChangeSkipToNext();
             }
         }
 

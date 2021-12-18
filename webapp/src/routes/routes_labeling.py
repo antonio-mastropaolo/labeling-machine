@@ -37,41 +37,59 @@ def labeling_with_artifact(target_artifact_id):
 
     if request.method != 'POST':
         if is_signed_in():
+
             target_artifact_id = int(target_artifact_id)
             artifact_data = Artifact.query.filter_by(id=target_artifact_id).first()
-            #print(artifact_data)
-            all_labels = {row[0] for row in LabelingData.query.with_entities(LabelingData.labeling).all()}
             all_taggers = {row[0] for row in
                            LabelingData.query.with_entities(LabelingData.username).filter_by(artifact_id=target_artifact_id).all()}
-            lock_artifact_by(who_is_signed_in(), target_artifact_id)
 
-            #wget here the java file from the repo if it does not exist already!
+            lock_artifact_by(who_is_signed_in(), target_artifact_id)
 
             with open(artifact_data.linkToFileJava) as f:
                 javaClassText = f.read()
 
-            methodsListLines = eval(artifact_data.methodsListLines)
+            counterAssociations = artifact_data.counterAssociations
+
+            spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
 
-            # lexer = JavaLexer()
-            # tokens = lexer.get_tokens(javaClassText)
-            # for item in tokens:
-            #     print(item)
+            isLabeled = 1 if artifact_data.labeled == 1 else 0
+            isReviewed = 1 if artifact_data.reviewed == 1 else 0
+
+            commentPositionList = []
+            rangeHighlightedCodeRev = []
+            moveSelectionButtonList = []
+            if(isLabeled==1):
+                artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
+                commentPositionList = eval(artifact_label.commentPosition)
+                rangeHighlightedCodeRev = artifact_label.rangeSelectedText
+                moveSelectionButtonList = eval(artifact_label.moveSelectionButton)
+
+            print(counterAssociations)
+
             linesList = []
+            linesMethodsString = ''
             for (line_index, line) in enumerate(javaClassText.splitlines()):
                 linesList.append(line_index)
-
+                linesMethodsString += '{}\n'.format(line_index)
 
             return render_template('labeling_pages/artifact.html',
                                    artifact_id=target_artifact_id,
                                    artifact_data=artifact_data,
                                    artifact_class=javaClassText,
-                                   artificat_methodsName = methodsName,
-                                   artifact_linesList = linesList,
-                                   artifact_methodsListLines = methodsListLines,
+                                   artifact_methodsListLines=spanListMethods,
+                                   artifact_label_commentPositionList=commentPositionList,
+                                   artifact_label_rangeSelectedText=rangeHighlightedCodeRev,
+                                   artifact_moveSelectionButtonList=moveSelectionButtonList,
+                                   isLabeled=isLabeled,
+                                   isReviewed=isReviewed,
+                                   artificat_methodsName=methodsName,
+                                   artificat_lines=linesList,
+                                   counterAssociations=counterAssociations,
                                    overall_labeling_status=get_overall_labeling_progress(),
                                    user_info=get_labeling_status(who_is_signed_in()),
-                                   existing_labeling_data=all_labels,
+                                   artifact_linesString=linesMethodsString,
+                                   #existing_labeling_data=all_labels,
                                    all_taggers=', '.join(all_taggers) if all_taggers is not None else None
                                    )
         else:
@@ -168,31 +186,50 @@ def label():
             return jsonify('{ "status": "Empty arguments" }')
 
         artifact_id = int(request.form['artifact_id'])
-        #labeling_data = request.form['labeling_data'].strip()
         duration_sec = int(request.form['duration'])
         code = request.form['code']
         comments = request.form['comments']
         categories = request.form['categories']
         span = request.form['span']
+        workingMode = request.form['workingMode']
+        rangeSelectedText = request.form['rangeSelectedText']
+        commentPosition = request.form['commentPosition']
+        moveSelectionButton = request.form['moveToSelectedButtons']
+        counterAssociations = request.form['counterAssociations']
+
+
+        if int(workingMode) == 0:
+            isLabeled = 1
+            isReviewed = 0
+        elif int(workingMode) == 1:
+            isLabeled = 1
+            isReviewed = 1
 
         if duration_sec <= 1:
             return jsonify('{ "status": "Too fast?" }')
 
-        already_labeled_this_sentence = LabelingData.query.filter_by(artifact_id=artifact_id).filter_by(username=who_is_signed_in()).first()
+        already_labeled_this_class = LabelingData.query.filter_by(artifact_id=artifact_id).filter_by(username=who_is_signed_in()).first()
 
-        if already_labeled_this_sentence is not None:
-            already_labeled_this_sentence.labeling = labeling_data
-            already_labeled_this_sentence.duration_sec = duration_sec
+        if already_labeled_this_class is not None:
+            already_labeled_this_class.labeling = labeling_data
+            already_labeled_this_class.duration_sec = duration_sec
             db.session.commit()
             return jsonify('{ "status": "updated" }')
         else:
-            # jr = LabelingData(artifact_id=artifact_id, labeling=labeling_data, remark='', username=who_is_signed_in(),
-            #                   duration_sec=duration_sec, code=code, comments=comments, span=span, categories=categories)
             jr = LabelingData(artifact_id=artifact_id, remark='', username=who_is_signed_in(),
-                              duration_sec=duration_sec, code=code, comments=comments, span=span, categories=categories)
+                              duration_sec=duration_sec, code=code, comments=comments, span=span,
+                              categories=categories, commentPosition=commentPosition,
+                              rangeSelectedText=rangeSelectedText, moveSelectionButton=moveSelectionButton)
             db.session.add(jr)
             db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
             db.session.commit()
+
+            artifact = Artifact.query.filter_by(id=artifact_id).first()
+            artifact.labeled = isLabeled
+            artifact.reviewed = isReviewed
+            artifact.counterAssociations = counterAssociations
+            db.session.commit()
+
             return jsonify('{ "status": "success" }')
     else:
         return "Not POST!"

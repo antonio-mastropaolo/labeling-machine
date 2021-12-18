@@ -29,14 +29,75 @@ function createNewCategory() {
     $("#new-category-button").text(newCategory);
 }
 
-function moveToSelectedMethod(startingLine) {
+function moveToSelectedMethodFromLine(startingLine) {
     var selector = '.row-line:contains(' + startingLine + ')';
     $(selector)[0].scrollIntoViewIfNeeded();
-
 
     $(selector).addClass('animationLabel').delay(1500).queue(function(){
         $(this).removeClass('animationLabel').dequeue();
     });
+
+}
+
+function buildRange(startOffset, endOffset){
+    var selection = window.getSelection();
+    //selection.removeAllRanges();
+    var range = document.createRange();
+    startContainer = document.getElementById("code");
+    endContainer = startContainer;
+    range.setStart(startContainer, startOffset);
+    //priorRange.setEnd(range.startContainer, range.startOffset);
+    range.setEnd(endContainer, endOffset);
+    selection.addRange(range);
+    unselectAll();
+    return range;
+}
+
+function highlightCodeFromRange(range){
+    var newNode = document.createElement("span");
+
+    //Adding ID for the given selection that is gonna be useful when we want to remove the highlighted text
+    newNode.setAttribute("id", "highlight-" + counterAssociations);
+    newNode.setAttribute("style", "background-color: #FFE5CC");
+    //var content = data.toString().split('\r\n');
+    //content = String(content).replace('\t', '');
+
+    newNode.appendChild(range.extractContents());
+    range.insertNode(newNode);
+    dictHighlightedCode[counterAssociations] = newNode;
+    return newNode;
+}
+
+function moveToSelectedMethodFromTag(indexComment, indexClassification) {
+
+    var arr = Array.from(comments);
+    var tagSelector = arr[indexComment];
+
+    $(tagSelector)[0].scrollIntoViewIfNeeded();
+
+    $(tagSelector).addClass('animationLabel').delay(500).queue(function(){
+        $(this).removeClass('animationLabel').dequeue();
+    });
+
+    // We highlight the previously made classification
+
+    // 1) we first highlight the comment
+    for(var i=0;i<commentPositionsRev.length;i++){
+        const position = commentPositionsRev[i];
+        console.log(position);
+        $(comments[position]).css('color','red');
+        updateTextArea($(comments[position]).text());
+    }
+
+    // 2) Second, we highlight the code
+    var startOffset = rangeHighlightedCodeRev['startOffset'];
+    var endOffset  = rangeHighlightedCodeRev['endOffset'];
+
+
+    var newRange = buildRange(startOffset, endOffset);
+    highlightCodeFromRange(newRange);
+    updateTextArea(newRange);
+
 
 }
 
@@ -65,31 +126,18 @@ function highlightTargetComments(elements,className){
 
 }
 
-function getSelectionParentElement() {
-    var parentEl = null, sel;
-    if (window.getSelection) {
-        sel = window.getSelection();
-        if (sel.rangeCount) {
-            parentEl = sel.getRangeAt(0).commonAncestorContainer;
-            if (parentEl.nodeType != 1) {
-                parentEl = parentEl.parentNode;
-            }
-        }
-    } else if ( (sel = document.selection) && sel.type != "Control") {
-        parentEl = sel.createRange().parentElement();
-    }
-    return parentEl;
-}
-
 function getSelectionCharOffsetsWithin(element) {
     var start = 0, end = 0, text = "";
-    var sel, range, priorRange;
+    var sel, range, priorRange, startOffset, endOffset;
     if (typeof window.getSelection != "undefined") { // Non-IE
         if (window.getSelection().toString() != "") {
             range = window.getSelection().getRangeAt(0);
             priorRange = range.cloneRange();
             priorRange.selectNodeContents(element);
+            startOffset = range.startOffset;
+            endOffset = range.endOffset;
             priorRange.setEnd(range.startContainer, range.startOffset);
+            //console.log(range.startOffset + '---- ' + range.endOffset);
             start = priorRange.toString().length;
             end = start + range.toString().length;
             // Get text
@@ -114,25 +162,17 @@ function getSelectionCharOffsetsWithin(element) {
 
     }
 
+
     return {
         start: start,
         end: end,
         text: text,
         targetTag: targetTag,
-        range: range
+        range: range,
+        startOffset: startOffset,
+        endOffset: endOffset
     };
 }
-
-
-function highlightRange(range) {
-    var newNode = document.createElement("div");
-    newNode.setAttribute(
-       "style",
-       "background-color: green; display: inline;"
-    );
-    range.surroundContents(newNode);
-}
-
 
 function reset(save=false){
 
@@ -147,16 +187,46 @@ function reset(save=false){
 
     if(!save) {
         resetHighlightedComment(dictHighlightedComments[counterAssociations]);
-        $(dictHighlightedCode[counterAssociations]).css('background-color','');
+        resetHighlightedCode(dictHighlightedCode[counterAssociations]);
+        //$(dictHighlightedCode[counterAssociations]).css('background-color','');
+    }
+
+    //deactivate button until the changes are completed and brought to the staging area
+    if(isLabeled==1 && flagSwitch){
+        $("#clearText").attr('disabled','disabled');
+        flagSwitch=false;
     }
 
     elementsToHighlight = [];
     dictHighlightedComments[counterAssociations] = []
+    unselectAll();
 }
 
-function resetHighlightedComment(customList){
-    for (var i = 0; i < customList.length; i++) {
-         $(customList[i][0]).css('color', '');
+function resetHighlightedCode(customList=null){
+    var cnt = $(customList).contents();
+    $(customList).replaceWith(cnt);
+    //$(customList).css('background-color','');
+    /*if(isLabeled==0) {
+        $(dictHighlightedCode[counterAssociations]).css('background-color','');
+    }else if (isLabeled==1){
+        for(var i=0;i<commentPositionsRev.length;i++){
+            const position = commentPositionsRev[i];
+            $(comments[position]).css('color','');
+        }
+    }*/
+}
+
+function resetHighlightedComment(customList=null){
+    if(isLabeled==0) {
+        for (var i = 0; i < customList.length; i++) {
+            $(customList[i][0]).css('color', '');
+        }
+    }else if (isLabeled==1){
+        for(var i=0;i<commentPositionsRev.length;i++){
+            const position = commentPositionsRev[i];
+            $(comments[position]).css('color','');
+        }
+
     }
 }
 
@@ -175,8 +245,9 @@ function checkForButtonValidity(){
         $("#textAreaSelectedText").text(textToDisplay);
     }else{
         $("#textAreaSelectedText").text(previousSelection + "\n" + textToDisplay);
-
     }
+    var refinedText = $("#textAreaSelectedText").text().replace(/^\s*\n/gm, "");
+    $("#textAreaSelectedText").text(refinedText);
 }
 
 
@@ -228,7 +299,7 @@ function saveCategorization(){
         //save snippet
         var allSelection = $("#textAreaSelectedText").val().toString();
         selectedCodeText = allSelection.replace(selectedCommentText,'');
-        console.log('Debug: ' + selectedCodeText + '--------- ' + selectedCommentText);
+        //console.log('Debug: ' + selectedCodeText + '--------- ' + selectedCommentText);
         if(selectedCodeText==""){
             alert("First link the given comment to the snippet!");
             resetHighlightedComment(dictHighlightedCode[counterAssociations]);
@@ -250,20 +321,32 @@ function saveCategorization(){
         var divID = "div-association" + '-' + counterAssociations; //+ "-" + target_method;
         var buttonID = "association" + '-' + counterAssociations;// + "-" + target_method;
         var buttonText = "#" + counterAssociations+ " -->";// + target_method;
-        //var scorllCall = 'moveToSelectedMethod('+ selectedLines[0]+')';
         var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
 
-        $( "#lowerSide" ).append( $(newButton) );
+        // handling list for the reviewing part
+        var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="moveToSelectedMethodFromTag(' + dictHighlightedCommentsPosition[counterAssociations][0] + ',' +counterAssociations + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + ' + </button></div>';
+        methodSelectionButton.push(moveToButton);
+
+
+        if(isLabeled == 0){
+            $( "#lowerSide" ).append( $(newButton) );
+        }
+
 
         //adding tag result to the lists we store in the DB
         selectedComments.push(selectedCommentText);
         selectedCode.push(selectedCodeText);
         selectedCategories.push(selectedCategory);
-        selectedSpanCode.push()
 
-        counterAssociations  = counterAssociations + 1;
-        $("#badgeCounter").text(counterAssociations);
+        if(isLabeled==0) {
+            counterAssociations = counterAssociations + 1;
+            $("#badgeCounter").text(counterAssociations);
+        }
 
+        //Bring back the change button
+        if(isLabeled==1 && !flagSwitch){
+            $("#clearText").removeAttr('disabled');
+        }
 
         reset(save=true);
 
@@ -278,7 +361,8 @@ function removeAssociation(divID){
     $("#badgeCounter").text(counterAssociations);
 
     //removing highlighting for code and comment
-    $(dictHighlightedCode[targetAssociation]).css('background-color','')
+    //$(dictHighlightedCode[targetAssociation]).css('background-color','')
+    resetHighlightedCode($(dictHighlightedCode[targetAssociation]));
     resetHighlightedComment(dictHighlightedComments[targetAssociation]);
 }
 
@@ -297,4 +381,24 @@ function unselectAll(){
     }
 }
 
-
+function clean(node)
+{
+  for(var n = 0; n < node.childNodes.length; n ++)
+  {
+    var child = node.childNodes[n];
+    if
+    (
+      child.nodeType === 8
+      ||
+      (child.nodeType === 3 && !/\S/.test(child.nodeValue))
+    )
+    {
+      node.removeChild(child);
+      n --;
+    }
+    else if(child.nodeType === 1)
+    {
+      clean(child);
+    }
+  }
+}
