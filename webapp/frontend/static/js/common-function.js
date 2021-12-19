@@ -72,6 +72,9 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
     var arr = Array.from(comments);
     var tagSelector = arr[indexComment];
+    currentIndexComment = indexComment;
+
+    currentClassification = indexClassification;
 
     $(tagSelector)[0].scrollIntoViewIfNeeded();
 
@@ -84,19 +87,37 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     // 1) we first highlight the comment
     for(var i=0;i<commentPositionsRev.length;i++){
         const position = commentPositionsRev[i];
-        console.log(position);
-        $(comments[position]).css('color','red');
-        updateTextArea($(comments[position]).text());
+        if(position[0] === indexComment) {
+            $(comments[position]).css('color', 'red');
+            updateTextArea($(comments[position]).text());
+        }
     }
 
     // 2) Second, we highlight the code
-    var startOffset = rangeHighlightedCodeRev['startOffset'];
-    var endOffset  = rangeHighlightedCodeRev['endOffset'];
+    var startOffset = rangeHighlightedCodeRev[indexClassification]['startOffset'];
+    var endOffset  = rangeHighlightedCodeRev[indexClassification]['endOffset'];
 
 
     var newRange = buildRange(startOffset, endOffset);
     highlightCodeFromRange(newRange);
     updateTextArea(newRange);
+
+    //Disable all the instances until the current one is reviewed
+
+    var buttons = Array.from( $('[id^="association-"]') );
+    for(var i=0;i<buttons.length;i++){
+        var extractedPosition = Number($(buttons[i]).attr('onclick').split(',')[1].match(/\d+/)[0]);
+        if(extractedPosition === Number(indexClassification)){
+            flexibleSelector = buttons[i];
+
+            continue;
+        }
+        $(buttons[i]).attr('disabled','disabled');
+    }
+
+    //highlight the category button
+    var bSelector = `#${selectedCategories[indexComment]}`;
+    $(bSelector).css('background-color','green')
 
 
 }
@@ -195,6 +216,9 @@ function reset(save=false){
     if(isLabeled==1 && flagSwitch){
         $("#clearText").attr('disabled','disabled');
         flagSwitch=false;
+        var bSelector = `#${selectedCategories[currentIndexComment]}`;
+        $(bSelector).css('background-color','');
+        changingToClassificationOnGoing=true;
     }
 
     elementsToHighlight = [];
@@ -277,13 +301,16 @@ function addNewCommentToBeLinked(element){
     }
     $(element).css('background-color','green');
     selectedCategory = element.id.toString();
+    if(selectedCategory === 'new-category-button'){ //save the new category
+        selectedCategory = $(element).text() + '-button';
+    }
     selectedCommentText =  $("#textAreaSelectedText").val().toString(); //at this stage we must have only the code comment/s
 
 }
 
 
 function isSelectedCategory(){
-    if(selectedCategory==""){
+    if(selectedCategory=="" && isLabeled==0){
         alert("First link the given comment to the snippet!");
         resetHighlightedComment(dictHighlightedCode[counterAssociations]);
         return false;
@@ -317,41 +344,76 @@ function saveCategorization(){
             $(selector).css('background-color','');
         }
 
-        //Add new association button
-        var divID = "div-association" + '-' + counterAssociations; //+ "-" + target_method;
-        var buttonID = "association" + '-' + counterAssociations;// + "-" + target_method;
-        var buttonText = "#" + counterAssociations+ " -->";// + target_method;
-        var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
 
-        // handling list for the reviewing part
-        var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="moveToSelectedMethodFromTag(' + dictHighlightedCommentsPosition[counterAssociations][0] + ',' +counterAssociations + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + ' + </button></div>';
-        methodSelectionButton.push(moveToButton);
+        if(isLabeled==0) {
+
+            //adding tag result to the lists we store in the DB
+            selectedComments.push(selectedCommentText);
+            selectedCode.push(selectedCodeText);
+            selectedCategories.push(selectedCategory);
+
+            //Add new association button
+            var divID = "div-association" + '-' + counterAssociations; //+ "-" + target_method;
+            var buttonID = "association" + '-' + counterAssociations;// + "-" + target_method;
+            var buttonText = "#" + counterAssociations+ " -->";// + target_method;
+            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
 
 
-        if(isLabeled == 0){
+            counterAssociations = counterAssociations + 1;
+            $("#badgeCounter").text(counterAssociations);
+
+            // handling list for the reviewing part
+
+            var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="moveToSelectedMethodFromTag(' + dictHighlightedCommentsPosition[counterAssociations][0] + ',' +counterAssociations + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + ' + </button></div>';
+            methodSelectionButton.push(moveToButton);
             $( "#lowerSide" ).append( $(newButton) );
         }
 
+        //Bringing back the change button and remove selectionButton
+        if(isLabeled==1){
 
-        //adding tag result to the lists we store in the DB
-        selectedComments.push(selectedCommentText);
-        selectedCode.push(selectedCodeText);
-        selectedCategories.push(selectedCategory);
 
-        if(isLabeled==0) {
-            counterAssociations = counterAssociations + 1;
-            $("#badgeCounter").text(counterAssociations);
-        }
+            if(changingToClassificationOnGoing) {
 
-        //Bring back the change button
-        if(isLabeled==1 && !flagSwitch){
+                // if the reviewer didn't change anything, it will overwrite such fields
+                selectedComments.splice(currentClassification, 1, selectedCommentText);
+
+                selectedCode.splice(currentClassification, 1, selectedCodeText);
+
+                selectedCategories.splice(currentClassification, 1, selectedCategory);
+
+                console.log(selectedComments);
+                console.log(selectedCode);
+                console.log(selectedCategories);
+                console.log(selectedSpanCode);
+            }
+
+
             $("#clearText").removeAttr('disabled');
+            removeAssociationFromTag();
+            var buttons = Array.from( $('[id^="association-"]') );
+            for(var i=0;i<buttons.length;i++){
+                $(buttons[i]).removeAttr('disabled');
+            }
+
+            var bSelector = `#${selectedCategories[currentIndexComment]}`;
+            $(bSelector).css('background-color','');
+            flagSwitch=false;
         }
 
         reset(save=true);
 
     }
 
+}
+
+function removeAssociationFromTag(){
+    $(flexibleSelector).fadeOut(300, function(){ $(this).remove();});
+    counterAssociations = counterAssociations -1;
+    $("#badgeCounter").text(counterAssociations);
+    //resetHighlightedCode($(dictHighlightedCode[targetAssociation]));
+    //resetHighlightedComment(dictHighlightedComments[targetAssociation]);
+    $("#textAreaSelectedText").text('');
 }
 
 function removeAssociation(divID){

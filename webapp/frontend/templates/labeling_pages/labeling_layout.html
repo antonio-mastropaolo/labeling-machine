@@ -353,10 +353,13 @@
         var selectedCodeText = "";
         var selectedCommentText = "";
         var counterAssociations = 0;
+        var currentIndexComment = -1;
+        var flexibleSelector = null;
+        var currentClassification=-1;
         let defaultColorHighlight='red';
         var flagSwitch=true;
+        var changingToClassificationOnGoing=false;
 
-        var selectedLines = [];
         var elementsToHighlight = [];
 
 
@@ -395,34 +398,40 @@
 
             comments = document.getElementsByClassName("hljs-comment");
 
-            /*$("#code")
-                .contents()
-                .filter(function() {
-                    // get only the text nodes
-                    return this.nodeType === 3;
-
-                }).wrap('<span class="text-content"></span>');
-            */
-
             //This instance need to be reviewed, therefore we start preparing the needed lists and the layout
             if(isLabeled==1 && isReviewed==0){
+
+                ShowNotification('Reviewing mode!','warning');
 
                 //Update the badgeCounter
                 counterAssociations = Number({{ counterAssociations }});
                 $("#badgeCounter").text(counterAssociations);
 
+                // Loading the lists
                 commentPositionsRev = {{ artifact_label_commentPositionList  }}
                 rangeHighlightedCodeRev = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});
+                selectedCode = {{ selectedCode | tojson }}
+                selectedComments = {{ selectedComments | tojson }}
+                selectedCategories = {{ artificat_label_categories |tojson }}
+                selectedSpanCode = {{ codeSpan | tojson }}
 
-                const moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |safe }}
+                const moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }};
+
+                console.log(selectedCode);
+                console.log(selectedComments);
+                console.log(selectedCategories);
+
+
+
                 for(var i=0; i<moveSelectionButtonList.length; i++){
                     $("#lowerSide").append( $(moveSelectionButtonList[i]) );
                 }
 
-
                 $("#savingClassification").removeClass("btn-dark").addClass("btn-success").text("Accept");
                 $("#clearText").removeClass("btn-dark").addClass("btn-warning").text("Change");
 
+            }else if(isLabeled==0 && isReviewed==0){
+                ShowNotification('Labeling mode!','warning');
             }
 
             //Highlight target comments
@@ -475,7 +484,6 @@
 
                 //extending elementsToHighlight
                 var tmpArray = previousElements.reverse().concat(nextElements);
-                var highlightedLinesPosition = []
                 for(var i=0;i<tmpArray.length;i++){
                     elementsToHighlight.push(tmpArray[i]);
                 }
@@ -504,7 +512,6 @@
 
             // Bind code are to "text select" events
             $('#code').bind('mouseup', function(event) {
-                console.log('IN!');
                 var code = document.getElementById("code");
                 var sel = getSelectionCharOffsetsWithin(code);
                 var start_point, stop_point, text_point, targetTag;
@@ -553,18 +560,19 @@
                             //Adding new element to the list
                             //console.log('Counter Association: ' +counterAssociations)
                             dictHighlightedCode[counterAssociations] = newNode;
-                            //console.log(sel.range);
 
                             dictRangeHighlightedCode[counterAssociations] = {
                                 'startOffset': sel.range.startOffset-2,
                                 'endOffset':  (sel.range.startOffset + newNode.childNodes.length)-1
                             }
 
-                            console.log(sel.range);
+                            //åconsole.log(sel.range);
 
 
                             let spanSelection = '('+start_point+'-'+stop_point+')';
-                            selectedSpanCode.push(spanSelection);
+                            if(isLabeled==0){ selectedSpanCode.push(spanSelection); }
+                            if(isLabeled==1){ selectedSpanCode.splice(currentClassification, 1, spanSelection);}
+
                         }
                     }
 
@@ -588,29 +596,31 @@
         //Add here a for loop over counterAssociation
         function submitClassifaction(){
             if (confirm('Are you sure?')) { //implement control
-
-                for (var i = 0; i < counterAssociations; i++) {
-
-                    let data_json = {
+                //var duration = get_elapsed_seconds();
+                //for (var i = 0; i < counterAssociations; i++) {
+                    // for a better handling of the front end we save only one row in the database for each labeling process
+                    var data_json = {
                         artifact_id: {{  artifact_id }},
                         code: JSON.stringify(selectedCode),
                         comments: JSON.stringify(selectedComments),
                         categories: JSON.stringify(selectedCategories),
                         span: JSON.stringify(selectedSpanCode),
-                        rangeSelectedText: JSON.stringify(dictRangeHighlightedCode[i]),
+                        rangeSelectedText: JSON.stringify(dictRangeHighlightedCode),
                         workingMode: JSON.stringify(workingMode),
                         moveToSelectedButtons: JSON.stringify(methodSelectionButton),
                         commentPosition: JSON.stringify(dictHighlightedCommentsPosition),
                         counterAssociations: counterAssociations,
-                        duration: get_elapsed_seconds()
+                        duration:get_elapsed_seconds()
                     };
-                    $.post("/label", data_json, function (response, status) {
-                        let response_json = $.parseJSON(response.toString())
+
+                    /*$.post("/label", data_json, function (response, status) {
+                        let response_json = $.parseJSON(response.toString());
                         ShowNotification(response_json['status'], "success");
 
-                    });
-                }
-                ChangeSkipToNext();
+                    });*/
+                    console.log(data_json);
+
+                //ChangeSkipToNext();
             }
         }
 

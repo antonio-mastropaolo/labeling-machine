@@ -59,13 +59,19 @@ def labeling_with_artifact(target_artifact_id):
             commentPositionList = []
             rangeHighlightedCodeRev = []
             moveSelectionButtonList = []
+            selectedCategories = []
+            selectedCode = []
+            selectedComments = []
+            codeSpan = []
             if(isLabeled==1):
                 artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
                 commentPositionList = eval(artifact_label.commentPosition)
                 rangeHighlightedCodeRev = artifact_label.rangeSelectedText
                 moveSelectionButtonList = eval(artifact_label.moveSelectionButton)
-
-            print(counterAssociations)
+                selectedCategories = eval(artifact_label.categories)
+                selectedCode = eval(artifact_label.code)
+                selectedComments = eval(artifact_label.comments)
+                codeSpan = eval(artifact_label.span)
 
             linesList = []
             linesMethodsString = ''
@@ -89,6 +95,10 @@ def labeling_with_artifact(target_artifact_id):
                                    overall_labeling_status=get_overall_labeling_progress(),
                                    user_info=get_labeling_status(who_is_signed_in()),
                                    artifact_linesString=linesMethodsString,
+                                   artificat_label_categories = selectedCategories,
+                                   selectedCode = selectedCode,
+                                   selectedComments = selectedComments,
+                                   codeSpan = codeSpan,
                                    #existing_labeling_data=all_labels,
                                    all_taggers=', '.join(all_taggers) if all_taggers is not None else None
                                    )
