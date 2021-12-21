@@ -15,9 +15,9 @@
                     <table>
                         <tr>
                             <th></th>
-                            <th><span class="badge1"/> APIs</th>
-                            <th><span class="badge2"/> Sentences</th>
-                            <th><span class="badge3"/> Reviewed</th>
+                            <th><span class="badge1"/> #Of Java Classes Labeled</th>
+{#                            <th><span class="badge2"/> Sentences</th>#}
+                            <th><span class="badge3"/> #Of Java Classes Reviewed</th>
                         </tr>
                         <tr>
                             <td style="padding-top: 10px;"></td>
@@ -27,8 +27,8 @@
                                 <td><b>{{ labelingStatDict['username'] }}</b></td>
                                 <td>{% if labelingStatDict['total_n_artifact']!=0 %}
                                     {{ labelingStatDict['total_n_artifact'] }} {% endif %}</td>
-                                <td>{% if labelingStatDict['total_n_sentence']!=0 %}
-                                    {{ labelingStatDict['total_n_sentence'] }} {% endif %}</td>
+{#                                <td>{% if labelingStatDict['total_n_sentence']!=0 %}#}
+{#                                    {{ labelingStatDict['total_n_sentence'] }} {% endif %}</td>#}
                                 <td>{% if labelingStatDict['total_n_reviewed']!=0 %}
                                     {{ labelingStatDict['total_n_reviewed'] }} {% endif %}</td>
                             </tr>

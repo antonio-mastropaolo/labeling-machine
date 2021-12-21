@@ -1,6 +1,6 @@
 import random
 
-from sqlalchemy import func, distinct
+from sqlalchemy import func, distinct, select
 
 from src import db
 from src.database.models import LabelingData, Artifact, FlaggedArtifact
@@ -18,22 +18,39 @@ def get_labeling_status(username):  # OLD: get_user_labeling_status
         return None
 
     labeling_status = {'username': username,
-                       'total_n_api': get_n_labeled_artifact_per_user().get(username, 0),
-                       'total_n_sentence': 0,
-                       'total_n_reviewed': 0  # get_n_reviewed_api_per_user().get(username, 0)
+                       'total_n_artifact': get_n_labeled_artifact_per_user().get(username, 0),
+                       'total_n_labeled': 0,
+                       'total_n_reviewed': 0 #get_total_number_of_reviewed_classes()
                        }
     return labeling_status
 
 
 def get_overall_labeling_progress():
     labeling_status = {'source_id': 0,
-                       'source_name': "Artifact Set 1",
-                       'n_artifacts_labeled': get_n_artifacts_labeled_by_n_or_more(2),
-                       'n_artifacts_to_be_labeled': N_API_NEEDS_LABELING,
-                       'n_artifacts_reviewed': 0
+                       'source_name': "Artifact Set",
+                       'n_artifacts_labeled': get_total_number_of_labeled_classes(),
+                       'n_artifacts_to_be_labeled': get_total_number_of_classes_to_be_labeled(),
+                       'n_artifacts_reviewed': get_total_number_of_reviewed_classes()
                        }
     return labeling_status
 
+
+def get_total_number_of_classes_in_db():
+    return db.session.query(func.count(Artifact.id)).scalar()
+
+def get_total_number_of_classes_to_be_labeled():
+    total = db.session.query(func.count(Artifact.id)).scalar()
+    labeled = get_total_number_of_labeled_classes()
+    N_CLASSES_NEEDS_LABELING = total - labeled
+    return N_CLASSES_NEEDS_LABELING
+
+def get_total_number_of_labeled_classes():
+    result = Artifact.query.filter_by(labeled=1).count()
+    return result
+
+def get_total_number_of_reviewed_classes():
+    result = Artifact.query.filter_by(reviewed=1).count()
+    return result
 
 def get_n_labeled_artifact_per_user():
     """
@@ -46,13 +63,13 @@ def get_n_labeled_artifact_per_user():
     return ret
 
 
-def get_n_artifacts_labeled_by_n_or_more(num):
-    artifacts_labeled_num_times = db.session.query(LabelingData.artifact_id).group_by(LabelingData.artifact_id).having(
-        func.count(distinct(LabelingData.username)) >= num)
-    artifacts_flagged_2_times = FlaggedArtifact.query.with_entities(
-        FlaggedArtifact.artifact_id).group_by(FlaggedArtifact.artifact_id).having(func.count() > 1)
-    result = artifacts_labeled_num_times.except_(artifacts_flagged_2_times).with_entities(func.count(LabelingData.artifact_id)).scalar()
-    return result
+# def get_n_artifacts_labeled_by_n_or_more(num):
+#     artifacts_labeled_num_times = db.session.query(LabelingData.artifact_id).group_by(LabelingData.artifact_id).having(
+#         func.count(distinct(LabelingData.username)) >= num)
+#     artifacts_flagged_2_times = FlaggedArtifact.query.with_entities(
+#         FlaggedArtifact.artifact_id).group_by(FlaggedArtifact.artifact_id).having(func.count() > 1)
+#     result = artifacts_labeled_num_times.except_(artifacts_flagged_2_times).with_entities(func.count(LabelingData.artifact_id)).scalar()
+#     return result
 
 
 def choose_next_random_api():

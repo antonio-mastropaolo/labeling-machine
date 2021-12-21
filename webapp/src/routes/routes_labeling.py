@@ -16,9 +16,10 @@ def labeling():
         if is_signed_in():
             # This is not fully correct! because maybe tagger A label N needed artifacts,
             # but since #tagged_by_two is less than two, app still propose artifacts to guy A
-            n_api_tagged_by_two_or_more = get_n_artifacts_labeled_by_n_or_more(2)
-            if n_api_tagged_by_two_or_more >= N_API_NEEDS_LABELING:
-                return "We are done. All {} Snippets are tagged by 2+ taggers.".format(N_API_NEEDS_LABELING)
+            n_classes= get_total_number_of_classes_in_db()
+            n_classes_reviewed = get_total_number_of_reviewed_classes()
+            if n_classes_reviewed >= N_API_NEEDS_LABELING:
+                return "We are done. All {} Classes are tagged and eventual conflicts have been resolved".format(N_API_NEEDS_LABELING)
             else:
                 selected_artifact_id = choose_next_random_api()
                 if selected_artifact_id < 0:
@@ -63,6 +64,7 @@ def labeling_with_artifact(target_artifact_id):
             selectedCode = []
             selectedComments = []
             codeSpan = []
+
             if(isLabeled==1):
                 artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
                 commentPositionList = eval(artifact_label.commentPosition)
@@ -75,6 +77,7 @@ def labeling_with_artifact(target_artifact_id):
 
             linesList = []
             linesMethodsString = ''
+
             for (line_index, line) in enumerate(javaClassText.splitlines()):
                 linesList.append(line_index)
                 linesMethodsString += '{}\n'.format(line_index)
