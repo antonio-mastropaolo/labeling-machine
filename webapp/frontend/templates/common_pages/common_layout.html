@@ -58,24 +58,12 @@
                     <a class="nav-link" id="navbar-reviewing" href="/reviewing">Review</a>
                 </li>
 
-                {#            <li class="nav-item dropdown">#}
-                {#                <a class="nav-link dropdown-toggle" href="#" id="navbar-doc" data-toggle="dropdown"#}
-                {#                   aria-haspopup="true" aria-expanded="false">#}
-                {#                    Doc#}
-                {#                </a>#}
-                {#                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">#}
-                {#                    <!--<a class="dropdown-item" target="_blank" href="https://docs.google.com/spreadsheets/d/1MjFEn-SZM7fXzIrCThwAp9L8otDitI_iHV_csPht0Zc/edit?usp=sharing">Tags</a>-->#}
-                {#                    <a class="dropdown-item" target="_blank" href="/faq">FAQ</a>#}
-                {#                </div>#}
-                {#            </li>#}
-
             </ul>
 
             {% if user_info %}
             <ul class="navbar-nav" style="right: 0">
                <li class="navbar-text badges" style="color: white;">
-                   <span class="badge1" title="Number of artifacts labeled by you"></span> <span>{{ user_info['total_n_artifact'] }}</span>
-                   <span class="badge2" title="Number of sentences labeled by you"></span> <span>{{ user_info['total_n_labeled'] }}</span>
+                   <span class="badge1" title="Number of artifacts labeled by you"></span> <span>{{ user_info['total_n_labeled'] }}</span>
                     <span class="badge3" title="Number of artifacts reviewed by you"></span> <span>{{ user_info['total_n_reviewed'] }}</span>
                </li>
 

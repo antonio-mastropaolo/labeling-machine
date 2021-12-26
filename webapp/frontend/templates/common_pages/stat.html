@@ -25,12 +25,8 @@
                         {% for labelingStatDict in users_labeling_stat %}
                             <tr>
                                 <td><b>{{ labelingStatDict['username'] }}</b></td>
-                                <td>{% if labelingStatDict['total_n_artifact']!=0 %}
-                                    {{ labelingStatDict['total_n_artifact'] }} {% endif %}</td>
-{#                                <td>{% if labelingStatDict['total_n_sentence']!=0 %}#}
-{#                                    {{ labelingStatDict['total_n_sentence'] }} {% endif %}</td>#}
-                                <td>{% if labelingStatDict['total_n_reviewed']!=0 %}
-                                    {{ labelingStatDict['total_n_reviewed'] }} {% endif %}</td>
+                                <td>{{ labelingStatDict['total_n_labeled'] }} </td>
+                                <td>{{ labelingStatDict['total_n_reviewed'] }} </td>
                             </tr>
                         {% endfor %}
                     </table>
@@ -39,10 +35,10 @@
                     <hr>
                     <br>
                     {% for source_id, s_info in sources_labeling_stat.items() %}
-                        <em><b>{{ s_info['source_name'] }}</b></em>
-                        <br>
+                        <!--<em><b>{{ s_info['source_name'] }}</b></em>
+                        <br> -->
                         Labeling
-                        <span style="float: right"><b>{{ s_info['n_artifacts_labeled'] }}</b> out of <b>{{ s_info['n_artifacts_to_be_labeled'] }}</b></span>
+                        <span style="float: right"><b>{{ s_info['n_artifacts_labeled'] }}</b> out of <b>{{ s_info['n_total_artifacts'] }}</b></span>
                         <div class="progress progress-bar-striped bg-info">
                             <div id="source-pb-{{ source_id }}-label" class="progress-bar" role="progressbar"
                                  style="width: 0%;"
@@ -52,7 +48,7 @@
                             </div>
                         </div>
                         Reviewing
-                        <span style="float: right"><b>{{ s_info['n_artifacts_reviewed'] }}</b> out of <b>{{ s_info['n_artifacts_to_be_labeled'] }}</b></span>
+                        <span style="float: right"><b>{{ s_info['n_artifacts_reviewed'] }}</b> out of <b>{{ s_info['n_total_artifacts'] }}</b></span>
 
                         <div class="progress progress-bar-striped bg-success">
                             <div id="source-pb-{{ source_id }}-review" class="progress-bar" role="progressbar"
@@ -72,12 +68,12 @@
 
     <script>
         {% for source_id, s_info in sources_labeling_stat.items() %}
-            var labelProgressPercentage = {{ s_info['n_artifacts_labeled'] }}*100 /{{ s_info['n_artifacts_to_be_labeled'] }};
+            var labelProgressPercentage = {{ s_info['n_artifacts_labeled'] }}*100 / {{ s_info['n_total_artifacts'] }};
             labelProgressPercentage = Math.ceil(labelProgressPercentage);
             document.getElementById("source-pb-{{ source_id }}-label").style.width = labelProgressPercentage + '%';
             document.getElementById("source-pb-{{ source_id }}-label").innerHTML = labelProgressPercentage + '%';
 
-            var reviewingProgressPercentage = {{ s_info['n_artifacts_reviewed'] }}*100 /{{ s_info['n_artifacts_to_be_labeled'] }};
+            var reviewingProgressPercentage = {{ s_info['n_artifacts_reviewed'] }} *100 / {{ s_info['n_total_artifacts'] }};
             reviewingProgressPercentage = Math.ceil(reviewingProgressPercentage);
             document.getElementById("source-pb-{{ source_id }}-review").style.width = reviewingProgressPercentage + '%';
             document.getElementById("source-pb-{{ source_id }}-review").innerHTML = reviewingProgressPercentage + '%';

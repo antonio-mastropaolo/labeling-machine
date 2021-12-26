@@ -4,7 +4,7 @@ from src import app, db
 from src.database.models import User
 from src.helper.consts import CURRENT_TASK
 from src.helper.tools_common import is_signed_in, unlock_artifacts_by, who_is_signed_in, sign_in, sign_out, get_all_users
-from src.helper.tools_labeling import get_labeling_status, get_n_labeled_artifact_per_user, get_overall_labeling_progress
+from src.helper.tools_labeling import get_labeling_status, get_n_labeled_artifact_per_user, get_overall_labeling_progress, get_n_reviewed_artifact_per_user
 
 
 @app.route("/")
@@ -69,18 +69,21 @@ def signout():
 
 @app.route("/stat", methods=['GET'])
 def stat():
+
     n_labeled_per_user = get_n_labeled_artifact_per_user()
+    n_reviewed_per_user = get_n_reviewed_artifact_per_user()
 
     users_labeling_stat = []  # list to keep it sorted
     for username in get_all_users():
         users_labeling_stat.append({'username': username,
-                                    'total_n_artifact': n_labeled_per_user.get(username, 0),
-                                    'total_n_sentence': 0,
-                                    'total_n_reviewed': 0
+                                    'total_n_artifact': n_labeled_per_user.get(username, 0) + n_reviewed_per_user.get(username, 0),
+                                    'total_n_labeled': n_labeled_per_user.get(username, 0),
+                                    'total_n_reviewed': n_reviewed_per_user.get(username, 0)
                                     })
 
-    users_labeling_stat = sorted(users_labeling_stat, key=lambda element: element['total_n_artifact'], reverse=True)
 
+    users_labeling_stat = sorted(users_labeling_stat, key=lambda element: element['total_n_artifact'], reverse=True)
+    print(users_labeling_stat)
     sources = get_overall_labeling_progress()
     sources_labeling_stat = {sources['source_id']: sources}
 

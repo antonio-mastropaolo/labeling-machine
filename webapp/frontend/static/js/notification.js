@@ -6,11 +6,11 @@
 /**
  * @param _type: success, warning, danger
  */
-function ShowNotification(_message, _type) {
-    showNotificationWithOptions("","",_message, _type)
+function ShowNotification(_message, _type, _delay=100) {
+    showNotificationWithOptions("","",_message, _type, _delay)
 }
 
-function showNotificationWithOptions(_icon, _title, _message, _type) {
+function showNotificationWithOptions(_icon, _title, _message, _type, _delay) {
     $.notify({
         // options
         icon: _icon,
@@ -21,7 +21,7 @@ function showNotificationWithOptions(_icon, _title, _message, _type) {
         type: _type,
         offset: {x: 0, y: -7},
         z_index: 2000,
-        delay: 100,
+        delay: _delay,
         placement: {
             from: "top",
             align: "center"

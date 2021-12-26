@@ -10,6 +10,9 @@
 
     <script src="{{ url_for('static', filename='js/jquery.lettering-0.6.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/common-function.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/rangy-1.3.0/rangy-core.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/rangy-1.3.0/rangy-serializer.js') }}"></script>
+
 
 
     {#    High priority css classes#}
@@ -129,7 +132,7 @@
                 <div style="text-align: center; font-size: medium; color: white;">
                     {{ overall_labeling_status['n_artifacts_labeled'] }}
                     out of
-                    {{ overall_labeling_status['n_artifacts_to_be_labeled'] }} | <em>{{ overall_labeling_status['source_name'] }}</em>
+                  {{ overall_labeling_status['n_total_artifacts'] }} {#   <em>{{ overall_labeling_status['source_name'] }}</em> #}
                 </div>
                 <div class="justify-content-center" style="display: flex;">
                     <div class="progress" style="width:50%;">
@@ -278,18 +281,20 @@
 
             <div class=" col-md-2 no-float" id="methodsLabel" style="background-color: black;">
 
-                <div id="upperSide" style="height: 50%; overflow-y: scroll; position: absolute; width:100%; float:left;">
+                <div id="upperSide" style="height: 40%;  position: absolute; width:100%; float:left; overflow-y: scroll;">
                     <!-- This Div is dyamically filled -->
                 </div>
 
-                 <div id="lowerSide" style="height: 50%; overflow-y: scroll; position:sticky; top:58.5%; width:100%;">
-
-                    <hr class="solid">
-                     <div style="text-align: center; color: white;">
-                         <h4 style="width:100%; position:relative;">ASSOCIATIONS</h4>
-                         <span id="badgeCounter" class="badge badge-secondary" style="font-size:20px;">0</span>
-                     </div>
+                <div id="divider" style="position: relative; top:38%; z-index:1000;">
                      <hr class="solid">
+                         <div style="text-align: center; color: white;">
+                             <h4 style="width:100%; position:relative;">ASSOCIATIONS</h4>
+                             <span id="badgeCounter" class="badge badge-secondary" style="font-size:20px;">0</span>
+                         </div>
+                    <hr class="solid">
+                </div>
+                 <div id="lowerSide" style="height: 50%;  overflow-y: scroll; position:sticky;  top:90%; width:100%; float: left;">
+
                 </div>
             </div>
 
@@ -326,14 +331,7 @@
         const linesList = {{ artificat_lines | tojson }};
         const isLabeled = {{ isLabeled }};
         const isReviewed = {{ isReviewed }};
-        const workingMode = isLabeled;
-
-        console.log(isLabeled);
-        console.log(isReviewed);
-
-        /*if(isLabeled)==0{
-
-        }*/
+        const workingMode = (isLabeled == 0 ? 0  : 1);
 
         var startTime = new Date().getTime();
 
@@ -349,6 +347,7 @@
                                 'incomplete-button',
         ]
 
+        var originalHTML=null;
         var selectedCategory = "";
         var selectedCodeText = "";
         var selectedCommentText = "";
@@ -356,25 +355,37 @@
         var currentIndexComment = -1;
         var flexibleSelector = null;
         var currentClassification=-1;
-        let defaultColorHighlight='red';
+        var defaultColorHighlight='red';
         var flagSwitch=true;
         var changingToClassificationOnGoing=false;
 
-        var elementsToHighlight = [];
-
+        var commentEleToHighlight = [];
+        var highlightedCommentsInReviewing = [];
 
         var dictHighlightedCode = {};
         var dictHighlightedComments = {};
-        var dictHighlightedCommentsPosition = [];
+
+
+        var dictHighlightedCommentsPosition = {};
         var dictRangeHighlightedCode = {};
+
+        dictHighlightedCode[0]=[];
+        dictRangeHighlightedCode[0]=[];
+        dictHighlightedCommentsPosition[0]=[];
+
+        /////////////////Initializing vocabularies/////////////////////
 
         var comments = []; //In this list we store all the comments within a given class
         var selectedComments = [];
         var selectedCode = [];
-        var selectedSpanCode = [];
+        var serializedRangeList=[]
+        //var selectedSpanCode = [];
         var selectedCategories = [];
         var commentsToHighlight = [];
         var methodSelectionButton = [];
+        var moveSelectionButtonList = [];
+        var highlightedCodeDuringSelection = []
+        var commentIndex = [];
 
         //global variables used mainly for the reviewing process
         var commentPositionsRev = null;
@@ -408,23 +419,28 @@
                 $("#badgeCounter").text(counterAssociations);
 
                 // Loading the lists
-                commentPositionsRev = {{ artifact_label_commentPositionList  }}
+                commentPositionsRev = {{ artifact_label_commentPositionList | tojson }}
                 rangeHighlightedCodeRev = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});
                 selectedCode = {{ selectedCode | tojson }}
                 selectedComments = {{ selectedComments | tojson }}
                 selectedCategories = {{ artificat_label_categories |tojson }}
-                selectedSpanCode = {{ codeSpan | tojson }}
+                {#selectedSpanCode = {{ codeSpan | tojson }}#}
+                moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }}
 
-                const moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }};
+                //console.log(selectedCode);
+                //console.log(selectedComments);
+                //console.log(selectedCategories);
 
-                console.log(selectedCode);
-                console.log(selectedComments);
-                console.log(selectedCategories);
-
-
-
+                var idsButton=[];
                 for(var i=0; i<moveSelectionButtonList.length; i++){
-                    $("#lowerSide").append( $(moveSelectionButtonList[i]) );
+                    var doc = new DOMParser().parseFromString(moveSelectionButtonList[i], "text/xml");
+                    var idButton = doc.getElementsByClassName("buttonWrapper")[0].id;
+                    idsButton.push(idButton);
+                    $("#lowerSide").append(  $(moveSelectionButtonList[i]) );
+                }
+
+                for(var i=1;i<idsButton.length;i++){
+                    $("#"+idsButton[i].replace('div-','')).attr('disabled','disabled');
                 }
 
                 $("#savingClassification").removeClass("btn-dark").addClass("btn-success").text("Accept");
@@ -455,23 +471,35 @@
                 var upperPartCommentSelection = '';
                 var lowerPartCommentSelection = '';
 
-                while(prevElement.hasClass('hljs-comment')){
-                    if(!elementsToHighlight.includes(prevElement)) {
+                var currentElement = this;
+
+                while(prevElement.hasClass('hljs-comment') && (currentElement.previousSibling.nodeType !== 3 || currentElement.previousSibling.textContent.trim()==='' && !commentWithin((currentElement.nextSibling.textContent.trim())))){
+                    if(!commentEleToHighlight.includes(prevElement)) {
                         previousElements.push(prevElement);
                     }
                     prevElement = $(prevElement).prev();
+                    currentElement = currentElement.previousSibling;
                 }
 
                 //Adding current element selected by the user if it's not in the list already
-                if(!elementsToHighlight.includes($(this))){
+                if(!commentEleToHighlight.includes($(this))){
                     nextElements.push($(this));
                 }
 
-                while(nextElement.hasClass("hljs-comment")){
-                    if(!elementsToHighlight.includes(nextElement)) {
+                currentElement = this;
+
+                while(nextElement.hasClass("hljs-comment") && (currentElement.nextSibling.nodeType !== 3 || currentElement.nextSibling.textContent.trim()==='') && !commentWithin(currentElement.nextSibling.textContent.trim())){
+                    console.log('current element');
+                    console.log(currentElement);
+
+                    if(!commentEleToHighlight.includes(nextElement)) {
                         nextElements.push(nextElement);
                     }
                     nextElement = $(nextElement).next();
+                    currentElement = currentElement.nextSibling;
+
+                    console.log('next element');
+                    console.log(nextElement);
                 }
 
                 for(var i=previousElements.length-1; i>=0;i--){
@@ -482,31 +510,29 @@
                     lowerPartCommentSelection = lowerPartCommentSelection + nextElements[i][0].innerText + "\n";
                 }
 
-                //extending elementsToHighlight
+                //extending commentEleToHighlight
                 var tmpArray = previousElements.reverse().concat(nextElements);
                 for(var i=0;i<tmpArray.length;i++){
-                    elementsToHighlight.push(tmpArray[i]);
+                    commentEleToHighlight.push(tmpArray[i]);
                 }
 
-                for(var i=0;i<elementsToHighlight.length;i++){
-                    $(elementsToHighlight[i]).css('color','red');
+                //console.log(commentEleToHighlight);
+
+                for(var i=0;i<commentEleToHighlight.length;i++){
+                    $(commentEleToHighlight[i]).css('color','red');
                 }
 
-                //console.log(elementsToHighlight);
+                //console.log(commentEleToHighlight);
                 var arr = Array.from(comments);
 
-                var commentIndex = [];
-                for(var i=0;i<elementsToHighlight.length;i++){
-                    commentIndex.push(arr.indexOf(elementsToHighlight[i][0]));
+
+                for(var i=0;i<commentEleToHighlight.length;i++){
+                    commentIndex.push(arr.indexOf(commentEleToHighlight[i][0]));
                 }
+
                 selectedCommentText = upperPartCommentSelection  + lowerPartCommentSelection;
                 updateTextArea(selectedCommentText);
                 unselectAll();
-
-
-                dictHighlightedComments[counterAssociations]=elementsToHighlight;
-                dictHighlightedCommentsPosition[counterAssociations]=commentIndex;
-
 
             });
 
@@ -521,28 +547,37 @@
                     stop_point = 0;
                     text_point = "";
                     targetTag = null;
-                } else{
+                } else {
                     start_point = sel.start;
                     stop_point = sel.end;
                     text_point = sel.text;
                     targetTag = sel.targetTag;
                 }
 
+                //console.log(sel.endOffset);
+
                 // If right side double selection is triggered
                 try{
                     targetTag = targetTag.previousSibling;
                 }catch(e){}
 
-                if(typeof(targetTag) != null && $(targetTag).hasClass('hljs-comment')){
+                if(typeof(targetTag) != null && $(targetTag).hasClass('hljs-comment') && ( Math.abs(start_point-stop_point)<=3) ){
+                    //console.log('hit');
 
-                    if(!elementsToHighlight.includes($(targetTag))) {
-                        elementsToHighlight.push($(targetTag));
+                    if(!commentEleToHighlight.includes($(targetTag))) {
+                        commentEleToHighlight.push($(targetTag));
                     }
                     selectedCommentText = $(targetTag).text();
                     $(targetTag).css('color','red');
-                    dictHighlightedComments[counterAssociations]=elementsToHighlight;
                     updateTextArea(selectedCommentText);
+                    unselectAll();
 
+                    var arr = Array.from(comments);
+
+                    for(var i=0;i<commentEleToHighlight.length;i++){
+                        commentIndex.push(arr.indexOf(commentEleToHighlight[i][0]));
+                    }
+                    //console.log(commentIndex);
 
                 }else{
                     if( selectedCategory === '' && selectedCommentText === '' && text_point!==''){
@@ -551,28 +586,23 @@
                         if (selectedCommentText !== '' && selectedCategory === '' && text_point !== '') {
                             alert('Please select the comment category!');
                         } else {
-                            console.log('spot!');
-                            //Adding highlighting with span token
+
+                            //Adding highlighting with span token and serialize range
                             var newNode = highlightCodeFromRange(sel.range);
+                            serializedRangeList.push(sel.serializedRange);
+
+                            console.log('current: ' + currentClassification);
+
+
+                            //const spanSelection = '('+start_point+'-'+stop_point+')';
+                            //if(isLabeled==0){ selectedSpanCode.push(spanSelection); }
+                            //if(isLabeled==1){ selectedSpanCode.splice(currentClassification, 1, spanSelection);}
+
                             updateTextArea(sel.text.trim());
                             unselectAll();
 
                             //Adding new element to the list
-                            //console.log('Counter Association: ' +counterAssociations)
-                            dictHighlightedCode[counterAssociations] = newNode;
-
-                            dictRangeHighlightedCode[counterAssociations] = {
-                                'startOffset': sel.range.startOffset-2,
-                                'endOffset':  (sel.range.startOffset + newNode.childNodes.length)-1
-                            }
-
-                            //åconsole.log(sel.range);
-
-
-                            let spanSelection = '('+start_point+'-'+stop_point+')';
-                            if(isLabeled==0){ selectedSpanCode.push(spanSelection); }
-                            if(isLabeled==1){ selectedSpanCode.splice(currentClassification, 1, spanSelection);}
-
+                            highlightedCodeDuringSelection.push(newNode);
                         }
                     }
 
@@ -595,6 +625,7 @@
 
         //Add here a for loop over counterAssociation
         function submitClassifaction(){
+
             if (confirm('Are you sure?')) { //implement control
                 //var duration = get_elapsed_seconds();
                 //for (var i = 0; i < counterAssociations; i++) {
@@ -604,23 +635,27 @@
                         code: JSON.stringify(selectedCode),
                         comments: JSON.stringify(selectedComments),
                         categories: JSON.stringify(selectedCategories),
-                        span: JSON.stringify(selectedSpanCode),
+                        //span: JSON.stringify(selectedSpanCode),
                         rangeSelectedText: JSON.stringify(dictRangeHighlightedCode),
-                        workingMode: JSON.stringify(workingMode),
-                        moveToSelectedButtons: JSON.stringify(methodSelectionButton),
+                        workingMode: workingMode,
+                        moveToSelectedButtons: (isLabeled == 0 ? JSON.stringify(methodSelectionButton) : JSON.stringify(moveSelectionButtonList)),
                         commentPosition: JSON.stringify(dictHighlightedCommentsPosition),
                         counterAssociations: counterAssociations,
                         duration:get_elapsed_seconds()
                     };
 
-                    /*$.post("/label", data_json, function (response, status) {
+
+                    $.post("/label", data_json, function (response, status) {
                         let response_json = $.parseJSON(response.toString());
                         ShowNotification(response_json['status'], "success");
 
-                    });*/
-                    console.log(data_json);
+                    });
 
-                //ChangeSkipToNext();
+                    console.log(dictHighlightedCommentsPosition);
+                    console.log(dictRangeHighlightedCode);
+
+
+                    //ChangeSkipToNext();
             }
         }
 

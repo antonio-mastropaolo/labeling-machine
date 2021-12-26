@@ -8,20 +8,20 @@ import json
 from pygments.lexers.jvm import *
 
 
-
-
 @app.route("/labeling", methods=['GET', 'POST'])
 def labeling():
     if request.method != 'POST':
         if is_signed_in():
             # This is not fully correct! because maybe tagger A label N needed artifacts,
             # but since #tagged_by_two is less than two, app still propose artifacts to guy A
-            n_classes= get_total_number_of_classes_in_db()
+            n_classes = get_total_number_of_classes_in_db()
             n_classes_reviewed = get_total_number_of_reviewed_classes()
-            if n_classes_reviewed >= N_API_NEEDS_LABELING:
-                return "We are done. All {} Classes are tagged and eventual conflicts have been resolved".format(N_API_NEEDS_LABELING)
+            if n_classes_reviewed == n_classes:
+                return "We are done. All {} Classes are tagged and eventual conflicts have been resolved".format(
+                    N_API_NEEDS_LABELING)
             else:
                 selected_artifact_id = choose_next_random_api()
+                print('Random selected artifact: {}'.format(selected_artifact_id))
                 if selected_artifact_id < 0:
                     return "It seems you are done. Please Wait for others [Code: {}]".format(selected_artifact_id)
                 return redirect(url_for('labeling_with_artifact', target_artifact_id=selected_artifact_id))
@@ -42,7 +42,8 @@ def labeling_with_artifact(target_artifact_id):
             target_artifact_id = int(target_artifact_id)
             artifact_data = Artifact.query.filter_by(id=target_artifact_id).first()
             all_taggers = {row[0] for row in
-                           LabelingData.query.with_entities(LabelingData.username).filter_by(artifact_id=target_artifact_id).all()}
+                           LabelingData.query.with_entities(LabelingData.username).filter_by(
+                               artifact_id=target_artifact_id).all()}
 
             lock_artifact_by(who_is_signed_in(), target_artifact_id)
 
@@ -63,9 +64,9 @@ def labeling_with_artifact(target_artifact_id):
             selectedCategories = []
             selectedCode = []
             selectedComments = []
-            codeSpan = []
+            #codeSpan = []
 
-            if(isLabeled==1):
+            if (isLabeled == 1):
                 artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
                 commentPositionList = eval(artifact_label.commentPosition)
                 rangeHighlightedCodeRev = artifact_label.rangeSelectedText
@@ -73,7 +74,7 @@ def labeling_with_artifact(target_artifact_id):
                 selectedCategories = eval(artifact_label.categories)
                 selectedCode = eval(artifact_label.code)
                 selectedComments = eval(artifact_label.comments)
-                codeSpan = eval(artifact_label.span)
+                #codeSpan = eval(artifact_label.span)
 
             linesList = []
             linesMethodsString = ''
@@ -98,11 +99,11 @@ def labeling_with_artifact(target_artifact_id):
                                    overall_labeling_status=get_overall_labeling_progress(),
                                    user_info=get_labeling_status(who_is_signed_in()),
                                    artifact_linesString=linesMethodsString,
-                                   artificat_label_categories = selectedCategories,
-                                   selectedCode = selectedCode,
-                                   selectedComments = selectedComments,
-                                   codeSpan = codeSpan,
-                                   #existing_labeling_data=all_labels,
+                                   artificat_label_categories=selectedCategories,
+                                   selectedCode=selectedCode,
+                                   selectedComments=selectedComments,
+                                   #codeSpan=codeSpan,
+                                   # existing_labeling_data=all_labels,
                                    all_taggers=', '.join(all_taggers) if all_taggers is not None else None
                                    )
         else:
@@ -160,7 +161,8 @@ def toggle_fp():
         action = request.form['action']
 
         n_flaggers = len(FlaggedArtifact.query.filter_by(artifact_id=artifact_id).all())
-        my_flag_report_on_artifact = FlaggedArtifact.query.filter_by(artifact_id=artifact_id).filter_by(added_by=who_is_signed_in()).first()
+        my_flag_report_on_artifact = FlaggedArtifact.query.filter_by(artifact_id=artifact_id).filter_by(
+            added_by=who_is_signed_in()).first()
 
         if my_flag_report_on_artifact is None:
             status = "false"
@@ -203,46 +205,61 @@ def label():
         code = request.form['code']
         comments = request.form['comments']
         categories = request.form['categories']
-        span = request.form['span']
+        #span = request.form['span']
         workingMode = request.form['workingMode']
         rangeSelectedText = request.form['rangeSelectedText']
         commentPosition = request.form['commentPosition']
         moveSelectionButton = request.form['moveToSelectedButtons']
         counterAssociations = request.form['counterAssociations']
 
-
         if int(workingMode) == 0:
             isLabeled = 1
             isReviewed = 0
-        elif int(workingMode) == 1:
+
+        else:
             isLabeled = 1
             isReviewed = 1
 
-        if duration_sec <= 1:
-            return jsonify('{ "status": "Too fast?" }')
 
-        already_labeled_this_class = LabelingData.query.filter_by(artifact_id=artifact_id).filter_by(username=who_is_signed_in()).first()
+        #if duration_sec <= 1:
+        #    return jsonify('{ "status": "Too fast?" }')
 
-        if already_labeled_this_class is not None:
-            already_labeled_this_class.labeling = labeling_data
-            already_labeled_this_class.duration_sec = duration_sec
-            db.session.commit()
-            return jsonify('{ "status": "updated" }')
-        else:
+        #already_labeled_this_class = LabelingData.query.filter_by(artifact_id=artifact_id).filter_by(
+        #    username=who_is_signed_in()).first()
+
+        # if already_labeled_this_class is not None:
+        #     already_labeled_this_class.duration_sec = duration_sec
+        #     db.session.commit()
+        #     return jsonify('{ "status": "updated" }')
+        #
+        # else:
+        if(int(workingMode)==0):
             jr = LabelingData(artifact_id=artifact_id, remark='', username=who_is_signed_in(),
-                              duration_sec=duration_sec, code=code, comments=comments, span=span,
-                              categories=categories, commentPosition=commentPosition,
-                              rangeSelectedText=rangeSelectedText, moveSelectionButton=moveSelectionButton)
+                                  duration_sec=duration_sec, code=code, comments=comments, #span=span,
+                                  categories=categories, commentPosition=commentPosition,
+                                  rangeSelectedText=rangeSelectedText, moveSelectionButton=moveSelectionButton
+                              )
+
             db.session.add(jr)
             db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
             db.session.commit()
 
-            artifact = Artifact.query.filter_by(id=artifact_id).first()
-            artifact.labeled = isLabeled
-            artifact.reviewed = isReviewed
-            artifact.counterAssociations = counterAssociations
+        else:
+            labeling_data = LabelingData.query.filter_by(artifact_id=artifact_id).first()
+            labeling_data.comments = comments
+            labeling_data.commentPosition = commentPosition
+            labeling_data.moveSelectionButton = moveSelectionButton
+            labeling_data.rangeSelectedText = rangeSelectedText
+            labeling_data.code = code
+            #labeling_data.span = span
+            labeling_data.categories = categories
             db.session.commit()
 
-            return jsonify('{ "status": "success" }')
-    else:
-        return "Not POST!"
+        artifact = Artifact.query.filter_by(id=artifact_id).first()
+        artifact.labeled = isLabeled
+        artifact.reviewed = isReviewed
+        artifact.counterAssociations = counterAssociations
+        db.session.commit()
+
+        return jsonify('{ "status": "success" }')
+
