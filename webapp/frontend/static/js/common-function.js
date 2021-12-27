@@ -61,8 +61,8 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     var tagSelector = arr[selectedComments[0]];
     currentClassification = indexClassification;
 
-    console.log(dictHighlightedCommentsPosition);
-    console.log(selectedComments);
+    //console.log(dictHighlightedCommentsPosition);
+    //console.log(selectedComments);
 
 
     $("#"+selectedCategories[currentClassification]).css('background-color','green'); //highlight the select button category
@@ -116,8 +116,8 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     }
 
     //highlight the category button
-    var bSelector = `#${selectedCategories[indexComment]}`;
-    $(bSelector).css('background-color','green')
+    // var bSelector = `#${selectedCategories[indexComment]}`;
+    // $(bSelector).css('background-color','green')
 
 }
 
@@ -217,9 +217,10 @@ function reset(save=false){
         //removing highlighting from the comment
         changeCommentHighlighting(null,'green', false);
         $("#association-"+currentClassification).fadeOut(300, function(){ $(this).remove();});
-        for(var i=currentClassification+2;i<moveSelectionButtonList.length;i++){
+
+        /*for(var i=currentClassification+2;i<moveSelectionButtonList.length;i++){
             $("#association-"+i).attr('disabled','disabled');
-        }
+        }*/
 
         if(counterAssociations==0){
             ShowNotification('You have reviewed all the instances....Please submit the new classification','success', 500);
@@ -266,17 +267,22 @@ function reset(save=false){
 }
 
 function resetHighlightedCode(customList=null, targetItem){
-    var item='highlight-'+targetItem
+    var item='highlight-'+targetItem;
     $(`span[id=${item}]`).css('background-color','');
+    /*if(isLabeled === 0){
+        var cnt = $(`span[id=${item}]`).contents();
+        $(`span[id=${item}]`).replaceWith(cnt);
+    }
+    else{ $(`span[id=${item}]`).css('background-color',''); }*/
 }
 
 function changeCommentHighlighting(customList, color, reset=false){
     //console.log(customList);
-    if(isLabeled==0) {
+    if(isLabeled === 0) {
         for (var i = 0; i < customList.length; i++) {
             $(customList[i][0]).css('color', color);
         }
-    }else if (isLabeled==1){
+    }else if (isLabeled === 1){
         if(reset){
             console.log(highlightedCommentsInReviewing);
             for(var i=0;i<highlightedCommentsInReviewing.length;i++){
@@ -332,7 +338,7 @@ function addNewCommentToBeLinked(element){
     var retCode=checkForButtonValidity();
     if (!retCode) { return false;}
     checkForChangedCategory(element);
-    if(element.id.toString()=="new-category-button"){
+    if(element.id.toString() === "new-category-button"){
         createNewCategory();
     }
     $(element).css('background-color','green');
@@ -378,7 +384,7 @@ function saveCategorization(){
             $(selector).css('background-color','');
         }
 
-        if(isLabeled==0) {
+        if(isLabeled === 0) {
 
             //adding tag result to the lists we store in the DB
             selectedComments.push(selectedCommentText);
@@ -405,7 +411,6 @@ function saveCategorization(){
         //Bringing back the change button and remove selectionButton
         if(isLabeled==1){
 
-
             // if the reviewer didn't change anything, it will overwrite such fields
             if (selectedCommentText.trim() !== '') { selectedComments[currentClassification] = selectedCommentText; }
             if (selectedCodeText.trim() !== '')    { selectedCode[currentClassification] = selectedCodeText; }
@@ -413,22 +418,29 @@ function saveCategorization(){
             if (serializedRangeList.length>0)      { dictRangeHighlightedCode[currentClassification] = serializedRangeList; }
             if (commentIndex.length>0)             { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)]; } //duplicates deletion due to mis-selection event
 
-
             //console.log(selectedCategories);
             //console.log(selectedComments);
             //console.log(selectedCode);
             //console.log(dictRangeHighlightedCode[currentClassification]);
 
             $("#clearText").text('Change');
-            removeAssociationFromTag();
 
-            var buttons = Array.from( $('[id^="association-"]') );
-            for(var i=0;i<buttons.length;i++){
-                $(buttons[i]).removeAttr('disabled');
+            var flagIN = false;
+            var counter = currentClassification+1;
+            var extractedItemToMatch = dictHighlightedCommentsPosition[counter];
+
+            while(extractedItemToMatch.length === 0){
+                counter = counter + 1;
+                //console.log('inin ' + counter);
+                extractedItemToMatch = dictHighlightedCommentsPosition[counter];
+                flagIN=true;
             }
+            //if(flagIN){ currentClassification=counter; console.log(currentClassification); }
+            $('#association-'+counter).removeAttr('disabled');
 
-            var bSelector = '#'+selectedCategories[currentClassification];
-            $(bSelector).css('background-color','');
+
+            //var bSelector = '#'+selectedCategories[currentClassification];
+            //$(bSelector).css('background-color','');
             flagSwitch=false;
 
         }
@@ -438,13 +450,13 @@ function saveCategorization(){
 
 }
 
-function removeAssociationFromTag(){
-
-    $(flexibleSelector).fadeOut(300, function(){ $(this).remove();});
-    counterAssociations = counterAssociations - 1;
-    $("#badgeCounter").text(counterAssociations);
-    $("#textAreaSelectedText").text('');
-}
+// function removeAssociationFromTag(){
+//
+//     $(flexibleSelector).fadeOut(300, function(){ $(this).remove();});
+//     counterAssociations = counterAssociations - 1;
+//     $("#badgeCounter").text(counterAssociations);
+//     $("#textAreaSelectedText").text('');
+// }
 
 function removeAssociation(divID){
 
@@ -463,9 +475,12 @@ function removeAssociation(divID){
         changeCommentHighlighting(commentEleToHighlight, '');
     }
 
-    dictRangeHighlightedCode[targetAssociation]=[];
-    dictHighlightedCommentsPosition[targetAssociation]=[];
-    methodSelectionButton[targetAssociation]=[];
+    dictRangeHighlightedCode[targetAssociation] = [];
+    dictHighlightedCommentsPosition[targetAssociation] = [];
+    methodSelectionButton[targetAssociation] = [];
+    selectedComments[targetAssociation] = [];
+    selectedCategories[targetAssociation] = [];
+    selectedCode[targetAssociation] = [];
 }
 
 
