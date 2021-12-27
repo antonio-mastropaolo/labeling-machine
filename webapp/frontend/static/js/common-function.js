@@ -29,14 +29,17 @@ function createNewCategory() {
     $("#new-category-button").text(newCategory);
 }
 
-function moveToSelectedMethodFromLine(startingLine) {
-    var selector = '.row-line:contains(' + startingLine + ')';
-    $(selector)[0].scrollIntoViewIfNeeded();
-
-    $(selector).addClass('animationLabel').delay(1500).queue(function(){
+function moveToSelectedMethod(indexClassification) {
+    var arr = Array.from(comments);
+    console.log('inside');
+    console.log(dictHighlightedCommentsPosition[indexClassification]);
+    indexComment = dictHighlightedCommentsPosition[indexClassification].toString();
+    var selectedComments = indexComment.split(',');
+    var tagSelector = arr[selectedComments[0]];
+    $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
         $(this).removeClass('animationLabel').dequeue();
     });
-
 }
 
 
@@ -87,14 +90,13 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     ////////////////////////////////////////////////////
     //Highlight the selected comment
 
-    console.log(selectedComments);
+    //console.log(selectedComments);
 
     for(var j=0;j<selectedComments.length;j++) {
 
         currentIndexComment = Number(j);
         // We highlight the previously made classification
         const position = dictHighlightedCommentsPosition[indexClassification][currentIndexComment];
-        console.log('-----> '+position);
         $(comments[position]).css('color', 'red');
         highlightedCommentsInReviewing.push(comments[position]);
         updateTextArea($(comments[position]).text());
@@ -392,18 +394,23 @@ function saveCategorization(){
             selectedCategories.push(selectedCategory);
             dictRangeHighlightedCode[counterAssociations] = serializedRangeList;
             dictHighlightedCommentsPosition[counterAssociations] = [...new Set(commentIndex)];
+            console.log('inside saveClass: ');
+            console.log(dictHighlightedCommentsPosition);
 
             //Add new association button
             var divID = "div-association" + '-' + counterAssociations; //+ "-" + target_method;
             var buttonID = "association" + '-' + counterAssociations;// + "-" + target_method;
             var buttonText = "#" + counterAssociations+ " -->";// + target_method;
-            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
-            
+            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + counterAssociations + ");" +  "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
+
+            //var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
+            //onclick="removeAssociation(\''+ divID +'\')">
+
             // handling list for the reviewing part
             var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick=" moveToSelectedMethodFromTag([' + dictHighlightedCommentsPosition[counterAssociations] + '],' +counterAssociations + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + ' + </button></div>';
             methodSelectionButton.push(moveToButton);
 
-            $("#badgeCounter").text(counterAssociations);
+            $("#badgeCounter").text(counterAssociations+1);
             $("#lowerSide" ).append( $(newButton) );
 
         }
@@ -425,23 +432,32 @@ function saveCategorization(){
 
             $("#clearText").text('Change');
 
-            var flagIN = false;
-            var counter = currentClassification+1;
-            var extractedItemToMatch = dictHighlightedCommentsPosition[counter];
 
-            while(extractedItemToMatch.length === 0){
-                counter = counter + 1;
-                //console.log('inin ' + counter);
-                extractedItemToMatch = dictHighlightedCommentsPosition[counter];
-                flagIN=true;
+            try {
+                var flagIN = false;
+
+                var counter = currentClassification + 1;
+                var extractedItemToMatch = dictHighlightedCommentsPosition[counter];
+
+
+                while (extractedItemToMatch.length === 0) {
+                    counter = counter + 1;
+                    //console.log('inin ' + counter);
+                    extractedItemToMatch = dictHighlightedCommentsPosition[counter];
+                    flagIN = true;
+                }
+                //if(flagIN){ currentClassification=counter; console.log(currentClassification); }
+                $('#association-' + counter).removeAttr('disabled');
+            }catch(e){
+                $('#association-' + currentClassification).removeAttr('disabled');
             }
-            //if(flagIN){ currentClassification=counter; console.log(currentClassification); }
-            $('#association-'+counter).removeAttr('disabled');
 
 
             //var bSelector = '#'+selectedCategories[currentClassification];
             //$(bSelector).css('background-color','');
             flagSwitch=false;
+            counterAssociations = counterAssociations - 1;
+            $("#badgeCounter").text(counterAssociations);
 
         }
 
