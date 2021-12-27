@@ -304,7 +304,7 @@
             <div class=" col-md-2"></div>
             <div class=" col-md-8">
                 <textarea id="textAreaSelectedText" rows="4" cols="50" class="textarea"></textarea>
-                <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="reset()">Clear</button>
+                <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="reset(); resetClicked=true;">Clear</button>
                 <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' style="text-align: center;" onclick="saveCategorization()">Save</button>
             </div>
             <div class=" col-md-2"></div>
@@ -354,6 +354,7 @@
         var counterAssociations = 0;
         var currentIndexComment = -1;
         var flexibleSelector = null;
+        var resetClicked=false;
         var currentClassification=-1;
         var defaultColorHighlight='red';
         var flagSwitch=true;
@@ -369,9 +370,7 @@
         var dictHighlightedCommentsPosition = {};
         var dictRangeHighlightedCode = {};
 
-        dictHighlightedCode[0]=[];
-        dictRangeHighlightedCode[0]=[];
-        dictHighlightedCommentsPosition[0]=[];
+
 
         /////////////////Initializing vocabularies/////////////////////
 
@@ -386,11 +385,7 @@
         var moveSelectionButtonList = [];
         var highlightedCodeDuringSelection = []
         var commentIndex = [];
-
-        //global variables used mainly for the reviewing process
-        var commentPositionsRev = null;
-        var rangeHighlightedCodeRev = null;
-
+        
 
         // -------------------------End-------------------------
 
@@ -409,8 +404,14 @@
 
             comments = document.getElementsByClassName("hljs-comment");
 
+            if(isLabeled==0){
+                dictHighlightedCode[0]=[];
+                dictRangeHighlightedCode[0]=[];
+                dictHighlightedCommentsPosition[0]=[];
+            }
+
             //This instance need to be reviewed, therefore we start preparing the needed lists and the layout
-            if(isLabeled==1 && isReviewed==0){
+            if(isLabeled==1){
 
                 ShowNotification('Reviewing mode!','warning');
 
@@ -419,20 +420,19 @@
                 $("#badgeCounter").text(counterAssociations);
 
                 // Loading the lists
-                commentPositionsRev = {{ artifact_label_commentPositionList | tojson }}
-                rangeHighlightedCodeRev = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});
+                dictHighlightedCommentsPosition = {{ artifact_label_commentPositionList | tojson }}
+                dictRangeHighlightedCode = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});
                 selectedCode = {{ selectedCode | tojson }}
                 selectedComments = {{ selectedComments | tojson }}
                 selectedCategories = {{ artificat_label_categories |tojson }}
                 {#selectedSpanCode = {{ codeSpan | tojson }}#}
                 moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }}
 
-                //console.log(selectedCode);
-                //console.log(selectedComments);
-                //console.log(selectedCategories);
+                console.log(dictHighlightedCommentsPosition);
 
                 var idsButton=[];
                 for(var i=0; i<moveSelectionButtonList.length; i++){
+                    if(dictHighlightedCommentsPosition[i].length==0){ continue; }
                     var doc = new DOMParser().parseFromString(moveSelectionButtonList[i], "text/xml");
                     var idButton = doc.getElementsByClassName("buttonWrapper")[0].id;
                     idsButton.push(idButton);
@@ -555,6 +555,8 @@
                 }
 
                 //console.log(sel.endOffset);
+                selectedCodeText = selectedCodeText + sel.text;
+                console.log(sel.text)
 
                 // If right side double selection is triggered
                 try{
@@ -577,7 +579,8 @@
                     for(var i=0;i<commentEleToHighlight.length;i++){
                         commentIndex.push(arr.indexOf(commentEleToHighlight[i][0]));
                     }
-                    //console.log(commentIndex);
+                    console.log('comment index: ');
+                    console.log(commentIndex);
 
                 }else{
                     if( selectedCategory === '' && selectedCommentText === '' && text_point!==''){
@@ -591,8 +594,7 @@
                             var newNode = highlightCodeFromRange(sel.range);
                             serializedRangeList.push(sel.serializedRange);
 
-                            console.log('current: ' + currentClassification);
-
+                            //console.log('current: ' + currentClassification);
 
                             //const spanSelection = '('+start_point+'-'+stop_point+')';
                             //if(isLabeled==0){ selectedSpanCode.push(spanSelection); }
@@ -638,9 +640,9 @@
                         //span: JSON.stringify(selectedSpanCode),
                         rangeSelectedText: JSON.stringify(dictRangeHighlightedCode),
                         workingMode: workingMode,
-                        moveToSelectedButtons: (isLabeled == 0 ? JSON.stringify(methodSelectionButton) : JSON.stringify(moveSelectionButtonList)),
+                        moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton) : JSON.stringify(moveSelectionButtonList)),
                         commentPosition: JSON.stringify(dictHighlightedCommentsPosition),
-                        counterAssociations: counterAssociations,
+                        counterAssociations: (isLabeled === 1 ?  Number({{ counterAssociations }}) : counterAssociations ),
                         duration:get_elapsed_seconds()
                     };
 
@@ -650,10 +652,7 @@
                         ShowNotification(response_json['status'], "success");
 
                     });
-
-                    console.log(dictHighlightedCommentsPosition);
-                    console.log(dictRangeHighlightedCode);
-
+                
 
                     //ChangeSkipToNext();
             }

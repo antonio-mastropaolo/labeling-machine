@@ -54,9 +54,6 @@ function highlightCodeFromRange(range){
 
 function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
-    console.log(indexComment);
-
-
     var arr = Array.from(comments);
     indexComment = indexComment.toString();
     console.log(indexClassification);
@@ -64,7 +61,11 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     var tagSelector = arr[selectedComments[0]];
     currentClassification = indexClassification;
 
-    dictRangeHighlightedCode[currentClassification]=[];
+    console.log(dictHighlightedCommentsPosition);
+    console.log(selectedComments);
+
+
+    $("#"+selectedCategories[currentClassification]).css('background-color','green'); //highlight the select button category
 
     //move down to the selected method
     $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -73,27 +74,27 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     });
 
     //deactivating other classification buttons
-    const keys = Object.keys(rangeHighlightedCodeRev);
+    const keys = Object.keys(dictRangeHighlightedCode);
     //console.log(keys);
     for(var i=0;i<keys.length;i++){
-        if(rangeHighlightedCodeRev[i].length==0 || i==indexClassification){
+        if(dictRangeHighlightedCode[i].length==0 || i==indexClassification){
             continue;
         }else{
             $('#association-'+i).attr('disabled','disabled');
-
         }
     }
 
     ////////////////////////////////////////////////////
-
-
     //Highlight the selected comment
+
+    console.log(selectedComments);
 
     for(var j=0;j<selectedComments.length;j++) {
 
-        currentIndexComment = j;
+        currentIndexComment = Number(j);
         // We highlight the previously made classification
-        const position = commentPositionsRev[indexClassification][currentIndexComment];
+        const position = dictHighlightedCommentsPosition[indexClassification][currentIndexComment];
+        console.log('-----> '+position);
         $(comments[position]).css('color', 'red');
         highlightedCommentsInReviewing.push(comments[position]);
         updateTextArea($(comments[position]).text());
@@ -102,9 +103,8 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     //Highlight the selected code
-    for(var i=0;i<rangeHighlightedCodeRev[indexClassification].length;i++){
-        //console.log(rangeHighlightedCodeRev[indexClassification][i]);
-        var deseriazedRange = rangy.deserializeRange(rangeHighlightedCodeRev[indexClassification][i]);
+    for(var i=0;i<dictRangeHighlightedCode[currentClassification].length;i++){
+        var deseriazedRange = rangy.deserializeRange(dictRangeHighlightedCode[currentClassification][i]);
         var newNode = document.createElement("span");
 
         //Adding ID for the given selection that is gonna be useful when we want to remove the highlighted text
@@ -196,9 +196,6 @@ function reset(save=false){
     $('.category-button').css("background-color",'');
     $("#new-category-button").text("Define New Category");
 
-    selectedCategory = "";
-    selectedCodeText = "";
-    selectedCommentText = "";
 
     if(!save) {
         changeCommentHighlighting(commentEleToHighlight,'', true);
@@ -216,8 +213,6 @@ function reset(save=false){
         var selector = "[id=highlight-"+(currentClassification)+"]";
         $(selector).css('background-color','#CCFFE5');
 
-        //console.log('debug mode!');
-        //console.log(commentEleToHighlight);
 
         //removing highlighting from the comment
         changeCommentHighlighting(null,'green', false);
@@ -255,11 +250,18 @@ function reset(save=false){
     commentEleToHighlight = [];
     commentIndex=[];
     serializedRangeList=[];
-    dictHighlightedComments[counterAssociations] = []
-    dictRangeHighlightedCode[counterAssociations] = []; //making space for the next classification
-    dictHighlightedComments[counterAssociations]=[];
-    dictHighlightedCommentsPosition[counterAssociations]=[];
+    //dictHighlightedComments[counterAssociations] = []
+    //dictRangeHighlightedCode[counterAssociations] = []; //making space for the next classification
+    //dictHighlightedCommentsPosition[counterAssociations]=[];
+    //dictHighlightedComments[counterAssociations]=[];
+    highlightedCommentsInReviewing=[];
     highlightedCodeDuringSelection = [];
+
+    resetClicked=false;
+    selectedCategory = "";
+    selectedCodeText = "";
+    selectedCommentText = "";
+
     unselectAll();
 }
 
@@ -276,6 +278,7 @@ function changeCommentHighlighting(customList, color, reset=false){
         }
     }else if (isLabeled==1){
         if(reset){
+            console.log(highlightedCommentsInReviewing);
             for(var i=0;i<highlightedCommentsInReviewing.length;i++){
                 $(highlightedCommentsInReviewing[i]).css('color','');
             }
@@ -356,19 +359,18 @@ function isSelectedCategory(){
 function saveCategorization(){
 
     dictHighlightedCode[counterAssociations] = highlightedCodeDuringSelection;
-    dictHighlightedComments[counterAssociations] = commentEleToHighlight;
-    dictHighlightedCommentsPosition[counterAssociations] = commentIndex;
+
+    if (commentEleToHighlight.length >0 ) {dictHighlightedComments[counterAssociations] = commentEleToHighlight; }
 
     if (isSelectedCategory()){
         //save snippet
-        var allSelection = $("#textAreaSelectedText").val().toString();
-        selectedCodeText = allSelection.replace(selectedCommentText,'');
 
-        if(selectedCodeText=="" && isLabeled==0){
+        if(selectedCodeText.trim() ==="" && resetClicked){
             alert("First link the given comment to the snippet!");
             $("#"+selectedCategory).css('background-color','');
             return false;
         }
+
 
         $("#textAreaSelectedText").text("");
         for(var i=0;i<labelCategories.length;i++){
@@ -383,6 +385,7 @@ function saveCategorization(){
             selectedCode.push(selectedCodeText);
             selectedCategories.push(selectedCategory);
             dictRangeHighlightedCode[counterAssociations] = serializedRangeList;
+            dictHighlightedCommentsPosition[counterAssociations] = [...new Set(commentIndex)];
 
             //Add new association button
             var divID = "div-association" + '-' + counterAssociations; //+ "-" + target_method;
@@ -391,10 +394,6 @@ function saveCategorization(){
             var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="removeAssociation(\''+ divID +'\')"></i></button></div>';
             
             // handling list for the reviewing part
-            
-            //console.log(commentIndex);
-            //console.log(dictHighlightedCommentsPosition);
-            
             var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick=" moveToSelectedMethodFromTag([' + dictHighlightedCommentsPosition[counterAssociations] + '],' +counterAssociations + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + ' + </button></div>';
             methodSelectionButton.push(moveToButton);
 
@@ -405,21 +404,20 @@ function saveCategorization(){
 
         //Bringing back the change button and remove selectionButton
         if(isLabeled==1){
-            console.log('Current Classification here: ' + currentClassification);
+
 
             // if the reviewer didn't change anything, it will overwrite such fields
-            //selectedComments.splice(currentClassification, 1, selectedCommentText);
-            //selectedCode.splice(currentClassification, 1, selectedCodeText);
-            //selectedCategories.splice(currentClassification, 1, selectedCategory);
+            if (selectedCommentText.trim() !== '') { selectedComments[currentClassification] = selectedCommentText; }
+            if (selectedCodeText.trim() !== '')    { selectedCode[currentClassification] = selectedCodeText; }
+            if (selectedCategory.trim() !== '')    { selectedCategories[currentClassification] = selectedCategory;}
+            if (serializedRangeList.length>0)      { dictRangeHighlightedCode[currentClassification] = serializedRangeList; }
+            if (commentIndex.length>0)             { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)]; } //duplicates deletion due to mis-selection event
 
-            selectedComments[currentClassification]=selectedCommentText;
-            selectedCategories[currentClassification]=selectedCategory;
-            selectedCode[currentClassification]=selectedCodeText;
-            dictRangeHighlightedCode[currentClassification] = serializedRangeList;
 
             //console.log(selectedCategories);
             //console.log(selectedComments);
             //console.log(selectedCode);
+            //console.log(dictRangeHighlightedCode[currentClassification]);
 
             $("#clearText").text('Change');
             removeAssociationFromTag();
@@ -429,7 +427,7 @@ function saveCategorization(){
                 $(buttons[i]).removeAttr('disabled');
             }
 
-            var bSelector = `#${selectedCategories[currentIndexComment]}`;
+            var bSelector = '#'+selectedCategories[currentClassification];
             $(bSelector).css('background-color','');
             flagSwitch=false;
 
@@ -466,7 +464,8 @@ function removeAssociation(divID){
     }
 
     dictRangeHighlightedCode[targetAssociation]=[];
-    methodSelectionButton.splice(targetAssociation,1);
+    dictHighlightedCommentsPosition[targetAssociation]=[];
+    methodSelectionButton[targetAssociation]=[];
 }
 
 
