@@ -172,7 +172,7 @@ function getSelectionCharOffsetsWithin(element) {
             priorRange = range.cloneRange();
             priorRange.selectNodeContents(element);
             priorRange.setEnd(range.startContainer, range.startOffset);
-            start = range.toString().length;
+            start = priorRange.toString().length;
             end = start + range.toString().length;
             // Get text
             text = range.toString();
@@ -385,8 +385,8 @@ function saveCategorization(){
     if (commentEleToHighlight.length >0 ) {dictHighlightedComments[counterAssociations] = commentEleToHighlight; }
 
     //Extracting span for the selected comments
-    whereCommentBegin = Math.max(beginningCommentCharacterPosition);
-    whereCommentEnd = Math.max(endCommentCharacterPosition);
+    //whereCommentBegin = Math.max(beginningCommentCharacterPosition);
+    //whereCommentEnd = Math.max(endCommentCharacterPosition);
 
 
     if (isSelectedCategory()){

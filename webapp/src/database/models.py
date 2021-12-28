@@ -68,7 +68,7 @@ class LabelingData(db.Model):
 
     # update the following two lines to store labeled data from users
     #labeling = db.Column(db.Text)   # actual data provided by labelers
-    remark = db.Column(db.Text)     # optional data provided by labelers
+    # remark = db.Column(db.Text)     # optional data provided by labelers
     comments = db.Column(db.Text)
     code = db.Column(db.Text)
     categories = db.Column(db.Text)

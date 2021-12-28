@@ -226,7 +226,7 @@ def label():
 
 
         if(int(workingMode)==0):
-            jr = LabelingData(artifact_id=artifact_id, remark='', username_tagger=who_is_signed_in(),
+            jr = LabelingData(artifact_id=artifact_id, username_tagger=who_is_signed_in(),
                                   duration_sec=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
                                   commentSpan=commentSpan, categories=categories, commentPosition=commentPosition,
                                   rangeSelectedText=rangeSelectedText, moveSelectionButton=moveSelectionButton
