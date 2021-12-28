@@ -42,7 +42,7 @@ def labeling_with_artifact(target_artifact_id):
             target_artifact_id = int(target_artifact_id)
             artifact_data = Artifact.query.filter_by(id=target_artifact_id).first()
             all_taggers = {row[0] for row in
-                           LabelingData.query.with_entities(LabelingData.username).filter_by(
+                           LabelingData.query.with_entities(LabelingData.username_tagger).filter_by(
                                artifact_id=target_artifact_id).all()}
 
             lock_artifact_by(who_is_signed_in(), target_artifact_id)
@@ -64,7 +64,8 @@ def labeling_with_artifact(target_artifact_id):
             selectedCategories = []
             selectedCode = []
             selectedComments = []
-            #codeSpan = []
+            codeSpan = []
+            commentSpan = []
 
             if (isLabeled == 1):
                 artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
@@ -74,7 +75,8 @@ def labeling_with_artifact(target_artifact_id):
                 selectedCategories = eval(artifact_label.categories)
                 selectedCode = eval(artifact_label.code)
                 selectedComments = eval(artifact_label.comments)
-                #codeSpan = eval(artifact_label.span)
+                codeSpan = eval(artifact_label.codeSpan)
+                commentSpan = eval(artifact_label.commentSpan)
 
             linesList = []
             linesMethodsString = ''
@@ -102,7 +104,8 @@ def labeling_with_artifact(target_artifact_id):
                                    artificat_label_categories=selectedCategories,
                                    selectedCode=selectedCode,
                                    selectedComments=selectedComments,
-                                   #codeSpan=codeSpan,
+                                   codeSpan=codeSpan,
+                                   commentSpan=commentSpan,
                                    # existing_labeling_data=all_labels,
                                    all_taggers=', '.join(all_taggers) if all_taggers is not None else None
                                    )
@@ -205,7 +208,8 @@ def label():
         code = request.form['code']
         comments = request.form['comments']
         categories = request.form['categories']
-        #span = request.form['span']
+        codeSpan = request.form['codeSpan']
+        commentSpan = request.form['commentSpan']
         workingMode = request.form['workingMode']
         rangeSelectedText = request.form['rangeSelectedText']
         commentPosition = request.form['commentPosition']
@@ -221,22 +225,10 @@ def label():
             isReviewed = 1
 
 
-        #if duration_sec <= 1:
-        #    return jsonify('{ "status": "Too fast?" }')
-
-        #already_labeled_this_class = LabelingData.query.filter_by(artifact_id=artifact_id).filter_by(
-        #    username=who_is_signed_in()).first()
-
-        # if already_labeled_this_class is not None:
-        #     already_labeled_this_class.duration_sec = duration_sec
-        #     db.session.commit()
-        #     return jsonify('{ "status": "updated" }')
-        #
-        # else:
         if(int(workingMode)==0):
-            jr = LabelingData(artifact_id=artifact_id, remark='', username=who_is_signed_in(),
-                                  duration_sec=duration_sec, code=code, comments=comments, #span=span,
-                                  categories=categories, commentPosition=commentPosition,
+            jr = LabelingData(artifact_id=artifact_id, remark='', username_tagger=who_is_signed_in(),
+                                  duration_sec=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
+                                  commentSpan=commentSpan, categories=categories, commentPosition=commentPosition,
                                   rangeSelectedText=rangeSelectedText, moveSelectionButton=moveSelectionButton
                               )
 
@@ -247,11 +239,13 @@ def label():
         else:
             labeling_data = LabelingData.query.filter_by(artifact_id=artifact_id).first()
             labeling_data.comments = comments
+            labeling_data.username_reviewer = who_is_signed_in()
             labeling_data.commentPosition = commentPosition
             labeling_data.moveSelectionButton = moveSelectionButton
             labeling_data.rangeSelectedText = rangeSelectedText
             labeling_data.code = code
-            #labeling_data.span = span
+            labeling_data.codeSpan = codeSpan
+            labeling_data.commentSpan = commentSpan
             labeling_data.categories = categories
             db.session.commit()
 

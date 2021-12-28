@@ -83,7 +83,6 @@ def stat():
 
 
     users_labeling_stat = sorted(users_labeling_stat, key=lambda element: element['total_n_artifact'], reverse=True)
-    print(users_labeling_stat)
     sources = get_overall_labeling_progress()
     sources_labeling_stat = {sources['source_id']: sources}
 

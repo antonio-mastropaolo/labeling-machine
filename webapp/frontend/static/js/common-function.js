@@ -1,3 +1,5 @@
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 function get_elapsed_seconds() {
     var date_now = new Date();
     var time_now = date_now.getTime();
@@ -29,7 +31,7 @@ function createNewCategory() {
     $("#new-category-button").text(newCategory);
 }
 
-function moveToSelectedMethod(indexClassification) {
+function moveToSelectedMethod(indexClassification){
     var arr = Array.from(comments);
     console.log('inside');
     console.log(dictHighlightedCommentsPosition[indexClassification]);
@@ -63,10 +65,6 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     var selectedComments = indexComment.split(',');
     var tagSelector = arr[selectedComments[0]];
     currentClassification = indexClassification;
-
-    //console.log(dictHighlightedCommentsPosition);
-    //console.log(selectedComments);
-
 
     $("#"+selectedCategories[currentClassification]).css('background-color','green'); //highlight the select button category
 
@@ -147,6 +145,24 @@ function highlightTargetComments(elements,className){
 
 }
 
+function fakeSelection4Comment(element){
+    var codeSection = document.getElementById("code");
+    var range, start, end, text;
+    range = document.createRange();
+    range.setStart(codeSection,0);
+    range.setEnd(element,0);
+    start = range.toString().length //- text.length;
+
+    range = document.createRange();
+    range.selectNode(element);
+    window.getSelection().addRange(range);
+    text = range.toString();
+    end = start + text.length;
+
+    return {'start':start,'end':end};
+
+}
+
 function getSelectionCharOffsetsWithin(element) {
     var start = 0, end = 0, text = "";
     var sel, range, priorRange, serializedRange;
@@ -161,7 +177,6 @@ function getSelectionCharOffsetsWithin(element) {
             // Get text
             text = range.toString();
             serializedRange = rangy.serializeRange(range,true);
-
         }
     } else if (typeof document.selection != "undefined" && (sel = document.selection).type != "Control") {  // IE
         range = sel.createRange();
@@ -179,7 +194,6 @@ function getSelectionCharOffsetsWithin(element) {
         targetTag = range.commonAncestorContainer;
     }catch(e){
         targetTag = null;
-
     }
 
     return {
@@ -197,7 +211,6 @@ function reset(save=false){
     $("#textAreaSelectedText").text("");
     $('.category-button').css("background-color",'');
     $("#new-category-button").text("Define New Category");
-
 
     if(!save) {
         changeCommentHighlighting(commentEleToHighlight,'', true);
@@ -251,16 +264,15 @@ function reset(save=false){
     }
 
     commentEleToHighlight = [];
-    commentIndex=[];
-    serializedRangeList=[];
-    //dictHighlightedComments[counterAssociations] = []
-    //dictRangeHighlightedCode[counterAssociations] = []; //making space for the next classification
-    //dictHighlightedCommentsPosition[counterAssociations]=[];
-    //dictHighlightedComments[counterAssociations]=[];
-    highlightedCommentsInReviewing=[];
+    commentIndex = [];
+    serializedRangeList = [];
+    highlightedCommentsInReviewing = [];
     highlightedCodeDuringSelection = [];
-
-    resetClicked=false;
+    beginningCommentCharacterPosition = [];
+    endCommentCharacterPosition = [];
+    listSelectedSpanCode = [];
+    listSelectedSpanComment = [];
+    resetClicked = false;
     selectedCategory = "";
     selectedCodeText = "";
     selectedCommentText = "";
@@ -269,8 +281,10 @@ function reset(save=false){
 }
 
 function resetHighlightedCode(customList=null, targetItem){
+
     var item='highlight-'+targetItem;
     $(`span[id=${item}]`).css('background-color','');
+
     /*if(isLabeled === 0){
         var cnt = $(`span[id=${item}]`).contents();
         $(`span[id=${item}]`).replaceWith(cnt);
@@ -370,6 +384,11 @@ function saveCategorization(){
 
     if (commentEleToHighlight.length >0 ) {dictHighlightedComments[counterAssociations] = commentEleToHighlight; }
 
+    //Extracting span for the selected comments
+    whereCommentBegin = Math.max(beginningCommentCharacterPosition);
+    whereCommentEnd = Math.max(endCommentCharacterPosition);
+
+
     if (isSelectedCategory()){
         //save snippet
 
@@ -394,8 +413,8 @@ function saveCategorization(){
             selectedCategories.push(selectedCategory);
             dictRangeHighlightedCode[counterAssociations] = serializedRangeList;
             dictHighlightedCommentsPosition[counterAssociations] = [...new Set(commentIndex)];
-            console.log('inside saveClass: ');
-            console.log(dictHighlightedCommentsPosition);
+            dictHighlightedCodeCharacterPosition[counterAssociations] = listSelectedSpanCode;
+            dictHighlightedCommentsCharacterPosition[counterAssociations] = listSelectedSpanComment;
 
             //Add new association button
             var divID = "div-association" + '-' + counterAssociations; //+ "-" + target_method;
@@ -419,19 +438,16 @@ function saveCategorization(){
         if(isLabeled==1){
 
             // if the reviewer didn't change anything, it will overwrite such fields
-            if (selectedCommentText.trim() !== '') { selectedComments[currentClassification] = selectedCommentText; }
-            if (selectedCodeText.trim() !== '')    { selectedCode[currentClassification] = selectedCodeText; }
-            if (selectedCategory.trim() !== '')    { selectedCategories[currentClassification] = selectedCategory;}
-            if (serializedRangeList.length>0)      { dictRangeHighlightedCode[currentClassification] = serializedRangeList; }
-            if (commentIndex.length>0)             { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)]; } //duplicates deletion due to mis-selection event
+            if (selectedCommentText.trim() !== '')  { selectedComments[currentClassification] = selectedCommentText; }
+            if (selectedCodeText.trim() !== '')     { selectedCode[currentClassification] = selectedCodeText; }
+            if (selectedCategory.trim() !== '')     { selectedCategories[currentClassification] = selectedCategory;}
+            if (serializedRangeList.length > 0)     { dictRangeHighlightedCode[currentClassification] = serializedRangeList; }
+            if (commentIndex.length > 0)            { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)]; } //duplicates deletion due to mis-selection event
+            if (listSelectedSpanCode.length > 0)    { dictHighlightedCodeCharacterPosition[currentClassification] = listSelectedSpanCode; }
+            if (listSelectedSpanComment.length > 0) { dictHighlightedCommentsCharacterPosition[currentClassification] = listSelectedSpanComment; }
 
-            //console.log(selectedCategories);
-            //console.log(selectedComments);
-            //console.log(selectedCode);
-            //console.log(dictRangeHighlightedCode[currentClassification]);
 
             $("#clearText").text('Change');
-
 
             try {
                 var flagIN = false;
@@ -439,22 +455,20 @@ function saveCategorization(){
                 var counter = currentClassification + 1;
                 var extractedItemToMatch = dictHighlightedCommentsPosition[counter];
 
-
                 while (extractedItemToMatch.length === 0) {
                     counter = counter + 1;
-                    //console.log('inin ' + counter);
                     extractedItemToMatch = dictHighlightedCommentsPosition[counter];
                     flagIN = true;
                 }
-                //if(flagIN){ currentClassification=counter; console.log(currentClassification); }
                 $('#association-' + counter).removeAttr('disabled');
+
             }catch(e){
                 $('#association-' + currentClassification).removeAttr('disabled');
             }
 
-
             //var bSelector = '#'+selectedCategories[currentClassification];
             //$(bSelector).css('background-color','');
+
             flagSwitch=false;
             counterAssociations = counterAssociations - 1;
             $("#badgeCounter").text(counterAssociations);
@@ -465,40 +479,6 @@ function saveCategorization(){
     }
 
 }
-
-// function removeAssociationFromTag(){
-//
-//     $(flexibleSelector).fadeOut(300, function(){ $(this).remove();});
-//     counterAssociations = counterAssociations - 1;
-//     $("#badgeCounter").text(counterAssociations);
-//     $("#textAreaSelectedText").text('');
-// }
-
-function removeAssociation(divID){
-
-    targetAssociation = divID.split('-')[2];
-    $('#'+divID).fadeOut(300, function(){ $(this).remove();});
-    counterAssociations = counterAssociations -1;
-    $("#badgeCounter").text(counterAssociations);
-
-    //removing highlighting for code and comment
-    resetHighlightedCode($(dictHighlightedCode[targetAssociation]),targetAssociation);
-    if(commentEleToHighlight.length==0){
-        //console.log(dictHighlightedComments);
-        changeCommentHighlighting(dictHighlightedComments[targetAssociation], '');
-    }else{
-        //console.log(commentEleToHighlight);
-        changeCommentHighlighting(commentEleToHighlight, '');
-    }
-
-    dictRangeHighlightedCode[targetAssociation] = [];
-    dictHighlightedCommentsPosition[targetAssociation] = [];
-    methodSelectionButton[targetAssociation] = [];
-    selectedComments[targetAssociation] = [];
-    selectedCategories[targetAssociation] = [];
-    selectedCode[targetAssociation] = [];
-}
-
 
 function unselectAll(){
     if (document.selection && document.selection.empty)
@@ -522,4 +502,42 @@ function commentWithin(text){
     }
     return false;
 }
+
+
+
+// function removeAssociationFromTag(){
+//
+//     $(flexibleSelector).fadeOut(300, function(){ $(this).remove();});
+//     counterAssociations = counterAssociations - 1;
+//     $("#badgeCounter").text(counterAssociations);
+//     $("#textAreaSelectedText").text('');
+// }
+
+/* The dynamic deletion of classification items has been disabled due to problem with ranges. ( If I manage to find a fix, then I can put it back ) */
+
+
+// function removeAssociation(divID){
+//
+//     targetAssociation = divID.split('-')[2];
+//     $('#'+divID).fadeOut(300, function(){ $(this).remove();});
+//     counterAssociations = counterAssociations -1;
+//     $("#badgeCounter").text(counterAssociations);
+//
+//     //removing highlighting for code and comment
+//     resetHighlightedCode($(dictHighlightedCode[targetAssociation]),targetAssociation);
+//     if(commentEleToHighlight.length==0){
+//         //console.log(dictHighlightedComments);
+//         changeCommentHighlighting(dictHighlightedComments[targetAssociation], '');
+//     }else{
+//         //console.log(commentEleToHighlight);
+//         changeCommentHighlighting(commentEleToHighlight, '');
+//     }
+//
+//     dictRangeHighlightedCode[targetAssociation] = [];
+//     dictHighlightedCommentsPosition[targetAssociation] = [];
+//     methodSelectionButton[targetAssociation] = [];
+//     selectedComments[targetAssociation] = [];
+//     selectedCategories[targetAssociation] = [];
+//     selectedCode[targetAssociation] = [];
+// }
 

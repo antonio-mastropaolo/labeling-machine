@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy.orm import validates
 from sqlalchemy.sql import func
 
@@ -70,11 +72,13 @@ class LabelingData(db.Model):
     comments = db.Column(db.Text)
     code = db.Column(db.Text)
     categories = db.Column(db.Text)
-    span = db.Column(db.Text)
+    codeSpan = db.Column(db.Text)
+    commentSpan = db.Column(db.Text)
     commentPosition = db.Column(db.Text)
     rangeSelectedText = db.Column(db.Text)
     moveSelectionButton = db.Column(db.Text)
 
-    username = db.Column(db.Text)
+    username_tagger = db.Column(db.Text)
+    username_reviewer = db.Column(db.Text)
     duration_sec = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime, default=func.now())
+    created_at = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())

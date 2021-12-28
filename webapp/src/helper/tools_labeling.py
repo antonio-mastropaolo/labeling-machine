@@ -17,11 +17,7 @@ def get_labeling_status(username):  # OLD: get_user_labeling_status
                        'total_n_labeled': get_n_labeled_artifact_per_user().get(username, 0),
                        'total_n_reviewed': get_n_reviewed_artifact_per_user().get(username, 0)
                        }
-    # print('******************')
-    # print(username)
-    # print(get_n_labeled_artifact_per_user().get(username,0))
-    # print(get_n_reviewed_artifact_per_user().get(username, 0))
-    # print('******************\n')
+
     return labeling_status
 
 
@@ -59,7 +55,7 @@ def get_n_labeled_artifact_per_user():
     """
     Return a dictionary of {username: n_labeled_artifact, ...}
     """
-    result = db.session.query(LabelingData.username, func.count(distinct(LabelingData.artifact_id))).group_by(LabelingData.username).all()
+    result = db.session.query(LabelingData.username_tagger, func.count(distinct(LabelingData.artifact_id))).group_by(LabelingData.username_tagger).all()
     ret = {}
     for row in result:
         ret[row[0]] = row[1]
@@ -70,7 +66,7 @@ def get_n_reviewed_artifact_per_user():
         Return a dictionary of {username: n_labeled_artifact, ...}
     """
     ret = {}
-    result = db.session.query(LabelingData.username, func.count(Artifact.reviewed)).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).group_by(LabelingData.username).all()
+    result = db.session.query(LabelingData.username_tagger, func.count(Artifact.reviewed)).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).group_by(LabelingData.username_tagger).all()
     for row in result:
         ret[row[0]] = row[1]
 
@@ -82,7 +78,7 @@ def choose_next_random_api():
 
     # ############### 1. Remove Already Labeled By Me
     labeled_artifact_ids = {row[0] for row in
-                            db.session.query(distinct(LabelingData.artifact_id)).filter(LabelingData.username == who_is_signed_in()).all()}
+                            db.session.query(distinct(LabelingData.artifact_id)).filter(LabelingData.username_tagger == who_is_signed_in()).all()}
     candidate_artifact_ids -= labeled_artifact_ids
 
 
