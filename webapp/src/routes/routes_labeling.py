@@ -47,13 +47,44 @@ def labeling_with_artifact(target_artifact_id):
 
             lock_artifact_by(who_is_signed_in(), target_artifact_id)
 
+            spanListMethods = eval(artifact_data.methodsListLines)
+            methodsName = eval(artifact_data.methodsName)
+
             with open(artifact_data.linkToFileJava) as f:
                 javaClassText = f.read()
 
+            with open(artifact_data.linkToFileJava) as f:
+                classLines = [item for item in f.readlines()]
+
+            #Mapping starting and ending method's lines to bytes position respectively
+            spanOfCharPerMethod = []
+            for startEndLine in spanListMethods:
+
+                start = int(startEndLine.split('-')[0])
+                end = int(startEndLine.split('-')[1])
+                IN = False
+
+                totalBefore = 0
+                totalUntilEnd = 0
+
+                for (idx, line) in enumerate(classLines):
+                    if (idx == start - 1):
+                        IN = True
+
+                    if IN:
+                        totalUntilEnd += len(line.encode('utf-8'))
+                    else:
+                        totalBefore += len(line.encode('utf-8'))
+
+                    if (idx == end and IN):
+                        totalUntilEnd += totalBefore
+                        break
+
+                spanOfCharPerMethod.append('{}-{}'.format(totalBefore, totalUntilEnd))
+
             counterAssociations = artifact_data.counterAssociations
 
-            spanListMethods = eval(artifact_data.methodsListLines)
-            methodsName = eval(artifact_data.methodsName)
+
 
             isLabeled = 1 if artifact_data.labeled == 1 else 0
             isReviewed = 1 if artifact_data.reviewed == 1 else 0
@@ -86,28 +117,29 @@ def labeling_with_artifact(target_artifact_id):
                 linesMethodsString += '{}\n'.format(line_index)
 
             return render_template('labeling_pages/artifact.html',
-                                   artifact_id=target_artifact_id,
-                                   artifact_data=artifact_data,
-                                   artifact_class=javaClassText,
-                                   artifact_methodsListLines=spanListMethods,
-                                   artifact_label_commentPositionList=commentPositionList,
-                                   artifact_label_rangeSelectedText=rangeHighlightedCodeRev,
-                                   artifact_moveSelectionButtonList=moveSelectionButtonList,
-                                   isLabeled=isLabeled,
-                                   isReviewed=isReviewed,
-                                   artificat_methodsName=methodsName,
-                                   artificat_lines=linesList,
-                                   counterAssociations=counterAssociations,
-                                   overall_labeling_status=get_overall_labeling_progress(),
-                                   user_info=get_labeling_status(who_is_signed_in()),
-                                   artifact_linesString=linesMethodsString,
-                                   artificat_label_categories=selectedCategories,
-                                   selectedCode=selectedCode,
-                                   selectedComments=selectedComments,
-                                   codeSpan=codeSpan,
-                                   commentSpan=commentSpan,
-                                   # existing_labeling_data=all_labels,
-                                   all_taggers=', '.join(all_taggers) if all_taggers is not None else None
+                                   artifact_id = target_artifact_id,
+                                   artifact_data = artifact_data,
+                                   artifact_class = javaClassText,
+                                   artifact_methodsListLines = spanListMethods,
+                                   artifact_methodsListBytes = spanOfCharPerMethod,
+                                   artifact_label_commentPositionList = commentPositionList,
+                                   artifact_label_rangeSelectedText = rangeHighlightedCodeRev,
+                                   artifact_moveSelectionButtonList = moveSelectionButtonList,
+                                   isLabeled = isLabeled,
+                                   isReviewed = isReviewed,
+                                   artificat_methodsName = methodsName,
+                                   artificat_lines = linesList,
+                                   counterAssociations = counterAssociations,
+                                   overall_labeling_status = get_overall_labeling_progress(),
+                                   user_info = get_labeling_status(who_is_signed_in()),
+                                   artifact_linesString = linesMethodsString,
+                                   artificat_label_categories = selectedCategories,
+                                   selectedCode = selectedCode,
+                                   selectedComments = selectedComments,
+                                   codeSpan = codeSpan,
+                                   commentSpan = commentSpan,
+                                   # existing_labeling_data = all_labels,
+                                   all_taggers = ', '.join(all_taggers) if all_taggers is not None else None
                                    )
         else:
             return "Please Sign-in first."

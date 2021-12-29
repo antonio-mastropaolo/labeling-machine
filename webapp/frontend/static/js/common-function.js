@@ -31,13 +31,21 @@ function createNewCategory() {
     $("#new-category-button").text(newCategory);
 }
 
+
+
 function moveToSelectedMethod(indexClassification){
     var arr = Array.from(comments);
-    console.log('inside');
-    console.log(dictHighlightedCommentsPosition[indexClassification]);
     indexComment = dictHighlightedCommentsPosition[indexClassification].toString();
     var selectedComments = indexComment.split(',');
     var tagSelector = arr[selectedComments[0]];
+    $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
+        $(this).removeClass('animationLabel').dequeue();
+    });
+}
+
+function moveToSelectedMethodFromLine(lineNumber){
+    var tagSelector = $(`.row-line:contains(${lineNumber})`);
     $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
     $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
         $(this).removeClass('animationLabel').dequeue();
@@ -88,8 +96,6 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     ////////////////////////////////////////////////////
     //Highlight the selected comment
 
-    //console.log(selectedComments);
-
     for(var j=0;j<selectedComments.length;j++) {
 
         currentIndexComment = Number(j);
@@ -97,7 +103,8 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
         const position = dictHighlightedCommentsPosition[indexClassification][currentIndexComment];
         $(comments[position]).css('color', 'red');
         highlightedCommentsInReviewing.push(comments[position]);
-        updateTextArea($(comments[position]).text());
+        updateTextArea('<span class="selected-comment">' + $(comments[position]).text() + '</span>');
+
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,7 +119,8 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
         newNode.setAttribute("style", "background-color: #FFE5CC");
         newNode.appendChild(deseriazedRange.extractContents());
         deseriazedRange.insertNode(newNode);
-        updateTextArea(newNode.textContent);
+        updateTextArea('<span class="selected-code">' +newNode.textContent + '</span>');
+        //updateTextArea(newNode.textContent);
     }
 
     //highlight the category button
@@ -121,8 +129,8 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
 }
 
-function highlightTargetComments(elements,className){
-
+function highlightTargetComments(elements,className, spanOfCharPerMethod){
+    var dictPosition = {}
     function look4Javadoc(comment){
         var commentLines = comment.split('\n');
         for(var i=0;i<commentLines.length;i++){
@@ -139,10 +147,31 @@ function highlightTargetComments(elements,className){
             continue
         }
         else{
+             dictPosition = fakeSelection4Comment(elements[i]);
+             //if(isCommentInRange(dictPosition,spanOfCharPerMethod)) { $(elements[i]).addClass(className);}
              $(elements[i]).addClass(className);
         }
     }
 
+}
+
+function isCommentInRange(dictPosition,spanOfCharPerMethod){
+
+    var start,end;
+
+    for(var i=0;i<spanOfCharPerMethod.length;i++){
+
+        start = spanOfCharPerMethod[i].split('-')[0];
+        end = spanOfCharPerMethod[i].split('-')[1];
+
+        if(dictPosition.start >= start && dictPosition.start <= end){
+            // console.log('*****************')
+            // console.log(dictPosition);
+            // console.log('*****************\n')
+            return true;
+        }
+    }
+    return false;
 }
 
 function fakeSelection4Comment(element){
@@ -299,40 +328,61 @@ function changeCommentHighlighting(customList, color, reset=false){
             $(customList[i][0]).css('color', color);
         }
     }else if (isLabeled === 1){
-        if(reset){
-            console.log(highlightedCommentsInReviewing);
-            for(var i=0;i<highlightedCommentsInReviewing.length;i++){
-                $(highlightedCommentsInReviewing[i]).css('color','');
-            }
-        }else{
-            //no changes have been made
+        // if(reset){
+        //     console.log(' u susott 2');
+        //     console.log(commentEleToHighlight);
+        //     console.log(highlightedCommentsInReviewing);
+        //     for(var i=0;i<highlightedCommentsInReviewing.length;i++){
+        //         $(highlightedCommentsInReviewing[i]).css('color','');
+        //     }
+        // }else{
+        //     //no changes have been made
+        //     console.log('u sosott');
             if(commentEleToHighlight.length==0) { commentEleToHighlight = highlightedCommentsInReviewing; }
             for(var i=0;i<commentEleToHighlight.length;i++){
-                $(commentEleToHighlight[i]).css('color','green');
+                $(commentEleToHighlight[i]).css('color','');
             }
-        }
+
     }
 }
+
+// function checkForButtonValidity(){
+//     let textBoxVal = $("#textAreaSelectedText").val();
+//     if(textBoxVal==""|| (!textBoxVal.trim().startsWith("//") && !textBoxVal.trim().startsWith("/*") && !textBoxVal.trim().startsWith('/**')  )) {
+//         alert("Select a comment first!");
+//         return false;
+//     }
+//     return true;
+// }
 
 function checkForButtonValidity(){
-    let textBoxVal = $("#textAreaSelectedText").val();
-    if(textBoxVal==""|| (!textBoxVal.trim().startsWith("//") && !textBoxVal.trim().startsWith("/*") && !textBoxVal.trim().startsWith('/**')  )) {
-        alert("Select a comment first!");
-        return false;
+
+    var textBoxTags = $("#textAreaSelectedText").children();
+
+    //console.log(textBoxTags);
+
+    for(var i=0;i<textBoxTags.length;i++){
+
+        if( $(textBoxTags[i]).hasClass('selected-comment')){
+            //console.log('ok!');
+            return true;
+        }
     }
-    return true;
+    return false;
 }
 
- function updateTextArea(textToDisplay){
-    var previousSelection = $("#textAreaSelectedText").val().toString();
-    if(previousSelection==""){
-        $("#textAreaSelectedText").text(textToDisplay);
-    }else{
-        $("#textAreaSelectedText").text(previousSelection + "\n" + textToDisplay);
-    }
-    var refinedText = $("#textAreaSelectedText").text().replace(/^\s*\n/gm, "");
-    $("#textAreaSelectedText").text(refinedText);
-}
+function updateTextArea(textToDisplay){ $("#textAreaSelectedText").append(textToDisplay);}
+
+//  function updateTextArea(textToDisplay){
+//     var previousSelection = $("#textAreaSelectedText").val().toString();
+//     if(previousSelection==""){
+//         $("#textAreaSelectedText").text(textToDisplay);
+//     }else{
+//         $("#textAreaSelectedText").text(previousSelection + "\n" + textToDisplay);
+//     }
+//     var refinedText = $("#textAreaSelectedText").text().replace(/^\s*\n/gm, "");
+//     $("#textAreaSelectedText").append(refinedText);
+// }
 
 
 function checkForChangedCategory(element){

@@ -24,6 +24,16 @@
             background-color: yellow;
         }
 
+        .selected-comment{
+            color:yellow;
+            display: block;
+        }
+
+        .selected-code{
+            color:#FFE5CC;
+            display: block;
+        }
+
 
         .buttonWrapper{
             padding-bottom:7px;
@@ -52,17 +62,19 @@
        .button-corner-down {
             position: fixed;
             bottom: 0.5%;
+            text-align: center;
+            background-color: black;
             left: 78%;
             width: 5%;
-            text-align: center;
         }
 
         .button-corner-up {
             position: fixed;
             bottom: 7%;
             left: 78%;
-            width: 5%;
             text-align: center;
+            background-color: black;
+            width: 5%;
         }
 
         .textarea {
@@ -71,6 +83,8 @@
             overflow-y: scroll;
             bottom:0;
             height:11%;
+            border-style: double;
+            background-color: #404040;
             position:fixed;
             margin-bottom: -2px;
         }
@@ -303,9 +317,9 @@
         <div class="row no-gutters">
             <div class=" col-md-2"></div>
             <div class=" col-md-8">
-                <textarea id="textAreaSelectedText" rows="4" cols="50" class="textarea"></textarea>
-                <button id="clearText" type="submit" class='btn btn-dark button-corner-down' onclick="reset(); resetClicked=true;">Clear</button>
-                <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' style="text-align: center;" onclick="saveCategorization()">Save</button>
+                <div contenteditable="true" id="textAreaSelectedText" rows="4" cols="50" class="textarea"></div>
+                <button id="clearText" style="color:white;" type="submit" class='btn btn-dark button-corner-down' onclick="reset(); resetClicked=true;">Clear</button>
+                <button id="savingClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization()">Save</button>
             </div>
             <div class=" col-md-2"></div>
         </div>
@@ -354,7 +368,6 @@
                                 'incomplete-button',
         ]
 
-        var originalHTML=null;
         var selectedCategory = "";
         var selectedCodeText = "";
         var selectedCommentText = "";
@@ -363,6 +376,7 @@
         var whereCommentBegin = -1;
         var whereCommentEnd = -1;
         var resetClicked=false;
+        var clicked = false;
         var currentClassification=-1;
         var defaultColorHighlight='red';
         var flagSwitch=true;
@@ -398,29 +412,40 @@
 
         $(document).ready(function () {
 
-            $("h1").css('color','white');
-            $("h2").css('color','white');
-            $('.hljs-comment').css('user-select','none');
+
+            $("h1").css('color', 'white');
+            $("h2").css('color', 'white');
+            $('.hljs-comment').css('user-select', 'none');
 
             // Filling up lines column
-            for (var i=0;i<linesList.length;i++){
-                linesList[i] = linesList[i]+1
-                var newButton = '<div style="width:100%;" class="row-line">'+linesList[i]+'</div>';
-                $( "#rows" ).append( $(newButton) );
+            for (var i = 0; i < linesList.length; i++) {
+                linesList[i] = linesList[i] + 1
+                var newButton = '<div style="width:100%;" class="row-line">' + linesList[i] + '</div>';
+                $("#rows").append($(newButton));
+            }
+
+            for (var i = 0; i < methodsList.length; i++) {
+                var buttonID = methodsListNames[i] + "-button";
+                var startingLine = methodsList[i].split("-")[0];
+                var buttonText = methodsListNames[i];// + " " +startingLine + '---' + endingLine;
+                var scorllCall = 'moveToSelectedMethodFromLine(' + startingLine + ')';
+                var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%; display:inline-flex; text-align: left;">' + buttonText + '</button> </div>';
+                //console.log(newButton);
+                $("#upperSide").append($(newButton));
             }
 
             comments = document.getElementsByClassName("hljs-comment");
 
-            if(isLabeled==0){
-                dictHighlightedCode[0]=[];
-                dictRangeHighlightedCode[0]=[];
-                dictHighlightedCommentsPosition[0]=[];
+            if (isLabeled == 0) {
+                dictHighlightedCode[0] = [];
+                dictRangeHighlightedCode[0] = [];
+                dictHighlightedCommentsPosition[0] = [];
             }
 
             //This instance need to be reviewed, therefore we start preparing the needed lists and the layout
-            if(isLabeled==1){
+            if (isLabeled == 1) {
 
-                ShowNotification('Reviewing mode!','warning');
+                ShowNotification('Reviewing mode!', 'warning');
 
                 //Update the badgeCounter
                 counterAssociations = Number({{ counterAssociations }});
@@ -428,36 +453,40 @@
 
                 // Loading the lists
                 dictHighlightedCommentsPosition = {{ artifact_label_commentPositionList | tojson }}
-                dictRangeHighlightedCode = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});
+                    dictRangeHighlightedCode = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});
                 selectedCode = {{ selectedCode | tojson }}
-                selectedComments = {{ selectedComments | tojson }}
-                selectedCategories = {{ artificat_label_categories |tojson }}
-                dictHighlightedCodeCharacterPosition = {{ codeSpan | tojson }}
-                dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }}
-                moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }}
+                    selectedComments = {{ selectedComments | tojson }}
+                        selectedCategories = {{ artificat_label_categories |tojson }}
+                            dictHighlightedCodeCharacterPosition = {{ codeSpan | tojson }}
+                                dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }}
+                                    moveSelectionButtonList =
+                {{ artifact_moveSelectionButtonList  |tojson }}
 
-                var idsButton=[];
-                for(var i=0; i<moveSelectionButtonList.length; i++){
-                    if(dictHighlightedCommentsPosition[i].length==0){ continue; }
+                var idsButton = [];
+                for (var i = 0; i < moveSelectionButtonList.length; i++) {
+                    if (dictHighlightedCommentsPosition[i].length == 0) {
+                        continue;
+                    }
                     var doc = new DOMParser().parseFromString(moveSelectionButtonList[i], "text/xml");
                     var idButton = doc.getElementsByClassName("buttonWrapper")[0].id;
                     idsButton.push(idButton);
-                    $("#lowerSide").append(  $(moveSelectionButtonList[i]) );
+                    $("#lowerSide").append($(moveSelectionButtonList[i]));
                 }
 
-                for(var i=1;i<idsButton.length;i++){
-                    $("#"+idsButton[i].replace('div-','')).attr('disabled','disabled');
+                for (var i = 1; i < idsButton.length; i++) {
+                    $("#" + idsButton[i].replace('div-', '')).attr('disabled', 'disabled');
                 }
 
                 $("#savingClassification").removeClass("btn-dark").addClass("btn-success").text("Accept");
                 $("#clearText").removeClass("btn-dark").addClass("btn-warning").text("Change");
 
-            }else if(isLabeled==0 && isReviewed==0){
-                ShowNotification('Labeling mode!','warning');
+            } else if (isLabeled == 0 && isReviewed == 0) {
+                ShowNotification('Labeling mode!', 'warning');
             }
 
             //Highlighting target comments
-            highlightTargetComments(comments,'commentHighlighting');
+            var spanOfCharPerMethod = {{ artifact_methodsListBytes | tojson }}
+                highlightTargetComments(comments, 'commentHighlighting', spanOfCharPerMethod);
 
             /*      If we find multi line comments written as single line
                     (E.G)
@@ -466,7 +495,7 @@
                     // to the server
              */
 
-            $(".commentHighlighting").dblclick(function() {
+            $(".commentHighlighting").dblclick(function () {
 
                 var prevElement = $(this).prev();
                 var nextElement = $(this).next();
@@ -479,8 +508,8 @@
 
                 var currentElement = this;
 
-                while(prevElement.hasClass('hljs-comment') && (currentElement.previousSibling.nodeType !== 3 || currentElement.previousSibling.textContent.trim()==='' && !commentWithin((currentElement.nextSibling.textContent.trim())))){
-                    if(!commentEleToHighlight.includes(prevElement)) {
+                while (prevElement.hasClass('hljs-comment') && (currentElement.previousSibling.nodeType !== 3 || currentElement.previousSibling.textContent.trim() === '' && !commentWithin((currentElement.nextSibling.textContent.trim())))) {
+                    if (!commentEleToHighlight.includes(prevElement)) {
                         previousElements.push(prevElement);
                     }
                     prevElement = $(prevElement).prev();
@@ -488,15 +517,15 @@
                 }
 
                 //Adding current element selected by the user if it's not in the list already
-                if(!commentEleToHighlight.includes($(this))){
+                if (!commentEleToHighlight.includes($(this))) {
                     nextElements.push($(this));
                 }
 
                 currentElement = this;
 
-                while(nextElement.hasClass("hljs-comment") && (currentElement.nextSibling.nodeType !== 3 || currentElement.nextSibling.textContent.trim()==='') && !commentWithin(currentElement.nextSibling.textContent.trim())){
+                while (nextElement.hasClass("hljs-comment") && (currentElement.nextSibling.nodeType !== 3 || currentElement.nextSibling.textContent.trim() === '') && !commentWithin(currentElement.nextSibling.textContent.trim())) {
 
-                    if(!commentEleToHighlight.includes(nextElement)) {
+                    if (!commentEleToHighlight.includes(nextElement)) {
                         nextElements.push(nextElement);
                     }
                     nextElement = $(nextElement).next();
@@ -504,130 +533,133 @@
 
                 }
 
-                for(var i=previousElements.length-1; i>=0;i--){
+                for (var i = previousElements.length - 1; i >= 0; i--) {
                     upperPartCommentSelection = upperPartCommentSelection + previousElements[i][0].innerText + "\n";
                 }
 
-                for(var i=0;i<nextElements.length;i++){
+                for (var i = 0; i < nextElements.length; i++) {
                     lowerPartCommentSelection = lowerPartCommentSelection + nextElements[i][0].innerText + "\n";
                 }
 
                 //extending commentEleToHighlight
                 var tmpArray = previousElements.reverse().concat(nextElements);
-                for(var i=0;i<tmpArray.length;i++){
+                for (var i = 0; i < tmpArray.length; i++) {
                     commentEleToHighlight.push(tmpArray[i]);
                 }
 
-                for(var i=0;i<commentEleToHighlight.length;i++){
-                    $(commentEleToHighlight[i]).css('color','red');
+                for (var i = 0; i < commentEleToHighlight.length; i++) {
+                    $(commentEleToHighlight[i]).css('color', 'red');
                 }
 
                 var arr = Array.from(comments);
 
-                for(var i=0;i<commentEleToHighlight.length;i++){
+                for (var i = 0; i < commentEleToHighlight.length; i++) {
                     commentIndex.push(arr.indexOf(commentEleToHighlight[i][0]));
                 }
 
-                selectedCommentText = upperPartCommentSelection  + lowerPartCommentSelection;
-                updateTextArea(selectedCommentText);
+                selectedCommentText = upperPartCommentSelection + lowerPartCommentSelection;
+
+                var lines = selectedCommentText.split('\n');
+                for (var k = 0; k < lines.length; k++) {
+                    updateTextArea('<span class="selected-comment">' + lines[k] + '</span>');
+                }
 
                 {#beginningCommentCharacterPosition.push(fakeSelection4Comment(commentEleToHighlight[0][0]).start);#}
                 {#endCommentCharacterPosition.push(fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length-1][0]).end);#}
                 beginningCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[0][0]).start;
-                endCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length-1][0]).end;
+                endCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length - 1][0]).end;
 
                 listSelectedSpanComment.push(beginningCommentCharacterPosition + '-' + endCommentCharacterPosition);
 
-
+                clicked = true;
                 unselectAll();
 
-            });
 
-            // Bind code are to "text select" events
-            $('#code').bind('mouseup', function(event) {
-                var code = document.getElementById("code");
-                var sel = getSelectionCharOffsetsWithin(code);
-                var start_point, stop_point, text_point, targetTag;
+                if (clicked) {
 
-                if (sel.start === sel.end){
-                    start_point = 0;
-                    stop_point = 0;
-                    text_point = "";
-                    targetTag = null;
-                } else {
-                    start_point = sel.start;
-                    stop_point = sel.end;
-                    text_point = sel.text;
-                    targetTag = sel.targetTag;
-                }
+                    // Bind code are to "text select" events
+                    $('#code').bind('mouseup', function (event) {
+                        var code = document.getElementById("code");
+                        var sel = getSelectionCharOffsetsWithin(code);
+                        var start_point, stop_point, text_point, targetTag;
 
-                selectedCodeText = selectedCodeText + sel.text;
-                // If right side double selection is triggered
-                try{
-                    targetTag = targetTag.previousSibling;
-                }catch(e){}
-
-                if(typeof(targetTag) != null && $(targetTag).hasClass('hljs-comment') && ( Math.abs(start_point-stop_point)<=3) ){
-                    //console.log('hit');
-
-                    if(!commentEleToHighlight.includes($(targetTag))) {
-                        commentEleToHighlight.push($(targetTag));
-                    }
-                    selectedCommentText = $(targetTag).text();
-                    $(targetTag).css('color','red');
-                    updateTextArea(selectedCommentText);
-
-                    //beginningCommentCharacterPosition.push(fakeSelection4Comment(commentEleToHighlight[0][0]).start);
-                    //endCommentCharacterPosition.push(fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length-1][0]).end);
-
-                    beginningCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[0][0]).start;
-                    endCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length-1][0]).end;
-
-                    listSelectedSpanComment.push(beginningCommentCharacterPosition + '-' + endCommentCharacterPosition);
-
-                    unselectAll();
-
-                    var arr = Array.from(comments);
-                    for(var i=0;i<commentEleToHighlight.length;i++){
-                        commentIndex.push(arr.indexOf(commentEleToHighlight[i][0]));
-                    }
-                }else{
-                    if( selectedCategory === '' && selectedCommentText === '' && text_point!==''){
-                        alert("Please select the comment first!");
-                    }else {
-                        if (selectedCommentText !== '' && selectedCategory === '' && text_point !== '') {
-                            alert('Please select the comment category!');
+                        if (sel.start === sel.end) {
+                            start_point = 0;
+                            stop_point = 0;
+                            text_point = "";
+                            targetTag = null;
                         } else {
+                            start_point = sel.start;
+                            stop_point = sel.end;
+                            text_point = sel.text;
+                            targetTag = sel.targetTag;
+                        }
 
-                            //Adding highlighting with span token and serialize range
-                            var newNode = highlightCodeFromRange(sel.range);
-                            serializedRangeList.push(sel.serializedRange);
 
-                            const spanSelection = start_point + '-' + stop_point;
-                            listSelectedSpanCode.push(spanSelection);
+                        selectedCodeText = selectedCodeText + sel.text;
+                        // If right side double selection is triggered
+                        try {
+                            targetTag = targetTag.previousSibling;
+                        } catch (e) {
+                        }
 
-                            updateTextArea(sel.text.trim());
+                        if (typeof (targetTag) != null && $(targetTag).hasClass('hljs-comment') && ( Math.abs(start_point-stop_point)<=3 )){
+
+
+                            if (!commentEleToHighlight.includes($(targetTag))) {
+                                commentEleToHighlight.push($(targetTag));
+                            }
+                            selectedCommentText = $(targetTag).text();
+                            $(targetTag).css('color', 'red');
+
+                            updateTextArea('<span class="selected-comment">' + selectedCommentText + '</span>');
+
+                            beginningCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[0][0]).start;
+                            endCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length - 1][0]).end;
+
+                            listSelectedSpanComment.push(beginningCommentCharacterPosition + '-' + endCommentCharacterPosition);
+
                             unselectAll();
 
-                            //Adding new element to the list
-                            highlightedCodeDuringSelection.push(newNode);
+                            var arr = Array.from(comments);
+                            for (var i = 0; i < commentEleToHighlight.length; i++) {
+                                commentIndex.push(arr.indexOf(commentEleToHighlight[i][0]));
+                            }
+                        } else {
+                            if (selectedCategory === '' && selectedCommentText === '' && text_point !== '') {
+                                alert("Please select the comment first!");
+                            } else {
+                                if (selectedCommentText !== '' && selectedCategory === '' && text_point !== '') {
+                                    alert('Please select the comment category!');
+                                } else {
+
+                                    //Adding highlighting with span token and serialize range
+                                    var newNode = highlightCodeFromRange(sel.range);
+                                    serializedRangeList.push(sel.serializedRange);
+
+                                    const spanSelection = start_point + '-' + stop_point;
+                                    listSelectedSpanCode.push(spanSelection);
+
+                                    var lines = sel.text.split('\n');
+                                    for (var k = 0; k < lines.length; k++) {
+                                        updateTextArea('<span class="selected-code">' + lines[k].trim() + '</span>');
+                                    }
+
+                                    //updateTextArea(sel.text.trim());
+                                    unselectAll();
+
+                                    //Adding new element to the list
+                                    highlightedCodeDuringSelection.push(newNode);
+                                }
+                            }
+
                         }
-                    }
-
+                        unselectAll();
+                        clicked = false;
+                    });
                 }
-                unselectAll();
-		    });
 
-            for (var i = 0; i < methodsList.length; i++) {
-              var buttonID = methodsListNames[i] + "-button";
-              var startingLine = methodsList[i].split("-")[0];
-              var buttonText = methodsListNames[i];// + " " +startingLine + '---' + endingLine;
-              var scorllCall = 'moveToSelectedMethodFromLine(' + startingLine+')';
-              var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%; display:inline-flex; text-align: left;">'+ buttonText + '</button> </div>';
-              //console.log(newButton);
-              $( "#upperSide" ).append( $(newButton) );
-
-            }
+            });
 
         });
 
