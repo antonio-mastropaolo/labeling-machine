@@ -84,13 +84,11 @@ def labeling_with_artifact(target_artifact_id):
 
             counterAssociations = artifact_data.counterAssociations
 
-
-
             isLabeled = 1 if artifact_data.labeled == 1 else 0
             isReviewed = 1 if artifact_data.reviewed == 1 else 0
 
             commentPositionList = []
-            rangeHighlightedCodeRev = []
+            #rangeHighlightedCodeRev = []
             moveSelectionButtonList = []
             selectedCategories = []
             selectedCode = []
@@ -101,7 +99,7 @@ def labeling_with_artifact(target_artifact_id):
             if (isLabeled == 1):
                 artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
                 commentPositionList = eval(artifact_label.commentPosition)
-                rangeHighlightedCodeRev = artifact_label.rangeSelectedText
+                #rangeHighlightedCodeRev = artifact_label.rangeSelectedText
                 moveSelectionButtonList = eval(artifact_label.moveSelectionButton)
                 selectedCategories = eval(artifact_label.categories)
                 selectedCode = eval(artifact_label.code)
@@ -123,7 +121,7 @@ def labeling_with_artifact(target_artifact_id):
                                    artifact_methodsListLines = spanListMethods,
                                    artifact_methodsListBytes = spanOfCharPerMethod,
                                    artifact_label_commentPositionList = commentPositionList,
-                                   artifact_label_rangeSelectedText = rangeHighlightedCodeRev,
+                                   #artifact_label_rangeSelectedText = rangeHighlightedCodeRev,
                                    artifact_moveSelectionButtonList = moveSelectionButtonList,
                                    isLabeled = isLabeled,
                                    isReviewed = isReviewed,
@@ -243,7 +241,7 @@ def label():
         codeSpan = request.form['codeSpan']
         commentSpan = request.form['commentSpan']
         workingMode = request.form['workingMode']
-        rangeSelectedText = request.form['rangeSelectedText']
+        #rangeSelectedText = request.form['rangeSelectedText']
         commentPosition = request.form['commentPosition']
         moveSelectionButton = request.form['moveToSelectedButtons']
         counterAssociations = request.form['counterAssociations']
@@ -261,7 +259,7 @@ def label():
             jr = LabelingData(artifact_id=artifact_id, username_tagger=who_is_signed_in(),
                                   duration_sec=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
                                   commentSpan=commentSpan, categories=categories, commentPosition=commentPosition,
-                                  rangeSelectedText=rangeSelectedText, moveSelectionButton=moveSelectionButton
+                                  moveSelectionButton=moveSelectionButton#, rangeSelectedText=rangeSelectedText
                               )
 
             db.session.add(jr)
@@ -274,7 +272,7 @@ def label():
             labeling_data.username_reviewer = who_is_signed_in()
             labeling_data.commentPosition = commentPosition
             labeling_data.moveSelectionButton = moveSelectionButton
-            labeling_data.rangeSelectedText = rangeSelectedText
+            #labeling_data.rangeSelectedText = rangeSelectedText
             labeling_data.code = code
             labeling_data.codeSpan = codeSpan
             labeling_data.commentSpan = commentSpan

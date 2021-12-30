@@ -98,26 +98,4 @@ def choose_next_random_api():
 
     return random.choice(candidate_artifact_ids_list)
 
-    # ############### 4. Starting from the javadoc-class with least labeled APIs, select a random API
-
-    # n_tagger_per_artifact = {row[0]: row[1] for row in
-    #                          db.session.query(LabelingData.artifact_id, func.count(distinct(LabelingData.username))) \
-    #                              .group_by(LabelingData.artifact_id).all()}
-    #
-    # print('___________: {}'.format(n_tagger_per_artifact))
-    # candidate_groups = [[], []]  # index 0,1: artifacts labeled by 0/1 tagger
-    # for artifact_id in candidate_artifact_ids:
-    #     if artifact_id not in n_tagger_per_artifact.keys():
-    #         candidate_groups[0].append(artifact_id)  # never tagged
-    #     elif n_tagger_per_artifact[artifact_id] == 1:
-    #         candidate_groups[1].append(artifact_id)  # tagged by one tagger
-
-
-    # if len(candidate_groups[1]) > 0:
-    #     return random.choice(candidate_groups[1])
-    # elif len(candidate_groups[0]) > 0:
-    #     return random.choice(candidate_groups[0])
-    # else:
-    #     return -2
-
 

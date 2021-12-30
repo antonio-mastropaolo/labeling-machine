@@ -57,7 +57,14 @@
           }
        }
 
-
+       .popUpRefresh{
+           border-style: solid;
+           position:absolute;
+           padding:2px;
+           color:white;
+           left:2.8%;
+           top:85%;
+       }
 
        .button-corner-down {
             position: fixed;
@@ -137,7 +144,7 @@
                             id="next-skip-btn"
                             onclick="skip_next_artifact()"
                             style="width: 100%;"> Skip
-                    </button>
+                        </button>
                     </div>
 
                  </div>
@@ -190,7 +197,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="code-summary-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Code Summary
                       </button>
                   </div>
@@ -199,7 +205,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="expand-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Expand
                       </button>
                   </div>
@@ -208,7 +213,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="rationale-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Rationale
                       </button>
                   </div>
@@ -217,7 +221,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="deprecation-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Deprecation
                       </button>
                   </div>
@@ -226,7 +229,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="usage-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Usage
                       </button>
                   </div>
@@ -235,7 +237,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="exception-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Exception
                       </button>
                   </div>
@@ -244,7 +245,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="todo-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > TO-DO
                       </button>
                   </div>
@@ -253,7 +253,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="comment-code-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Commented Code
                       </button>
                   </div>
@@ -262,7 +261,6 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="incomplete-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Incomplete
                       </button>
                   </div>
@@ -271,9 +269,15 @@
                       <button class="btn btn btn-dark category-button"
                         type="submit"
                         id="new-category-button"
-                        onclick="addNewCommentToBeLinked(this);"
                         style="width: 100%" > Define new category
                       </button>
+                  </div>
+
+                  <hr class="solid" style="position:relative; top:-15px;">
+
+                  <hr class="solid" style="position:sticky; top:90.2%;">
+                  <div id='refreshButton' style="position:fixed; left:6.5%; top:92%;" onclick="window.location.reload();">
+                          <i class="far fa-trash-alt fa-4x" style="color:white;"></i>
                   </div>
 
               </div>
@@ -340,7 +344,6 @@
         hljs.highlightAll();
 
 
-
         //updating progress bar
         var labelProgressPercentage = {{ overall_labeling_status['n_artifacts_labeled'] }}*100 / {{ overall_labeling_status['n_total_artifacts'] }};
         labelProgressPercentage = Math.ceil(labelProgressPercentage);
@@ -388,9 +391,12 @@
         var dictHighlightedCode = {};
         var dictHighlightedComments = {};
         var dictHighlightedCommentsPosition = {};
-        var dictRangeHighlightedCode = {};
+        //var dictRangeHighlightedCode = {};
         var dictHighlightedCommentsCharacterPosition = {};
         var dictHighlightedCodeCharacterPosition = {};
+        var dictSelectedCategories = {};
+        var dictSelectedCode = {};
+        var dictSelectedComment = {};
 
 
         var comments = []; //In this list we store all the comments within a given class
@@ -438,9 +444,23 @@
 
             if (isLabeled == 0) {
                 dictHighlightedCode[0] = [];
-                dictRangeHighlightedCode[0] = [];
+                //dictRangeHighlightedCode[0] = [];
                 dictHighlightedCommentsPosition[0] = [];
             }
+
+            $("#refreshButton").mouseenter(function() {
+                    var myDiv = document.createElement('div');
+                    myDiv.setAttribute('class', 'popUpRefresh');
+                    myDiv.setAttribute('id', 'popUP');
+                    myDiv.innerHTML = 'Remove all classifications!';
+                    document.body.appendChild(myDiv);
+                }
+            );
+
+            $("#refreshButton").mouseleave(function() {
+                    $("#popUP").remove();
+                }
+            );
 
             //This instance need to be reviewed, therefore we start preparing the needed lists and the layout
             if (isLabeled == 1) {
@@ -453,14 +473,13 @@
 
                 // Loading the lists
                 dictHighlightedCommentsPosition = {{ artifact_label_commentPositionList | tojson }}
-                    dictRangeHighlightedCode = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});
-                selectedCode = {{ selectedCode | tojson }}
-                    selectedComments = {{ selectedComments | tojson }}
-                        selectedCategories = {{ artificat_label_categories |tojson }}
-                            dictHighlightedCodeCharacterPosition = {{ codeSpan | tojson }}
-                                dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }}
-                                    moveSelectionButtonList =
-                {{ artifact_moveSelectionButtonList  |tojson }}
+                {#dictRangeHighlightedCode = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});#}
+                dictSelectedCode = {{ selectedCode | tojson }};
+                dictSelectedComment = {{ selectedComments | tojson }};
+                dictSelectedCategories = {{ artificat_label_categories |tojson }};
+                dictHighlightedCodeCharacterPosition = {{ codeSpan | tojson }}
+                dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }}
+                moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }}
 
                 var idsButton = [];
                 for (var i = 0; i < moveSelectionButtonList.length; i++) {
@@ -483,6 +502,11 @@
             } else if (isLabeled == 0 && isReviewed == 0) {
                 ShowNotification('Labeling mode!', 'warning');
             }
+
+            $(".buttonWrapper").dblclick(function () {
+                var buttonID = this.childNodes[0].nextSibling.id;
+                addNewCommentToBeLinked(this.childNodes[0].nextSibling)
+            });
 
             //Highlighting target comments
             var spanOfCharPerMethod = {{ artifact_methodsListBytes | tojson }}
@@ -558,107 +582,107 @@
                 }
 
                 selectedCommentText = upperPartCommentSelection + lowerPartCommentSelection;
-
                 var lines = selectedCommentText.split('\n');
                 for (var k = 0; k < lines.length; k++) {
                     updateTextArea('<span class="selected-comment">' + lines[k] + '</span>');
                 }
 
-                {#beginningCommentCharacterPosition.push(fakeSelection4Comment(commentEleToHighlight[0][0]).start);#}
-                {#endCommentCharacterPosition.push(fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length-1][0]).end);#}
                 beginningCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[0][0]).start;
                 endCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length - 1][0]).end;
-
                 listSelectedSpanComment.push(beginningCommentCharacterPosition + '-' + endCommentCharacterPosition);
 
-                clicked = true;
                 unselectAll();
 
+            });
 
-                if (clicked) {
+            // Bind code are to "text select" events
+            $('#code').bind('mouseup', function (event) {
+                var code = document.getElementById("code");
+                var sel = getSelectionCharOffsetsWithin(code);
+                var start_point, stop_point, text_point, targetTag;
 
-                    // Bind code are to "text select" events
-                    $('#code').bind('mouseup', function (event) {
-                        var code = document.getElementById("code");
-                        var sel = getSelectionCharOffsetsWithin(code);
-                        var start_point, stop_point, text_point, targetTag;
-
-                        if (sel.start === sel.end) {
-                            start_point = 0;
-                            stop_point = 0;
-                            text_point = "";
-                            targetTag = null;
-                        } else {
-                            start_point = sel.start;
-                            stop_point = sel.end;
-                            text_point = sel.text;
-                            targetTag = sel.targetTag;
-                        }
-
-
-                        selectedCodeText = selectedCodeText + sel.text;
-                        // If right side double selection is triggered
-                        try {
-                            targetTag = targetTag.previousSibling;
-                        } catch (e) {
-                        }
-
-                        if (typeof (targetTag) != null && $(targetTag).hasClass('hljs-comment') && ( Math.abs(start_point-stop_point)<=3 )){
-
-
-                            if (!commentEleToHighlight.includes($(targetTag))) {
-                                commentEleToHighlight.push($(targetTag));
-                            }
-                            selectedCommentText = $(targetTag).text();
-                            $(targetTag).css('color', 'red');
-
-                            updateTextArea('<span class="selected-comment">' + selectedCommentText + '</span>');
-
-                            beginningCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[0][0]).start;
-                            endCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length - 1][0]).end;
-
-                            listSelectedSpanComment.push(beginningCommentCharacterPosition + '-' + endCommentCharacterPosition);
-
-                            unselectAll();
-
-                            var arr = Array.from(comments);
-                            for (var i = 0; i < commentEleToHighlight.length; i++) {
-                                commentIndex.push(arr.indexOf(commentEleToHighlight[i][0]));
-                            }
-                        } else {
-                            if (selectedCategory === '' && selectedCommentText === '' && text_point !== '') {
-                                alert("Please select the comment first!");
-                            } else {
-                                if (selectedCommentText !== '' && selectedCategory === '' && text_point !== '') {
-                                    alert('Please select the comment category!');
-                                } else {
-
-                                    //Adding highlighting with span token and serialize range
-                                    var newNode = highlightCodeFromRange(sel.range);
-                                    serializedRangeList.push(sel.serializedRange);
-
-                                    const spanSelection = start_point + '-' + stop_point;
-                                    listSelectedSpanCode.push(spanSelection);
-
-                                    var lines = sel.text.split('\n');
-                                    for (var k = 0; k < lines.length; k++) {
-                                        updateTextArea('<span class="selected-code">' + lines[k].trim() + '</span>');
-                                    }
-
-                                    //updateTextArea(sel.text.trim());
-                                    unselectAll();
-
-                                    //Adding new element to the list
-                                    highlightedCodeDuringSelection.push(newNode);
-                                }
-                            }
-
-                        }
-                        unselectAll();
-                        clicked = false;
-                    });
+                if (sel.start === sel.end) {
+                    start_point = 0;
+                    stop_point = 0;
+                    text_point = "";
+                    targetTag = null;
+                } else {
+                    start_point = sel.start;
+                    stop_point = sel.end;
+                    text_point = sel.text;
+                    targetTag = sel.targetTag;
                 }
 
+
+                selectedCodeText = selectedCodeText + sel.text;
+                // If right side double selection is triggered
+                try {
+                    targetTag = targetTag.previousSibling;
+                } catch (e) {
+                }
+
+                //console.log(targetTag);
+
+                if (typeof (targetTag) != null && $(targetTag).hasClass('hljs-comment') && ( Math.abs(start_point-stop_point)<=3 )){
+
+                    if (!commentEleToHighlight.includes($(targetTag))) {
+                        commentEleToHighlight.push($(targetTag));
+                    }
+                    selectedCommentText = $(targetTag).text();
+                    $(targetTag).css('color', 'red');
+
+                    updateTextArea('<span class="selected-comment">' + selectedCommentText + '</span>');
+
+                    beginningCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[0][0]).start;
+                    endCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length - 1][0]).end;
+
+                    listSelectedSpanComment.push(beginningCommentCharacterPosition + '-' + endCommentCharacterPosition);
+
+                    unselectAll();
+
+                    var arr = Array.from(comments);
+                    for (var i = 0; i < commentEleToHighlight.length; i++) {
+                        commentIndex.push(arr.indexOf(commentEleToHighlight[i][0]));
+                    }
+
+                } else {
+                    if (selectedCategory === '' && selectedCommentText === '' && text_point !== '' &&  !text_point.trim().startsWith('//') && !text_point.trim().startsWith('/*')) {
+                        alert("Please select the comment first!");
+                    } else {
+                        if (selectedCommentText !== '' && selectedCategory === '' && text_point !== '') {
+                            alert('Please select the comment category!');
+                        } else {
+
+                            if(!text_point.trim().startsWith('//') && !text_point.startsWith('/*')) {
+
+                                //old highlighting!
+                                //Adding highlighting with span token and serialize range
+                                //var newNode = highlightCodeFromRange(sel.range);
+                                //var newNode = null;
+
+                                //Adding new elements to the list
+                                //highlightedCodeDuringSelection.push(newNode);
+                                //serializedRangeList.push(sel.serializedRange);
+
+                                highlightRangeNew(start_point, stop_point);
+
+                                const spanSelection = start_point + '-' + stop_point;
+                                listSelectedSpanCode.push(spanSelection);
+
+                                var lines = sel.text.split('\n');
+                                for (var k = 0; k < lines.length; k++) {
+                                    updateTextArea('<span class="selected-code">' + lines[k] + '</span>');
+                                }
+
+                                unselectAll();
+
+                            }
+                        }
+                    }
+
+                }
+                unselectAll();
+                clicked = false;
             });
 
         });
@@ -671,12 +695,12 @@
                 // for a better handling of the front end we save only one row in the database for each labeling process
                 var data_json = {
                     artifact_id: {{  artifact_id }},
-                    code: JSON.stringify(selectedCode),
-                    comments: JSON.stringify(selectedComments),
-                    categories: JSON.stringify(selectedCategories),
+                    code: JSON.stringify(dictSelectedCode),
+                    comments: JSON.stringify(dictSelectedComment),
+                    categories: JSON.stringify(dictSelectedCategories),
                     codeSpan: JSON.stringify(dictHighlightedCodeCharacterPosition),
                     commentSpan: JSON.stringify(dictHighlightedCommentsCharacterPosition),
-                    rangeSelectedText: JSON.stringify(dictRangeHighlightedCode),
+                    //rangeSelectedText: JSON.stringify(dictRangeHighlightedCode),
                     workingMode: workingMode,
                     moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton) : JSON.stringify(moveSelectionButtonList)),
                     commentPosition: JSON.stringify(dictHighlightedCommentsPosition),
@@ -692,9 +716,9 @@
                 });
 
                 //wait two seconds before moving on
-                setTimeout(function(){
+                /*setTimeout(function(){
                     ChangeSkipToNext();
-                },1000);
+                },1000);*/
             }
         }
 
