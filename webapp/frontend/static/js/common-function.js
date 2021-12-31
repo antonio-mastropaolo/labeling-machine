@@ -35,6 +35,7 @@ function createNewCategory() {
 
 function moveToSelectedMethod(indexClassification){
     var arr = Array.from(comments);
+    console.log(dictHighlightedCommentsPosition);
     indexComment = dictHighlightedCommentsPosition[indexClassification].toString();
     var selectedComments = indexComment.split(',');
     var tagSelector = arr[selectedComments[0]];
@@ -136,12 +137,20 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
     var arr = Array.from(comments);
     indexComment = indexComment.toString();
-    console.log(indexClassification);
     var selectedComments = indexComment.split(',');
     var tagSelector = arr[selectedComments[0]];
     currentClassification = indexClassification;
 
-    $("#"+selectedCategories[currentClassification]).css('background-color','green'); //highlight the select button category
+     //highlight the select button category
+    for(var i=0; i<dictSelectedCategories[currentClassification].length; i++){
+        if(!labelCategories.includes(dictSelectedCategories[currentClassification][i])){
+            //Then we have a new category defined by the tagger
+            $("#new-category-button").css('background-color','green').text(dictSelectedCategories[currentClassification][i]);
+
+        }
+        $("#"+dictSelectedCategories[currentClassification][i]).css('background-color','green');
+    }
+
 
     //move down to the selected method
     $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -150,15 +159,12 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     });
 
     //deactivating other classification buttons
-    const keys = Object.keys(dictSelectedCode);
-    //console.log(keys);
-    for(var i=0;i<keys.length;i++){
-        if(dictSelectedCode[i].length==0 || i==indexClassification){
-            continue;
-        }else{
-            $('#association-'+i).attr('disabled','disabled');
-        }
+
+    for (const [key, value] of Object.entries(dictSelectedCode)) {
+          if (key === indexClassification){ continue; }
+          else{ $('#association-'+i).attr('disabled','disabled'); }
     }
+
 
     ////////////////////////////////////////////////////
     //Highlight the selected comment
@@ -185,29 +191,30 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
         var start = Number(dictHighlightedCodeCharacterPosition[currentClassification][i].split('-')[0]);
         var end = Number(dictHighlightedCodeCharacterPosition[currentClassification][i].split('-')[1]);
 
-        console.log(start);
-        console.log(end);
+        //console.log(start);
+        //console.log(end);
 
         if(start === 0 || end === 0){
             continue;
         }
-        var newNodes = highlightRangeNew(start,end);
-        for(var j=0; j<newNodes.length;j++) {
-            var concat = '';
-            var newNode = newNodes[j];
-            // var lines = newNode.textContent.split('\n');
-            //
-            // for (var k = 0; k < lines.length; k++) {
-            //     concat = concat + lines[k].trim();
-            //     console.log(concat);
-            // }
-            // console.log(concat);
-            updateTextArea('<span class="selected-code">' + newNode.textContent + '</span>');
+
+        // semi-column heuristic to reconstruct and display the highlighted code correctly
+        highlightRangeNew(start,end);
+        var spanSelector = "[id=highlight-"+(currentClassification)+"]";
+        var concatenedString = ''
+        var previousString = ''
+
+        for(var j=0; j < $(spanSelector).length; j++){
+            concatenedString = previousString + $(spanSelector)[j].innerText;
+            if(concatenedString.trim().endsWith(';') || concatenedString.trim().endsWith('}')){
+                updateTextArea('<span class="selected-code">' + concatenedString + '</span>');
+                previousString = '';
+            }else{
+                previousString = concatenedString;
+            }
         }
+
     }
-
-    //console.log(dictHighlightedCodeCharacterPosition[currentClassification]);
-
 
     /*for(var i=0;i<dictRangeHighlightedCode[currentClassification].length;i++){
         var deseriazedRange = rangy.deserializeRange(dictRangeHighlightedCode[currentClassification][i]);
@@ -226,10 +233,10 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
     }*/
 
-    var lines = newNode.textContent.split('\n');
-    for (var k = 0; k < lines.length; k++) {
-        updateTextArea('<span class="selected-code">' + lines[k] + '</span>');
-    }
+    // var lines = newNode.textContent.split('\n');
+    // for (var k = 0; k < lines.length; k++) {
+    //     updateTextArea('<span class="selected-code">' + lines[k] + '</span>');
+    // }
 
 }
 
@@ -371,15 +378,16 @@ function reset(save=false){
         }
 
     }else if(isLabeled==0 && save){
-        var selector = "[id=highlight-"+(currentClassification)+"]";
+        var selector = "[id=highlight-"+(dictIndex)+"]";
         $(selector).css('background-color','');
 
         //changing highlighting for the comment and code
         changeCommentHighlighting(commentEleToHighlight, 'green', false);
+        console.log('start here!');
+        console.log(highlightedCodeDuringSelection);
         for(var i=0;i< highlightedCodeDuringSelection.length;i++){
             $(highlightedCodeDuringSelection[i]).css('background-color','#CCFFE5');
         }
-        counterAssociations = counterAssociations+1;
     }
 
     //deactivate button until the changes are completed and brought to the staging area
@@ -497,10 +505,17 @@ function addNewCommentToBeLinked(element){
     if(selectedCategory === 'new-category-button'){ //save the new category
         selectedCategory = $(element).text() + '-button';
     }
+
     selectedCategories.push(selectedCategory);
 
     //selectedCommentText =  $("#textAreaSelectedText").val().toString(); //at this stage we must have only the code comment/s
     //console.log($("#textAreaSelectedText").children());
+}
+
+function realLenghtList(list){
+    var refinedLength=0;
+    for(var k=0; k<list.length;k++){ if(list[k].length>0){ refinedLength = refinedLength+1; } }
+    return refinedLength;
 }
 
 
@@ -519,7 +534,7 @@ function saveCategorization(){
 
     dictHighlightedCode[counterAssociations] = highlightedCodeDuringSelection;
 
-    if (commentEleToHighlight.length >0 ) {dictHighlightedComments[counterAssociations] = commentEleToHighlight; }
+    if (commentEleToHighlight.length > 0 ) {  dictHighlightedComments[counterAssociations] = commentEleToHighlight; }
 
     if (isSelectedCategory()){
         //save snippet
@@ -540,30 +555,59 @@ function saveCategorization(){
         if(isLabeled === 0) {
 
             //adding tag result to the lists we store in the DB
-            selectedComments.push(selectedCommentText);
-            selectedCode.push(selectedCodeText);
+            //selectedComments.push(selectedCommentText);
+            //selectedCode.push(selectedCodeText);
             //dictRangeHighlightedCode[counterAssociations] = serializedRangeList;
-            dictHighlightedCommentsPosition[counterAssociations] = [...new Set(commentIndex)];
-            dictHighlightedCodeCharacterPosition[counterAssociations] = listSelectedSpanCode;
-            dictHighlightedCommentsCharacterPosition[counterAssociations] = listSelectedSpanComment;
-            dictSelectedCode[counterAssociations] = selectedCode;
-            dictSelectedComment[counterAssociations] = selectedComments;
-            dictSelectedCategories[counterAssociations] = selectedCategories;
+
+            dictHighlightedCommentsPosition[dictIndex] = [...new Set(commentIndex)];
+            dictHighlightedCodeCharacterPosition[dictIndex] = listSelectedSpanCode;
+            dictHighlightedCommentsCharacterPosition[dictIndex] = listSelectedSpanComment;
+
+            if(selectedCode.length>0) {
+                dictSelectedCode[dictIndex] = selectedCode.filter(function (e) {
+                    return e
+                });
+            }
+
+            if(selectedComments.length>0) {
+                dictSelectedComment[dictIndex] = selectedComments.filter(function (e) {
+                    return e
+                });
+            }
+
+            if(selectedCategories.length>0) {
+                dictSelectedCategories[dictIndex] = selectedCategories.filter(function (e) {
+                    return e
+                });
+            }
 
             //Add new association button
-            var divID = "div-association" + '-' + counterAssociations; //+ "-" + target_method;
-            var buttonID = "association" + '-' + counterAssociations;// + "-" + target_method;
-            var buttonText = "#" + counterAssociations+ " -->";// + target_method;
-            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + counterAssociations + ");" +  "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
+            var divID = "div-association" + '-' + dictIndex;
+            var buttonID = "association" + '-' + dictIndex;
+            var buttonText = "#" + dictIndex;
 
-            //var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
+            //var myButton = document.getElementById(buttonID);
+            // while(myButton){
+            //     counterAssociations = counterAssociations + 1;
+            //     divID = "div-association" + '-' + counterAssociations;
+            //     buttonID = "association" + '-' + counterAssociations;
+            //     buttonText = "#" + counterAssociations;
+            //     myButton = document.getElementById(buttonID);
+            // }
+
+
+            //var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + counterAssociations + ");" +  "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
+
+            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="moveToSelectedMethod( '+ counterAssociations +' ); removeAssociation(\''+ divID +'\')"></i></button></div>';
             //onclick="removeAssociation(\''+ divID +'\')">
 
             // handling list for the reviewing part
-            var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick=" moveToSelectedMethodFromTag([' + dictHighlightedCommentsPosition[counterAssociations] + '],' +counterAssociations + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + ' + </button></div>';
+            var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick=" moveToSelectedMethodFromTag([' + dictHighlightedCommentsPosition[dictIndex] + '],' +dictIndex + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + ' + </button></div>';
             methodSelectionButton.push(moveToButton);
 
-            $("#badgeCounter").text(counterAssociations+1);
+            dictIndex += 1;
+            counterAssociations = counterAssociations + 1;
+            $("#badgeCounter").text(counterAssociations);
             $("#lowerSide" ).append( $(newButton) );
 
         }
@@ -572,51 +616,53 @@ function saveCategorization(){
         if(isLabeled==1){
 
             // if the reviewer didn't change anything, it will overwrite such fields
-            if (selectedCommentText.trim() !== '')  { selectedComments[currentClassification] = selectedCommentText; }
-            if (selectedCodeText.trim() !== '')     { selectedCode[currentClassification] = selectedCodeText; }
-            if (selectedCategory.trim() !== '')     { selectedCategories[currentClassification] = selectedCategory;}
+            //if (selectedCommentText.trim() !== '' && selectedCommentText.trim() !== null)  { selectedComments.push(selectedCommentText); }
+            //if (selectedCodeText.trim() !== ''    && selectedCodeText.trim() !== null  )   { selectedCode.push(selectedCodeText); }
+            //if (selectedCategory.trim() !== ''    && selectedCategory.trim() !== null  )   { selectedCategories.push(selectedCategory);}
             //if (serializedRangeList.length > 0)     { dictRangeHighlightedCode[currentClassification] = serializedRangeList; }
-            if (commentIndex.length > 0)            { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)]; } //duplicates deletion due to mis-selection event
+            if (commentIndex.length > 0)            { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)];  } //duplicates deletion due to mis-selection event
             if (listSelectedSpanCode.length > 0)    { dictHighlightedCodeCharacterPosition[currentClassification] = listSelectedSpanCode; }
             if (listSelectedSpanComment.length > 0) { dictHighlightedCommentsCharacterPosition[currentClassification] = listSelectedSpanComment; }
-            if (selectedCode.length > 0)            { dictSelectedCode[currentClassification] = selectedCode; }
-            if (selectedComments.length > 0 )       { dictSelectedComment[currentClassification] = selectedComments; }
-            if (selectedCategories.length > 0)      { dictSelectedCategories[currentClassification] = selectedCategories; }
-
-            // console.log(selectedCode);
-            // console.log(selectedCategories);
-            // console.log(selectedComments);
-
-            // dictSelectedCode[currentClassification] = selectedCode;
-            // dictSelectedComment[currentClassification] = selectedComments;
-            // dictSelectedCategories[currentClassification] = selectedCategories;
+            if (selectedCode.length > 0)            { dictSelectedCode[currentClassification] = selectedCode;        dictSelectedCode[currentClassification] = dictSelectedCode[currentClassification].filter(function(e){return e}); }
+            if (selectedComments.length > 0 )       { dictSelectedComment[currentClassification] = selectedComments; dictSelectedComment[currentClassification] = dictSelectedComment[currentClassification].filter(function(e){return e});}
+            if (selectedCategories.length > 0)      { dictSelectedCategories[currentClassification] = [...new Set(selectedCategories)]; dictSelectedCategories[currentClassification] = dictSelectedCategories[currentClassification].filter(function(e){return e}); }
 
             $("#clearText").text('Change');
 
-            try {
-                var flagIN = false;
 
-                var counter = currentClassification + 1;
-                var extractedItemToMatch = dictHighlightedCommentsPosition[counter];
+            //fix here
+            var flagNext =false;
+            for (const [key, value] of Object.entries(dictSelectedCode)) {
 
-                while (extractedItemToMatch.length === 0) {
-                    counter = counter + 1;
-                    extractedItemToMatch = dictHighlightedCommentsPosition[counter];
-                    flagIN = true;
+                if( Number(key) === currentClassification){ flagNext = true; continue; }
+                if(flagNext){
+                    $('#association-'+key).removeAttr('disabled');
+                    break;
                 }
-                $('#association-' + counter).removeAttr('disabled');
-
-            }catch(e){
-                $('#association-' + currentClassification).removeAttr('disabled');
             }
 
-            //var bSelector = '#'+selectedCategories[currentClassification];
-            //$(bSelector).css('background-color','');
+
+            // try {
+            //     var flagIN = false;
+            //
+            //     var counter = currentClassification + 1;
+            //     var extractedItemToMatch = dictHighlightedCommentsPosition[counter];
+            //
+            //     while (extractedItemToMatch.length === 0) {
+            //         counter = counter + 1;
+            //         extractedItemToMatch = dictHighlightedCommentsPosition[counter];
+            //         flagIN = true;
+            //     }
+            //     $('#association-' + counter).removeAttr('disabled');
+            //
+            // }catch(e){
+            //     $('#association-' + currentClassification).removeAttr('disabled');
+            // }
+
 
             flagSwitch=false;
             counterAssociations = counterAssociations - 1;
             $("#badgeCounter").text(counterAssociations);
-
         }
 
         reset(save=true);
@@ -648,40 +694,40 @@ function commentWithin(text){
 }
 
 
+function removeAssociation(divID){
+    targetAssociation = divID.split('-')[2];
+    $('#'+divID).fadeOut(300, function(){ $(this).remove();});
+    counterAssociations = counterAssociations -1;
+    $("#badgeCounter").text(counterAssociations);
 
-// function removeAssociationFromTag(){
-//
-//     $(flexibleSelector).fadeOut(300, function(){ $(this).remove();});
-//     counterAssociations = counterAssociations - 1;
-//     $("#badgeCounter").text(counterAssociations);
-//     $("#textAreaSelectedText").text('');
-// }
+    //removing highlighting for code and comment
+    resetHighlightedCode($(dictHighlightedCode[targetAssociation]),targetAssociation);
+    if(commentEleToHighlight.length === 0){
+        //console.log(dictHighlightedComments);
+        changeCommentHighlighting(dictHighlightedComments[targetAssociation], '');
+    }else{
+        //console.log(commentEleToHighlight);
+        changeCommentHighlighting(commentEleToHighlight, '');
+    }
 
-/* The dynamic deletion of classification items has been disabled due to problem with ranges. ( If I manage to find a fix, then I can put it back ) */
+    //dictRangeHighlightedCode[targetAssociation] = [];
+    dictHighlightedCommentsPosition[targetAssociation] = [];
+    dictHighlightedCodeCharacterPosition[targetAssociation] = [];
+    dictSelectedCode[targetAssociation] = [];
+    dictSelectedCategories[targetAssociation] = [];
+    dictSelectedComment[targetAssociation] = [];
+    methodSelectionButton[targetAssociation] = '';
+    selectedComments = [];
+    selectedCategories = [];
+    selectedCode = [];
+}
 
-
-// function removeAssociation(divID){
-//
-//     targetAssociation = divID.split('-')[2];
-//     $('#'+divID).fadeOut(300, function(){ $(this).remove();});
-//     counterAssociations = counterAssociations -1;
-//     $("#badgeCounter").text(counterAssociations);
-//
-//     //removing highlighting for code and comment
-//     resetHighlightedCode($(dictHighlightedCode[targetAssociation]),targetAssociation);
-//     if(commentEleToHighlight.length==0){
-//         //console.log(dictHighlightedComments);
-//         changeCommentHighlighting(dictHighlightedComments[targetAssociation], '');
-//     }else{
-//         //console.log(commentEleToHighlight);
-//         changeCommentHighlighting(commentEleToHighlight, '');
-//     }
-//
-//     dictRangeHighlightedCode[targetAssociation] = [];
-//     dictHighlightedCommentsPosition[targetAssociation] = [];
-//     methodSelectionButton[targetAssociation] = [];
-//     selectedComments[targetAssociation] = [];
-//     selectedCategories[targetAssociation] = [];
-//     selectedCode[targetAssociation] = [];
-// }
+function cleanDict(obj) {
+  for (var propName in obj) {
+    if (obj[propName].length === 0 || obj[propName] === undefined) {
+      delete obj[propName];
+    }
+  }
+  return obj
+}
 
