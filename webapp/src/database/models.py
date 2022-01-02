@@ -65,10 +65,6 @@ class LabelingData(db.Model):
     __tablename__ = 'LabelingData'
     labeling_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     artifact_id = db.Column(db.Integer)
-
-    # update the following two lines to store labeled data from users
-    #labeling = db.Column(db.Text)   # actual data provided by labelers
-    # remark = db.Column(db.Text)     # optional data provided by labelers
     comments = db.Column(db.Text)
     code = db.Column(db.Text)
     categories = db.Column(db.Text)
@@ -77,8 +73,10 @@ class LabelingData(db.Model):
     commentPosition = db.Column(db.Text)
     rangeSelectedText = db.Column(db.Text)
     moveSelectionButton = db.Column(db.Text)
-
     username_tagger = db.Column(db.Text)
     username_reviewer = db.Column(db.Text)
-    duration_sec = db.Column(db.Integer)
-    created_at = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())
+    elapsed_labeling_time = db.Column(db.Integer)
+    elapsed_reviewing_time = db.Column(db.Integer)
+    labeled_at = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())
+    reviewed_at = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())
+

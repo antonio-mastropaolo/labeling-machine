@@ -28,6 +28,7 @@ def get_overall_labeling_progress():
                        'n_artifacts_labeled': get_total_number_of_labeled_classes(),
                        'n_artifacts_to_be_labeled': get_total_number_of_classes_to_be_labeled(),
                        'n_artifacts_reviewed': get_total_number_of_reviewed_classes(),
+                       'n_artifacts_labeled_and_reviewed': get_total_number_of_labeled_and_reviewed_classes(),
                        'n_total_artifacts': get_total_number_of_classes_in_db()
                        }
 
@@ -49,6 +50,10 @@ def get_total_number_of_labeled_classes():
 
 def get_total_number_of_reviewed_classes():
     result = Artifact.query.filter_by(reviewed=1).count()
+    return result
+
+def get_total_number_of_labeled_and_reviewed_classes():
+    result = Artifact.query.filter_by(labeled=1, reviewed=1).count()
     return result
 
 def get_n_labeled_artifact_per_user():
