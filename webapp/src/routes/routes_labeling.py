@@ -1,3 +1,5 @@
+import datetime
+
 from flask import render_template, request, redirect, url_for, jsonify
 from src.helper.tools_labeling import *
 from src.helper.tools_common import is_signed_in, lock_artifact_by
@@ -249,7 +251,6 @@ def label():
         if int(workingMode) == 0:
             isLabeled = 1
             isReviewed = 0
-
         else:
             isLabeled = 1
             isReviewed = 1
@@ -257,7 +258,7 @@ def label():
 
         if(int(workingMode)==0):
             jr = LabelingData(artifact_id=artifact_id, username_tagger=who_is_signed_in(),
-                                  duration_sec=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
+                                  elapsed_labeling_time=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
                                   commentSpan=commentSpan, categories=categories, commentPosition=commentPosition,
                                   moveSelectionButton=moveSelectionButton#, rangeSelectedText=rangeSelectedText
                               )
@@ -269,6 +270,8 @@ def label():
         else:
             labeling_data = LabelingData.query.filter_by(artifact_id=artifact_id).first()
             labeling_data.comments = comments
+            labeling_data.reviewed_at = datetime.datetime.utcnow()
+            labeling_data.elapsed_reviewing_time = duration_sec
             labeling_data.username_reviewer = who_is_signed_in()
             labeling_data.commentPosition = commentPosition
             labeling_data.moveSelectionButton = moveSelectionButton

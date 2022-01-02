@@ -641,6 +641,7 @@
                     $(targetTag).css('color', 'red');
 
                     updateTextArea('<span class="selected-comment">' + selectedCommentText + '</span>');
+                    selectedComments.push(selectedCommentText);
 
                     beginningCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[0][0]).start;
                     endCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[commentEleToHighlight.length - 1][0]).end;
@@ -663,19 +664,6 @@
                         } else {
 
                             if(!text_point.trim().startsWith('//') && !text_point.startsWith('/*') && stop_point>0 && stop_point > 0) {
-
-                                /* -------- old highlighting systems starts here ! --------*/
-
-                                //Adding highlighting with span token and serialize range
-                                //var newNode = highlightCodeFromRange(sel.range);
-                                //var newNode = null;
-
-                                //Adding new elements to the list
-                                //highlightedCodeDuringSelection.push(newNode);
-                                //serializedRangeList.push(sel.serializedRange);
-
-                                /* -------- old highlighting systems ends here ! --------*/
-
 
                                 var highlightedCodeNode = highlightRangeNew(start_point, stop_point);
 
@@ -703,6 +691,8 @@
 
         function submitClassifaction(){
 
+            var newRefinedDict = getSameKeysDict(cleanDict(dictHighlightedCodeCharacterPosition), cleanDict(dictHighlightedCommentsCharacterPosition));
+
             if (confirm('Are you sure?')) {
 
                 var data_json = {
@@ -711,7 +701,7 @@
                     comments: JSON.stringify(cleanDict(dictSelectedComment)),
                     categories: JSON.stringify(cleanDict(dictSelectedCategories)),
                     codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPosition)),
-                    commentSpan: JSON.stringify(cleanDict(dictHighlightedCommentsCharacterPosition)),
+                    commentSpan: JSON.stringify(newRefinedDict),
                     commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPosition)),
                     //rangeSelectedText: JSON.stringify(dictRangeHighlightedCode),
                     workingMode: workingMode,

@@ -35,7 +35,6 @@ function createNewCategory() {
 
 function moveToSelectedMethod(indexClassification){
     var arr = Array.from(comments);
-    console.log(dictHighlightedCommentsPosition);
     indexComment = dictHighlightedCommentsPosition[indexClassification].toString();
     var selectedComments = indexComment.split(',');
     var tagSelector = arr[selectedComments[0]];
@@ -100,6 +99,7 @@ function highlightRangeNew(start, end){
         dig(element);
     });
 
+
     let highlightedSection = [];
 
     for (let i = 0; i < replacements.length; i++) {
@@ -119,19 +119,6 @@ function highlightRangeNew(start, end){
     unselectAll();
     return highlightedSection;
 }
-
-
-// function highlightCodeFromRange(range){
-//     var newNode = document.createElement("span");
-//     //Adding ID for the given selection that is gonna be useful when we want to remove the highlighted text
-//     if(isLabeled==0) { newNode.setAttribute("id", "highlight-" + counterAssociations); }
-//     else{ newNode.setAttribute("id", "highlight-" + currentClassification);}
-//     newNode.setAttribute("style", "background-color: #FFE5CC");
-//     newNode.appendChild(range.extractContents());
-//     range.insertNode(newNode);
-//     dictHighlightedCode[counterAssociations] = newNode;
-//     return newNode;
-// }
 
 function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
@@ -184,59 +171,43 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-
     //Highlight the selected code
-    for(var i=0;i<dictHighlightedCodeCharacterPosition[currentClassification].length;i++){
+    for(var i=0;i<dictHighlightedCodeCharacterPosition[currentClassification].length;i++) {
 
         var start = Number(dictHighlightedCodeCharacterPosition[currentClassification][i].split('-')[0]);
         var end = Number(dictHighlightedCodeCharacterPosition[currentClassification][i].split('-')[1]);
 
-        //console.log(start);
-        //console.log(end);
 
-        if(start === 0 || end === 0){
+        if (start === 0 || end === 0) {
             continue;
         }
 
-        // semi-column heuristic to reconstruct and display the highlighted code correctly
-        highlightRangeNew(start,end);
-        var spanSelector = "[id=highlight-"+(currentClassification)+"]";
-        var concatenedString = ''
-        var previousString = ''
-
-        for(var j=0; j < $(spanSelector).length; j++){
-            concatenedString = previousString + $(spanSelector)[j].innerText;
-            if(concatenedString.trim().endsWith(';') || concatenedString.trim().endsWith('}')){
-                updateTextArea('<span class="selected-code">' + concatenedString + '</span>');
-                previousString = '';
-            }else{
-                previousString = concatenedString;
-            }
-        }
-
+        highlightRangeNew(start, end);
     }
 
-    /*for(var i=0;i<dictRangeHighlightedCode[currentClassification].length;i++){
-        var deseriazedRange = rangy.deserializeRange(dictRangeHighlightedCode[currentClassification][i]);
-        var newNode = document.createElement("span");
 
-        //Adding ID for the given selection that is gonna be useful when we want to remove the highlighted text
-        newNode.setAttribute("id", "highlight-" + currentClassification);
-        newNode.setAttribute("style", "background-color: #FFE5CC");
-        newNode.appendChild(deseriazedRange.extractContents());
-        deseriazedRange.insertNode(newNode);
+    // semi-column heuristic to reconstruct and display the highlighted code correctly
 
-        var lines = newNode.textContent.split('\n');
-        for (var k = 0; k < lines.length; k++) {
-            updateTextArea('<span class="selected-code">' + lines[k] + '</span>');
+
+    var spanSelector = "[id=highlight-"+(currentClassification)+"]";
+    var concatenedString = ''
+    var previousString = ''
+
+
+    for(var j=0; j < $(spanSelector).length; j++){
+        // console.log('************');
+        // console.log($(spanSelector)[j].innerText);
+        // console.log('*************');
+
+        concatenedString = previousString + $(spanSelector)[j].innerText;
+        if(concatenedString.trim().endsWith(';') || concatenedString.trim().endsWith('}') || concatenedString.trim().endsWith('{')){
+            updateTextArea('<span class="selected-code">' + concatenedString + '</span>');
+            previousString = '';
+        }else{
+            previousString = concatenedString;
         }
+    }
 
-    }*/
-
-    // var lines = newNode.textContent.split('\n');
-    // for (var k = 0; k < lines.length; k++) {
-    //     updateTextArea('<span class="selected-code">' + lines[k] + '</span>');
-    // }
 
 }
 
@@ -383,8 +354,6 @@ function reset(save=false){
 
         //changing highlighting for the comment and code
         changeCommentHighlighting(commentEleToHighlight, 'green', false);
-        console.log('start here!');
-        console.log(highlightedCodeDuringSelection);
         for(var i=0;i< highlightedCodeDuringSelection.length;i++){
             $(highlightedCodeDuringSelection[i]).css('background-color','#CCFFE5');
         }
@@ -466,32 +435,6 @@ function checkForButtonValidity(){
 
 function updateTextArea(textToDisplay){ $("#textAreaSelectedText").append(textToDisplay);}
 
-//  function updateTextArea(textToDisplay){
-//     var previousSelection = $("#textAreaSelectedText").val().toString();
-//     if(previousSelection==""){
-//         $("#textAreaSelectedText").text(textToDisplay);
-//     }else{
-//         $("#textAreaSelectedText").text(previousSelection + "\n" + textToDisplay);
-//     }
-//     var refinedText = $("#textAreaSelectedText").text().replace(/^\s*\n/gm, "");
-//     $("#textAreaSelectedText").append(refinedText);
-// }
-
-
-function checkForChangedCategory(element){
-
-    function arrayRemove(arr, value) {
-            return arr.filter(function(ele){
-                return ele != value;
-            });
-        }
-
-    var refinedCategories = arrayRemove(labelCategories, element.id.toString());
-    for(var i=0;i<refinedCategories.length;i++){
-        var selector="#"+refinedCategories[i];
-        $(selector).css('background-color','');
-    }
-}
 
 function addNewCommentToBeLinked(element){
     var retCode=checkForButtonValidity();
@@ -507,15 +450,6 @@ function addNewCommentToBeLinked(element){
     }
 
     selectedCategories.push(selectedCategory);
-
-    //selectedCommentText =  $("#textAreaSelectedText").val().toString(); //at this stage we must have only the code comment/s
-    //console.log($("#textAreaSelectedText").children());
-}
-
-function realLenghtList(list){
-    var refinedLength=0;
-    for(var k=0; k<list.length;k++){ if(list[k].length>0){ refinedLength = refinedLength+1; } }
-    return refinedLength;
 }
 
 
@@ -586,16 +520,6 @@ function saveCategorization(){
             var buttonID = "association" + '-' + dictIndex;
             var buttonText = "#" + dictIndex;
 
-            //var myButton = document.getElementById(buttonID);
-            // while(myButton){
-            //     counterAssociations = counterAssociations + 1;
-            //     divID = "div-association" + '-' + counterAssociations;
-            //     buttonID = "association" + '-' + counterAssociations;
-            //     buttonText = "#" + counterAssociations;
-            //     myButton = document.getElementById(buttonID);
-            // }
-
-
             //var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + counterAssociations + ");" +  "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
 
             var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="moveToSelectedMethod( '+ counterAssociations +' ); removeAssociation(\''+ divID +'\')"></i></button></div>';
@@ -613,7 +537,7 @@ function saveCategorization(){
         }
 
         //Bringing back the change button and remove selectionButton
-        if(isLabeled==1){
+        if(isLabeled==1 && currentClassification>=0){
 
             // if the reviewer didn't change anything, it will overwrite such fields
             //if (selectedCommentText.trim() !== '' && selectedCommentText.trim() !== null)  { selectedComments.push(selectedCommentText); }
@@ -623,14 +547,13 @@ function saveCategorization(){
             if (commentIndex.length > 0)            { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)];  } //duplicates deletion due to mis-selection event
             if (listSelectedSpanCode.length > 0)    { dictHighlightedCodeCharacterPosition[currentClassification] = listSelectedSpanCode; }
             if (listSelectedSpanComment.length > 0) { dictHighlightedCommentsCharacterPosition[currentClassification] = listSelectedSpanComment; }
-            if (selectedCode.length > 0)            { dictSelectedCode[currentClassification] = selectedCode;        dictSelectedCode[currentClassification] = dictSelectedCode[currentClassification].filter(function(e){return e}); }
-            if (selectedComments.length > 0 )       { dictSelectedComment[currentClassification] = selectedComments; dictSelectedComment[currentClassification] = dictSelectedComment[currentClassification].filter(function(e){return e});}
+            if (selectedCode.length > 0)            { dictSelectedCode[currentClassification] = selectedCode.filter(function(e){return e}); }
+            if (selectedComments.length > 0 )       { dictSelectedComment[currentClassification] = selectedComments.filter(function(e){return e}); }
             if (selectedCategories.length > 0)      { dictSelectedCategories[currentClassification] = [...new Set(selectedCategories)]; dictSelectedCategories[currentClassification] = dictSelectedCategories[currentClassification].filter(function(e){return e}); }
 
             $("#clearText").text('Change');
 
 
-            //fix here
             var flagNext =false;
             for (const [key, value] of Object.entries(dictSelectedCode)) {
 
@@ -640,24 +563,6 @@ function saveCategorization(){
                     break;
                 }
             }
-
-
-            // try {
-            //     var flagIN = false;
-            //
-            //     var counter = currentClassification + 1;
-            //     var extractedItemToMatch = dictHighlightedCommentsPosition[counter];
-            //
-            //     while (extractedItemToMatch.length === 0) {
-            //         counter = counter + 1;
-            //         extractedItemToMatch = dictHighlightedCommentsPosition[counter];
-            //         flagIN = true;
-            //     }
-            //     $('#association-' + counter).removeAttr('disabled');
-            //
-            // }catch(e){
-            //     $('#association-' + currentClassification).removeAttr('disabled');
-            // }
 
 
             flagSwitch=false;
@@ -713,9 +618,11 @@ function removeAssociation(divID){
     //dictRangeHighlightedCode[targetAssociation] = [];
     dictHighlightedCommentsPosition[targetAssociation] = [];
     dictHighlightedCodeCharacterPosition[targetAssociation] = [];
+
     dictSelectedCode[targetAssociation] = [];
     dictSelectedCategories[targetAssociation] = [];
     dictSelectedComment[targetAssociation] = [];
+
     methodSelectionButton[targetAssociation] = '';
     selectedComments = [];
     selectedCategories = [];
@@ -724,10 +631,37 @@ function removeAssociation(divID){
 
 function cleanDict(obj) {
   for (var propName in obj) {
-    if (obj[propName].length === 0 || obj[propName] === undefined) {
+    if (obj[propName].length === 0 || obj[propName] === undefined || obj[propName] === null) {
       delete obj[propName];
     }
   }
   return obj
 }
 
+function getSameKeysDict(dict1, dict2){
+    var newRefinedDict = {}
+    for (const [key1, value1] of Object.entries(dict1)) {
+        for (const [key2, value2] of Object.entries(dict2)) {
+            if(key1 === key2){
+                newRefinedDict[key2]=value2;
+                break;
+            }
+        }
+    }
+    return newRefinedDict;
+}
+
+function checkForChangedCategory(element){
+
+    function arrayRemove(arr, value) {
+            return arr.filter(function(ele){
+                return ele != value;
+            });
+        }
+
+    var refinedCategories = arrayRemove(labelCategories, element.id.toString());
+    for(var i=0;i<refinedCategories.length;i++){
+        var selector="#"+refinedCategories[i];
+        $(selector).css('background-color','');
+    }
+}
