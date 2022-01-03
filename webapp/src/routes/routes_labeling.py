@@ -7,7 +7,6 @@ from src import app
 from src.database.models import Note
 from src.helper.consts import *
 import json
-from pygments.lexers.jvm import *
 
 
 @app.route("/labeling", methods=['GET', 'POST'])
@@ -52,10 +51,15 @@ def labeling_with_artifact(target_artifact_id):
             spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
 
-            with open(artifact_data.linkToFileJava) as f:
+            newLinkToFileJava = '/labeling-machine/'+'/'.join(artifact_data.linkToFileJava.split('/')[5:])
+            print('--> ' + newLinkToFileJava)
+
+            with open(newLinkToFileJava) as f:
                 javaClassText = f.read()
 
-            with open(artifact_data.linkToFileJava) as f:
+
+
+            with open(newLinkToFileJava) as f:
                 classLines = [item for item in f.readlines()]
 
             #Mapping starting and ending method's lines to bytes position respectively

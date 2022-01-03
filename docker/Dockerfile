@@ -7,6 +7,8 @@ RUN apt-get install -y sqlite3
 # Copy contents
 COPY webapp /labeling-machine/webapp
 COPY requirements.txt /labeling-machine
+COPY data /labeling-machine/data
+
 
 # FLASK Environment variables
 ENV FLASK_APP=src
@@ -17,7 +19,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --trusted-host pypi.python.org -r /labeling-machine/requirements.txt
 
 WORKDIR /labeling-machine/webapp
-RUN flask initdb
+#RUN flask initdb
 
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
