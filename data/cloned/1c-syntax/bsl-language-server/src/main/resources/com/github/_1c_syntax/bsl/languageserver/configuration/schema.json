@@ -1,0 +1,680 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://1c-syntax.github.io/bsl-language-server/configuration/schema.json",
+    "type": "object",
+    "title": "BSL Language Server Configuration File.",
+    "additionalItems": false,
+    "definitions": {
+        "parameter": {
+            "$id": "#/definitions/parameter",
+            "type": [
+                "boolean",
+                "object"
+            ],
+            "title": "Concrete diagnostic parameters' configuration.\nCan be boolean for turning on/off or object.",
+            "default": true
+        },
+        "diagnosticParameters": {
+            "$id": "#/definitions/diagnosticParameters",
+            "type": "object",
+            "title": "Diagnostics parameters configuration.\nKey-value object, where key is a diagnosticCode, and value is boolean or object with concrete diagnostic configuration.",
+            "default": null,
+            "additionalProperties": {
+                "$ref": "#/definitions/parameter"
+            },
+            "properties": {
+                "AllFunctionPathMustHaveReturn": {
+                    "$ref": "parameters-schema.json#/definitions/AllFunctionPathMustHaveReturn"
+                },
+                "AssignAliasFieldsInQuery": {
+                    "$ref": "parameters-schema.json#/definitions/AssignAliasFieldsInQuery"
+                },
+                "BeginTransactionBeforeTryCatch": {
+                    "$ref": "parameters-schema.json#/definitions/BeginTransactionBeforeTryCatch"
+                },
+                "CachedPublic": {
+                    "$ref": "parameters-schema.json#/definitions/CachedPublic"
+                },
+                "CanonicalSpellingKeywords": {
+                    "$ref": "parameters-schema.json#/definitions/CanonicalSpellingKeywords"
+                },
+                "CodeAfterAsyncCall": {
+                    "$ref": "parameters-schema.json#/definitions/CodeAfterAsyncCall"
+                },
+                "CodeBlockBeforeSub": {
+                    "$ref": "parameters-schema.json#/definitions/CodeBlockBeforeSub"
+                },
+                "CodeOutOfRegion": {
+                    "$ref": "parameters-schema.json#/definitions/CodeOutOfRegion"
+                },
+                "CognitiveComplexity": {
+                    "$ref": "parameters-schema.json#/definitions/CognitiveComplexity"
+                },
+                "CommandModuleExportMethods": {
+                    "$ref": "parameters-schema.json#/definitions/CommandModuleExportMethods"
+                },
+                "CommentedCode": {
+                    "$ref": "parameters-schema.json#/definitions/CommentedCode"
+                },
+                "CommitTransactionOutsideTryCatch": {
+                    "$ref": "parameters-schema.json#/definitions/CommitTransactionOutsideTryCatch"
+                },
+                "CommonModuleAssign": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleAssign"
+                },
+                "CommonModuleInvalidType": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleInvalidType"
+                },
+                "CommonModuleMissingAPI": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleMissingAPI"
+                },
+                "CommonModuleNameCached": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleNameCached"
+                },
+                "CommonModuleNameClient": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleNameClient"
+                },
+                "CommonModuleNameClientServer": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleNameClientServer"
+                },
+                "CommonModuleNameFullAccess": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleNameFullAccess"
+                },
+                "CommonModuleNameGlobal": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleNameGlobal"
+                },
+                "CommonModuleNameGlobalClient": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleNameGlobalClient"
+                },
+                "CommonModuleNameServerCall": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleNameServerCall"
+                },
+                "CommonModuleNameWords": {
+                    "$ref": "parameters-schema.json#/definitions/CommonModuleNameWords"
+                },
+                "CompilationDirectiveLost": {
+                    "$ref": "parameters-schema.json#/definitions/CompilationDirectiveLost"
+                },
+                "CompilationDirectiveNeedLess": {
+                    "$ref": "parameters-schema.json#/definitions/CompilationDirectiveNeedLess"
+                },
+                "ConsecutiveEmptyLines": {
+                    "$ref": "parameters-schema.json#/definitions/ConsecutiveEmptyLines"
+                },
+                "CrazyMultilineString": {
+                    "$ref": "parameters-schema.json#/definitions/CrazyMultilineString"
+                },
+                "CreateQueryInCycle": {
+                    "$ref": "parameters-schema.json#/definitions/CreateQueryInCycle"
+                },
+                "CyclomaticComplexity": {
+                    "$ref": "parameters-schema.json#/definitions/CyclomaticComplexity"
+                },
+                "DataExchangeLoading": {
+                    "$ref": "parameters-schema.json#/definitions/DataExchangeLoading"
+                },
+                "DeletingCollectionItem": {
+                    "$ref": "parameters-schema.json#/definitions/DeletingCollectionItem"
+                },
+                "DeprecatedAttributes8312": {
+                    "$ref": "parameters-schema.json#/definitions/DeprecatedAttributes8312"
+                },
+                "DeprecatedCurrentDate": {
+                    "$ref": "parameters-schema.json#/definitions/DeprecatedCurrentDate"
+                },
+                "DeprecatedFind": {
+                    "$ref": "parameters-schema.json#/definitions/DeprecatedFind"
+                },
+                "DeprecatedMessage": {
+                    "$ref": "parameters-schema.json#/definitions/DeprecatedMessage"
+                },
+                "DeprecatedMethodCall": {
+                    "$ref": "parameters-schema.json#/definitions/DeprecatedMethodCall"
+                },
+                "DeprecatedMethods8310": {
+                    "$ref": "parameters-schema.json#/definitions/DeprecatedMethods8310"
+                },
+                "DeprecatedMethods8317": {
+                    "$ref": "parameters-schema.json#/definitions/DeprecatedMethods8317"
+                },
+                "DeprecatedTypeManagedForm": {
+                    "$ref": "parameters-schema.json#/definitions/DeprecatedTypeManagedForm"
+                },
+                "DuplicateRegion": {
+                    "$ref": "parameters-schema.json#/definitions/DuplicateRegion"
+                },
+                "EmptyCodeBlock": {
+                    "$ref": "parameters-schema.json#/definitions/EmptyCodeBlock"
+                },
+                "EmptyRegion": {
+                    "$ref": "parameters-schema.json#/definitions/EmptyRegion"
+                },
+                "EmptyStatement": {
+                    "$ref": "parameters-schema.json#/definitions/EmptyStatement"
+                },
+                "ExcessiveAutoTestCheck": {
+                    "$ref": "parameters-schema.json#/definitions/ExcessiveAutoTestCheck"
+                },
+                "ExecuteExternalCode": {
+                    "$ref": "parameters-schema.json#/definitions/ExecuteExternalCode"
+                },
+                "ExecuteExternalCodeInCommonModule": {
+                    "$ref": "parameters-schema.json#/definitions/ExecuteExternalCodeInCommonModule"
+                },
+                "ExportVariables": {
+                    "$ref": "parameters-schema.json#/definitions/ExportVariables"
+                },
+                "ExtraCommas": {
+                    "$ref": "parameters-schema.json#/definitions/ExtraCommas"
+                },
+                "FieldsFromJoinsWithoutIsNull": {
+                    "$ref": "parameters-schema.json#/definitions/FieldsFromJoinsWithoutIsNull"
+                },
+                "FormDataToValue": {
+                    "$ref": "parameters-schema.json#/definitions/FormDataToValue"
+                },
+                "FullOuterJoinQuery": {
+                    "$ref": "parameters-schema.json#/definitions/FullOuterJoinQuery"
+                },
+                "FunctionNameStartsWithGet": {
+                    "$ref": "parameters-schema.json#/definitions/FunctionNameStartsWithGet"
+                },
+                "FunctionOutParameter": {
+                    "$ref": "parameters-schema.json#/definitions/FunctionOutParameter"
+                },
+                "FunctionReturnsSamePrimitive": {
+                    "$ref": "parameters-schema.json#/definitions/FunctionReturnsSamePrimitive"
+                },
+                "FunctionShouldHaveReturn": {
+                    "$ref": "parameters-schema.json#/definitions/FunctionShouldHaveReturn"
+                },
+                "GetFormMethod": {
+                    "$ref": "parameters-schema.json#/definitions/GetFormMethod"
+                },
+                "GlobalContextMethodCollision8312": {
+                    "$ref": "parameters-schema.json#/definitions/GlobalContextMethodCollision8312"
+                },
+                "IdenticalExpressions": {
+                    "$ref": "parameters-schema.json#/definitions/IdenticalExpressions"
+                },
+                "IfConditionComplexity": {
+                    "$ref": "parameters-schema.json#/definitions/IfConditionComplexity"
+                },
+                "IfElseDuplicatedCodeBlock": {
+                    "$ref": "parameters-schema.json#/definitions/IfElseDuplicatedCodeBlock"
+                },
+                "IfElseDuplicatedCondition": {
+                    "$ref": "parameters-schema.json#/definitions/IfElseDuplicatedCondition"
+                },
+                "IfElseIfEndsWithElse": {
+                    "$ref": "parameters-schema.json#/definitions/IfElseIfEndsWithElse"
+                },
+                "IncorrectLineBreak": {
+                    "$ref": "parameters-schema.json#/definitions/IncorrectLineBreak"
+                },
+                "IncorrectUseLikeInQuery": {
+                    "$ref": "parameters-schema.json#/definitions/IncorrectUseLikeInQuery"
+                },
+                "IncorrectUseOfStrTemplate": {
+                    "$ref": "parameters-schema.json#/definitions/IncorrectUseOfStrTemplate"
+                },
+                "InvalidCharacterInFile": {
+                    "$ref": "parameters-schema.json#/definitions/InvalidCharacterInFile"
+                },
+                "IsInRoleMethod": {
+                    "$ref": "parameters-schema.json#/definitions/IsInRoleMethod"
+                },
+                "JoinWithSubQuery": {
+                    "$ref": "parameters-schema.json#/definitions/JoinWithSubQuery"
+                },
+                "JoinWithVirtualTable": {
+                    "$ref": "parameters-schema.json#/definitions/JoinWithVirtualTable"
+                },
+                "LatinAndCyrillicSymbolInWord": {
+                    "$ref": "parameters-schema.json#/definitions/LatinAndCyrillicSymbolInWord"
+                },
+                "LineLength": {
+                    "$ref": "parameters-schema.json#/definitions/LineLength"
+                },
+                "LogicalOrInTheWhereSectionOfQuery": {
+                    "$ref": "parameters-schema.json#/definitions/LogicalOrInTheWhereSectionOfQuery"
+                },
+                "MagicDate": {
+                    "$ref": "parameters-schema.json#/definitions/MagicDate"
+                },
+                "MagicNumber": {
+                    "$ref": "parameters-schema.json#/definitions/MagicNumber"
+                },
+                "MetadataObjectNameLength": {
+                    "$ref": "parameters-schema.json#/definitions/MetadataObjectNameLength"
+                },
+                "MethodSize": {
+                    "$ref": "parameters-schema.json#/definitions/MethodSize"
+                },
+                "MissingCodeTryCatchEx": {
+                    "$ref": "parameters-schema.json#/definitions/MissingCodeTryCatchEx"
+                },
+                "MissingEventSubscriptionHandler": {
+                    "$ref": "parameters-schema.json#/definitions/MissingEventSubscriptionHandler"
+                },
+                "MissingParameterDescription": {
+                    "$ref": "parameters-schema.json#/definitions/MissingParameterDescription"
+                },
+                "MissingReturnedValueDescription": {
+                    "$ref": "parameters-schema.json#/definitions/MissingReturnedValueDescription"
+                },
+                "MissingSpace": {
+                    "$ref": "parameters-schema.json#/definitions/MissingSpace"
+                },
+                "MissingTempStorageDeletion": {
+                    "$ref": "parameters-schema.json#/definitions/MissingTempStorageDeletion"
+                },
+                "MissingTemporaryFileDeletion": {
+                    "$ref": "parameters-schema.json#/definitions/MissingTemporaryFileDeletion"
+                },
+                "MissingVariablesDescription": {
+                    "$ref": "parameters-schema.json#/definitions/MissingVariablesDescription"
+                },
+                "MultilineStringInQuery": {
+                    "$ref": "parameters-schema.json#/definitions/MultilineStringInQuery"
+                },
+                "MultilingualStringHasAllDeclaredLanguages": {
+                    "$ref": "parameters-schema.json#/definitions/MultilingualStringHasAllDeclaredLanguages"
+                },
+                "MultilingualStringUsingWithTemplate": {
+                    "$ref": "parameters-schema.json#/definitions/MultilingualStringUsingWithTemplate"
+                },
+                "NestedConstructorsInStructureDeclaration": {
+                    "$ref": "parameters-schema.json#/definitions/NestedConstructorsInStructureDeclaration"
+                },
+                "NestedFunctionInParameters": {
+                    "$ref": "parameters-schema.json#/definitions/NestedFunctionInParameters"
+                },
+                "NestedStatements": {
+                    "$ref": "parameters-schema.json#/definitions/NestedStatements"
+                },
+                "NestedTernaryOperator": {
+                    "$ref": "parameters-schema.json#/definitions/NestedTernaryOperator"
+                },
+                "NonExportMethodsInApiRegion": {
+                    "$ref": "parameters-schema.json#/definitions/NonExportMethodsInApiRegion"
+                },
+                "NonStandardRegion": {
+                    "$ref": "parameters-schema.json#/definitions/NonStandardRegion"
+                },
+                "NumberOfOptionalParams": {
+                    "$ref": "parameters-schema.json#/definitions/NumberOfOptionalParams"
+                },
+                "NumberOfParams": {
+                    "$ref": "parameters-schema.json#/definitions/NumberOfParams"
+                },
+                "NumberOfValuesInStructureConstructor": {
+                    "$ref": "parameters-schema.json#/definitions/NumberOfValuesInStructureConstructor"
+                },
+                "OSUsersMethod": {
+                    "$ref": "parameters-schema.json#/definitions/OSUsersMethod"
+                },
+                "OneStatementPerLine": {
+                    "$ref": "parameters-schema.json#/definitions/OneStatementPerLine"
+                },
+                "OrderOfParams": {
+                    "$ref": "parameters-schema.json#/definitions/OrderOfParams"
+                },
+                "OrdinaryAppSupport": {
+                    "$ref": "parameters-schema.json#/definitions/OrdinaryAppSupport"
+                },
+                "PairingBrokenTransaction": {
+                    "$ref": "parameters-schema.json#/definitions/PairingBrokenTransaction"
+                },
+                "ParseError": {
+                    "$ref": "parameters-schema.json#/definitions/ParseError"
+                },
+                "ProcedureReturnsValue": {
+                    "$ref": "parameters-schema.json#/definitions/ProcedureReturnsValue"
+                },
+                "PublicMethodsDescription": {
+                    "$ref": "parameters-schema.json#/definitions/PublicMethodsDescription"
+                },
+                "RedundantAccessToObject": {
+                    "$ref": "parameters-schema.json#/definitions/RedundantAccessToObject"
+                },
+                "RefOveruse": {
+                    "$ref": "parameters-schema.json#/definitions/RefOveruse"
+                },
+                "SelectTopWithoutOrderBy": {
+                    "$ref": "parameters-schema.json#/definitions/SelectTopWithoutOrderBy"
+                },
+                "SelfAssign": {
+                    "$ref": "parameters-schema.json#/definitions/SelfAssign"
+                },
+                "SelfInsertion": {
+                    "$ref": "parameters-schema.json#/definitions/SelfInsertion"
+                },
+                "SemicolonPresence": {
+                    "$ref": "parameters-schema.json#/definitions/SemicolonPresence"
+                },
+                "SetPermissionsForNewObjects": {
+                    "$ref": "parameters-schema.json#/definitions/SetPermissionsForNewObjects"
+                },
+                "SeveralCompilerDirectives": {
+                    "$ref": "parameters-schema.json#/definitions/SeveralCompilerDirectives"
+                },
+                "SpaceAtStartComment": {
+                    "$ref": "parameters-schema.json#/definitions/SpaceAtStartComment"
+                },
+                "StyleElementConstructors": {
+                    "$ref": "parameters-schema.json#/definitions/StyleElementConstructors"
+                },
+                "TempFilesDir": {
+                    "$ref": "parameters-schema.json#/definitions/TempFilesDir"
+                },
+                "TernaryOperatorUsage": {
+                    "$ref": "parameters-schema.json#/definitions/TernaryOperatorUsage"
+                },
+                "ThisObjectAssign": {
+                    "$ref": "parameters-schema.json#/definitions/ThisObjectAssign"
+                },
+                "TimeoutsInExternalResources": {
+                    "$ref": "parameters-schema.json#/definitions/TimeoutsInExternalResources"
+                },
+                "TooManyReturns": {
+                    "$ref": "parameters-schema.json#/definitions/TooManyReturns"
+                },
+                "TryNumber": {
+                    "$ref": "parameters-schema.json#/definitions/TryNumber"
+                },
+                "Typo": {
+                    "$ref": "parameters-schema.json#/definitions/Typo"
+                },
+                "UnaryPlusInConcatenation": {
+                    "$ref": "parameters-schema.json#/definitions/UnaryPlusInConcatenation"
+                },
+                "UnionAll": {
+                    "$ref": "parameters-schema.json#/definitions/UnionAll"
+                },
+                "UnknownPreprocessorSymbol": {
+                    "$ref": "parameters-schema.json#/definitions/UnknownPreprocessorSymbol"
+                },
+                "UnreachableCode": {
+                    "$ref": "parameters-schema.json#/definitions/UnreachableCode"
+                },
+                "UnsafeSafeModeMethodCall": {
+                    "$ref": "parameters-schema.json#/definitions/UnsafeSafeModeMethodCall"
+                },
+                "UnusedLocalMethod": {
+                    "$ref": "parameters-schema.json#/definitions/UnusedLocalMethod"
+                },
+                "UnusedParameters": {
+                    "$ref": "parameters-schema.json#/definitions/UnusedParameters"
+                },
+                "UsageWriteLogEvent": {
+                    "$ref": "parameters-schema.json#/definitions/UsageWriteLogEvent"
+                },
+                "UseLessForEach": {
+                    "$ref": "parameters-schema.json#/definitions/UseLessForEach"
+                },
+                "UsingCancelParameter": {
+                    "$ref": "parameters-schema.json#/definitions/UsingCancelParameter"
+                },
+                "UsingExternalCodeTools": {
+                    "$ref": "parameters-schema.json#/definitions/UsingExternalCodeTools"
+                },
+                "UsingFindElementByString": {
+                    "$ref": "parameters-schema.json#/definitions/UsingFindElementByString"
+                },
+                "UsingGoto": {
+                    "$ref": "parameters-schema.json#/definitions/UsingGoto"
+                },
+                "UsingHardcodeNetworkAddress": {
+                    "$ref": "parameters-schema.json#/definitions/UsingHardcodeNetworkAddress"
+                },
+                "UsingHardcodePath": {
+                    "$ref": "parameters-schema.json#/definitions/UsingHardcodePath"
+                },
+                "UsingHardcodeSecretInformation": {
+                    "$ref": "parameters-schema.json#/definitions/UsingHardcodeSecretInformation"
+                },
+                "UsingLikeInQuery": {
+                    "$ref": "parameters-schema.json#/definitions/UsingLikeInQuery"
+                },
+                "UsingModalWindows": {
+                    "$ref": "parameters-schema.json#/definitions/UsingModalWindows"
+                },
+                "UsingObjectNotAvailableUnix": {
+                    "$ref": "parameters-schema.json#/definitions/UsingObjectNotAvailableUnix"
+                },
+                "UsingServiceTag": {
+                    "$ref": "parameters-schema.json#/definitions/UsingServiceTag"
+                },
+                "UsingSynchronousCalls": {
+                    "$ref": "parameters-schema.json#/definitions/UsingSynchronousCalls"
+                },
+                "UsingThisForm": {
+                    "$ref": "parameters-schema.json#/definitions/UsingThisForm"
+                },
+                "VirtualTableCallWithoutParameters": {
+                    "$ref": "parameters-schema.json#/definitions/VirtualTableCallWithoutParameters"
+                },
+                "WrongDataPathForFormElements": {
+                    "$ref": "parameters-schema.json#/definitions/WrongDataPathForFormElements"
+                },
+                "WrongUseFunctionProceedWithCall": {
+                    "$ref": "parameters-schema.json#/definitions/WrongUseFunctionProceedWithCall"
+                },
+                "WrongUseOfRollbackTransactionMethod": {
+                    "$ref": "parameters-schema.json#/definitions/WrongUseOfRollbackTransactionMethod"
+                },
+                "YoLetterUsage": {
+                    "$ref": "parameters-schema.json#/definitions/YoLetterUsage"
+                }
+            }
+        },
+        "codeLensParameters": {
+            "$id": "#/definitions/codeLensParameters",
+            "type": "object",
+            "title": "CodeLenses parameters configuration.\nKey-value object, where key is a code lens ID, and value is boolean or object with concrete code lens configuration.",
+            "default": null,
+            "additionalProperties": {
+                "$ref": "#/definitions/parameter"
+            },
+            "properties": {
+                "cognitiveComplexity": {
+                    "default": true,
+                    "type": [
+                        "boolean",
+                        "object"
+                    ],
+                    "title": "Show cognitive complexity score above method definition.",
+                    "properties": {
+                        "complexityThreshold": {
+                            "description": "Complexity threshold to show the lens",
+                            "default": -1,
+                            "type": "integer",
+                            "title": "Complexity threshold to show the lens"
+                        }
+                    },
+                    "$id": "#/definitions/codeLensParameters/cognitiveComplexity"
+                },
+                "cyclomaticComplexity": {
+                    "default": true,
+                    "type": [
+                        "boolean",
+                        "object"
+                    ],
+                    "title": "Show cyclomatic complexity score above method definition.",
+                    "properties": {
+                        "complexityThreshold": {
+                            "description": "Complexity threshold to show the lens",
+                            "default": -1,
+                            "type": "integer",
+                            "title": "Complexity threshold to show the lens"
+                        }
+                    },
+                    "$id": "#/definitions/codeLensParameters/cyclomaticComplexity"
+                }
+            }
+        }
+    },
+    "properties": {
+        "language": {
+            "$id": "#/properties/language",
+            "type": "string",
+            "oneOf": [
+                {
+                    "const": "en",
+                    "description": "English"
+                },
+                {
+                    "const": "ru",
+                    "description": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439 (russian)"
+                }
+            ],
+            "title": "Language of messages, resources and all communications between BLS LS and user.",
+            "default": "ru"
+        },
+        "codeLens": {
+            "$id": "#/properties/codeLens",
+            "type": "object",
+            "title": "Code Lens configuration.",
+            "properties": {
+                "parameters": {
+                    "$ref": "#/definitions/codeLensParameters"
+                }
+            }
+        },
+        "documentLink": {
+            "$id": "#/properties/documentLink",
+            "type": "object",
+            "title": "Document link configuration.",
+            "properties": {
+                "showDiagnosticDescription": {
+                    "$id": "#/properties/showDiagnosticDescription",
+                    "type": "boolean",
+                    "title": "Show additional links to diagnostics documentation.",
+                    "default": false
+                }
+            }
+        },
+        "diagnostics": {
+            "$id": "#/properties/diagnostics",
+            "type": "object",
+            "title": "Diagnostics configuration.",
+            "properties": {
+                "parameters": {
+                    "$ref": "#/definitions/diagnosticParameters"
+                },
+                "computeTrigger": {
+                    "$id": "#/properties/computeTrigger",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "const": "onSave",
+                            "description": "Compute on save"
+                        },
+                        {
+                            "const": "onType",
+                            "description": "Compute on type (edit file)"
+                        },
+                        {
+                            "const": "never",
+                            "description": "Never compute"
+                        }
+                    ],
+                    "title": "Trigger for the computation of diagnostics.",
+                    "default": "onSave"
+                },
+                "skipSupport": {
+                    "$id": "#/properties/skipSupport",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "const": "withSupport",
+                            "description": "Skip computing diagnostics on modules with any kind of support."
+                        },
+                        {
+                            "const": "withSupportLocked",
+                            "description": "Skip computing diagnostics on modules with `not editable` support mode."
+                        },
+                        {
+                            "const": "never",
+                            "description": "Never skip computing."
+                        }
+                    ],
+                    "title": "Analyze module support variant and skip all diagnostics if necessary.",
+                    "default": "never"
+                },
+                "mode": {
+                    "$id": "#/properties/mode",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "const": "on",
+                            "description": "All diagnostics activated by default are enabled."
+                        },
+                        {
+                            "const": "off",
+                            "description": "All diagnostics are disabled"
+                        },
+                        {
+                            "const": "except",
+                            "description": "All diagnostics except defined in 'parameters' section are disabled."
+                        },
+                        {
+                            "const": "only",
+                            "description": "Only diagnostics defined in 'parameters' section are enabled."
+                        },
+                        {
+                            "const": "all",
+                            "description": "All diagnostics are enabled."
+                        }
+                    ],
+                    "title": "Diagnostics enabling/disabling mode.",
+                    "default": "on"
+                },
+                "ordinaryAppSupport": {
+                    "$id": "#/properties/ordinaryAppSupport",
+                    "type": "boolean",
+                    "title": "Ordinary client support. Diagnostics will require taking into account the features of a ordinary application.",
+                    "default": true,
+                    "oneOf": [
+                        {
+                            "const": true,
+                            "description": "Configuration uses ordinary application (default)."
+                        },
+                        {
+                            "const": false,
+                            "description": "Ignore ordinary application warnings."
+                        }
+                    ]
+                }
+            }
+        },
+        "useDevSite": {
+            "$id": "#/properties/useDevSite",
+            "type": "boolean",
+            "title": "Use develop version of site for documentation links.",
+            "default": false
+        },
+        "siteRoot": {
+            "$id": "#/properties/siteRoot",
+            "type": "string",
+            "title": "Root URL for documentation links.",
+            "default": "https://1c-syntax.github.io/bsl-language-server"
+        },
+        "traceLog": {
+            "$id": "#/properties/traceLog",
+            "type": "string",
+            "title": "Path to file to log all inbound and outbound requests between BSL Language Server and Language Client from used IDE.\nCan be absolute or relative (to the project root). If set *significantly slows down* communication speed between server and client.",
+            "default": "",
+            "examples": [
+                ".trace.log"
+            ]
+        },
+        "configurationRoot": {
+            "$id": "#/properties/configurationRoot",
+            "type": "string",
+            "title": "Path to root directory of configuration files.",
+            "default": null
+        }
+    }
+}
