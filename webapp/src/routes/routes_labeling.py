@@ -50,8 +50,8 @@ def labeling_with_artifact(target_artifact_id):
             spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
 
-            #newLinkToFileJava = '/labeling-machine/'+'/'.join(artifact_data.linkToFileJava.split('/')[5:])
-            newLinkToFileJava = artifact_data.linkToFileJava
+            newLinkToFileJava = '/labeling-machine/'+'/'.join(artifact_data.linkToFileJava.split('/')[5:])
+            #newLinkToFileJava = artifact_data.linkToFileJava
 
             with open(newLinkToFileJava) as f:
                 javaClassText = f.read()
