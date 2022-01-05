@@ -4,9 +4,8 @@ from flask import render_template, request, redirect, url_for, jsonify
 from src.helper.tools_labeling import *
 from src.helper.tools_common import is_signed_in, lock_artifact_by
 from src import app
-from src.database.models import Note
 from src.helper.consts import *
-import json
+import json,re
 
 
 @app.route("/labeling", methods=['GET', 'POST'])
@@ -51,13 +50,33 @@ def labeling_with_artifact(target_artifact_id):
             spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
 
-            newLinkToFileJava = '/labeling-machine/'+'/'.join(artifact_data.linkToFileJava.split('/')[5:])
-            print('--> ' + newLinkToFileJava)
+            #newLinkToFileJava = '/labeling-machine/'+'/'.join(artifact_data.linkToFileJava.split('/')[5:])
+            newLinkToFileJava = artifact_data.linkToFileJava
 
             with open(newLinkToFileJava) as f:
                 javaClassText = f.read()
 
+            pattern = r"(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)"
+            regex = re.compile(pattern, re.MULTILINE | re.DOTALL)
+            javaClassLines = javaClassText.splitlines()
 
+            refinedIndicisList = []
+            for (idx, item) in enumerate(spanListMethods):
+                start = int(item.split('-')[0])
+                end = int(item.split('-')[1])
+                method = '\n'.join(javaClassLines[start:end])
+                try:
+                    regex.search(method).group(0)
+                    refinedIndicisList.append(idx)
+                except Exception:
+                    continue
+
+
+            spanListMethods = [spanListMethods[index] for index in refinedIndicisList]
+            methodsName = [methodsName[index] for index in refinedIndicisList]
+
+            print(spanListMethods)
+            print(methodsName)
 
             with open(newLinkToFileJava) as f:
                 classLines = [item for item in f.readlines()]
@@ -151,89 +170,25 @@ def labeling_with_artifact(target_artifact_id):
         return "Why POST?"
 
 
-@app.route("/note", methods=['GET', 'POST'])
-def note():
-    if CURRENT_TASK['level'] != 0:  # We are not at Labeling phase anymore.
-        return jsonify('{{ "error": "We are not labeling. Labeling data is in read-only mode." }}')
+
+@app.route("/flag", methods=['GET', 'POST'])
+def flagClass():
 
     if request.method == 'POST':
-        artifact_id = request.form['artifact_id']
-        note_text = request.form['note']
-        action = request.form['action']
+        if request.form['artifact_id'] == '':
+            return jsonify('{ "status": "Empty arguments" }')
 
-        n = len(Note.query.filter_by(artifact_id=artifact_id).filter_by(note=note_text).all())
-        my_note_report_on_artifact = Note.query.filter_by(artifact_id=artifact_id).filter_by(note=note_text).filter_by(
-            added_by=who_is_signed_in()).first()
-        if my_note_report_on_artifact is None:
-            status = "false"
-        else:
-            status = "true"
+    try:
+        new_fp_report = FlaggedArtifact(artifact_id=int(request.form['artifact_id']), added_by=who_is_signed_in())
+        db.session.add(new_fp_report)
+        db.session.commit()
+    except Exception:
+        print('Already Added, we do not care')
 
-        if action == 'status':
-            return jsonify('{{ "error": "", "{}_new_status": {}, "total": {} }}'.format(note_text, status, n))
-        if action == 'toggle':
-            if my_note_report_on_artifact is None:
-                noteedPost = Note(artifact_id=artifact_id, note=note_text, added_by=who_is_signed_in())
-                db.session.add(noteedPost)
-                db.session.commit()
-                n += 1
-                status = "true"
-            else:
-                db.session.delete(my_note_report_on_artifact)
-                db.session.commit()
-                n -= 1
-                status = "false"
-            return jsonify('{{ "error": "", "{}_new_status": {}, "total": {} }}'.format(note_text, status, n))
-        else:
-            return jsonify('{{ "error": "Bad Request: {}" }}'.format(action))
-    else:
-        return "Not POST!"
-
-
-@app.route("/flag_artifact", methods=['GET', 'POST'])
-def toggle_fp():
-    if CURRENT_TASK['level'] != 0:  # We are not at Labeling phase anymore.
-        return jsonify('{{ "error": "We are not labeling. Labeling data is in read-only mode." }}')
-
-    if request.method == 'POST':
-        artifact_id = request.form['artifact_id']
-        action = request.form['action']
-
-        n_flaggers = len(FlaggedArtifact.query.filter_by(artifact_id=artifact_id).all())
-        my_flag_report_on_artifact = FlaggedArtifact.query.filter_by(artifact_id=artifact_id).filter_by(
-            added_by=who_is_signed_in()).first()
-
-        if my_flag_report_on_artifact is None:
-            status = "false"
-        else:
-            status = "true"
-
-        if action == 'status':
-            return jsonify('{{ "error": "", "new_status": {}, "nFP": {} }}'.format(status, n_flaggers))
-        if action == 'toggle':
-            if my_flag_report_on_artifact is None:
-                new_fp_report = FlaggedArtifact(artifact_id=artifact_id, added_by=who_is_signed_in())
-                db.session.add(new_fp_report)
-                db.session.commit()
-                n_flaggers += 1
-                status = "true"
-            else:
-                db.session.delete(my_flag_report_on_artifact)
-                db.session.commit()
-                n_flaggers -= 1
-                status = "false"
-            return jsonify('{{ "error": "", "new_status": {}, "nFP": {} }}'.format(status, n_flaggers))
-        else:
-            return jsonify('{{ "error": "Bad Request: {}" }}'.format(action))
-
-    else:
-        return "Not POST!"
-
+    return jsonify('{ "status": "success" }')
 
 @app.route("/label", methods=['GET', 'POST'])
 def label():
-    if CURRENT_TASK['level'] != 0:  # We are not at Labeling phase anymore.
-        return jsonify('{ "error": "We are not labeling. Labeling data is in read-only mode." }')
 
     if request.method == 'POST':
         if request.form['artifact_id'] == '' or request.form['duration'] == '':

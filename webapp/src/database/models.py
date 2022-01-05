@@ -24,18 +24,6 @@ class User(db.Model):
         return value.title()
 
 
-class Note(db.Model):
-    """
-    Additional notes on artifacts. e.g., "Nice example", "Needs extra caution".
-    """
-    __tablename__ = 'Note'
-    id = db.Column(db.INTEGER, primary_key=True, autoincrement=True)
-    artifact_id = db.Column(db.Integer, nullable=False)
-    note = db.Column(db.Text, nullable=False)
-    added_by = db.Column(db.Text, nullable=False)
-    added_at = db.Column(db.DateTime, default=func.now())
-
-
 class FlaggedArtifact(db.Model):
     __tablename__ = 'FlaggedArtifact'
     artifact_id = db.Column(db.Integer, primary_key=True)

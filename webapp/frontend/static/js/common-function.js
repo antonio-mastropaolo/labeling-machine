@@ -105,7 +105,7 @@ function highlightRangeNew(start, end){
     for (let i = 0; i < replacements.length; i++) {
         let replacement = replacements[i];
         let highlight = document.createElement('span');
-        if(isLabeled==0) { highlight.setAttribute("id", "highlight-" + counterAssociations); }
+        if(isLabeled==0) { highlight.setAttribute("id", "highlight-" + dictIndex); }
         else{ highlight.setAttribute("id", "highlight-" + currentClassification);}
         highlight.setAttribute("style", "background-color: #FFE5CC");
         let wordNode = replacement.node.splitText(replacement.pos);
@@ -121,6 +121,17 @@ function highlightRangeNew(start, end){
 }
 
 function moveToSelectedMethodFromTag(indexComment, indexClassification) {
+
+    //unlock code section
+    $("#code").css('user-select','');
+
+    //activate the previously disabled save and clear button
+    $("#saveClassification").removeAttr('disabled');
+    $("#clearText").removeAttr('disabled');
+
+    if ($("#clearText").text().trim() === 'Reset'){
+        $("#clearText").text('Change');
+    }
 
     var arr = Array.from(comments);
     indexComment = indexComment.toString();
@@ -161,7 +172,7 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
         currentIndexComment = Number(j);
         // We highlight the previously made classification
         const position = dictHighlightedCommentsPosition[indexClassification][currentIndexComment];
-        $(comments[position]).css('color', 'red');
+        $(comments[position]).css('color', 'red').attr('id','comment-highlight-'+currentClassification);
         highlightedCommentsInReviewing.push(comments[position]);
         var lines = $(comments[position]).text().split('\n');
         for (var k = 0; k < lines.length; k++) {
@@ -193,20 +204,27 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     var concatenedString = ''
     var previousString = ''
 
-
-    for(var j=0; j < $(spanSelector).length; j++){
-        // console.log('************');
-        // console.log($(spanSelector)[j].innerText);
-        // console.log('*************');
-
-        concatenedString = previousString + $(spanSelector)[j].innerText;
-        if(concatenedString.trim().endsWith(';') || concatenedString.trim().endsWith('}') || concatenedString.trim().endsWith('{')){
-            updateTextArea('<span class="selected-code">' + concatenedString + '</span>');
-            previousString = '';
-        }else{
-            previousString = concatenedString;
-        }
+    // we should find a nice way to highlight the selected text
+    for(var j=0; j < $(spanSelector).length; j++) {
+        concatenedString = concatenedString + $(spanSelector)[j].innerText;
     }
+
+    if(concatenedString.includes(';') || concatenedString.includes('{') || concatenedString.includes('}')){
+        concatenedString = '';
+        for(var j=0; j < $(spanSelector).length; j++){
+            concatenedString = previousString + $(spanSelector)[j].innerText;
+            if(concatenedString.trim().endsWith(';') || concatenedString.trim().endsWith('}') || concatenedString.trim().endsWith('{')){
+                updateTextArea('<span class="selected-code">' + concatenedString + '</span>');
+                previousString = '';
+            }else{
+                previousString = concatenedString;
+            }
+        }
+    }else{
+        updateTextArea('<span class="selected-code">' + concatenedString + '</span>');
+    }
+
+
 
 
 }
@@ -325,17 +343,31 @@ function reset(save=false){
     $("#new-category-button").text("Define New Category");
 
     if(!save) {
-        changeCommentHighlighting(commentEleToHighlight,'', true);
+        //changeCommentHighlighting(commentEleToHighlight,'', true);
+        if(isLabeled==0){
+            var spanSelector = "[id=comment-highlight-" + (dictIndex) + "]";
+            $(spanSelector).css('color', '');
+            resetHighlightedCode(dictHighlightedCode[dictIndex], dictIndex);
+        }
+
         if(isLabeled==1){
+            //reset comment
+            var spanSelector = "[id=comment-highlight-" + (currentClassification) + "]";
+            $(spanSelector).css('color', '');
+
             //reset code
-            var spanSelector = "[id=highlight-"+(currentClassification)+"]";
+            spanSelector = "[id=highlight-"+(currentClassification)+"]";
             $(spanSelector).css('background-color','').attr("id","old-span");
-        }else {
-            resetHighlightedCode(dictHighlightedCode[counterAssociations], counterAssociations);
         }
     }
 
     if(isLabeled==1 && save){
+
+        //Disable Save and Reset button until the user click on the first association
+        $("#saveClassification").attr('disabled','disabled');
+        $("#clearText").attr('disabled','disabled');
+
+
         //changing previous span token(highlighting) with the green one
         var selector = "[id=highlight-"+(currentClassification)+"]";
         $(selector).css('background-color','#CCFFE5');
@@ -410,15 +442,6 @@ function changeCommentHighlighting(customList, color, reset=false){
 
     }
 }
-
-// function checkForButtonValidity(){
-//     let textBoxVal = $("#textAreaSelectedText").val();
-//     if(textBoxVal==""|| (!textBoxVal.trim().startsWith("//") && !textBoxVal.trim().startsWith("/*") && !textBoxVal.trim().startsWith('/**')  )) {
-//         alert("Select a comment first!");
-//         return false;
-//     }
-//     return true;
-// }
 
 function checkForButtonValidity(){
 
@@ -520,9 +543,9 @@ function saveCategorization(){
             var buttonID = "association" + '-' + dictIndex;
             var buttonText = "Association: #" + dictIndex;
 
-            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" +  "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
+            //var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" +  "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
 
-            //var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="moveToSelectedMethod( '+ counterAssociations +' ); removeAssociation(\''+ divID +'\')"></i></button></div>';
+            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="moveToSelectedMethod( '+ dictIndex +' ); removeAssociation(\''+ divID +'\')"></i></button></div>';
             //onclick="removeAssociation(\''+ divID +'\')">
 
             // handling list for the reviewing part
@@ -570,6 +593,8 @@ function saveCategorization(){
             $("#badgeCounter").text(counterAssociations);
         }
 
+        //lock code section
+        $("#code").css('user-select','none');
         reset(save=true);
     }
 
@@ -607,15 +632,21 @@ function removeAssociation(divID){
 
     //removing highlighting for code and comment
     resetHighlightedCode($(dictHighlightedCode[targetAssociation]),targetAssociation);
-    if(commentEleToHighlight.length === 0){
+    var spanSelector = "[id=comment-highlight-"+(targetAssociation)+"]";
+    $(spanSelector).css('color','');
+
+    /*if(commentEleToHighlight.length === 0){
+        var spanSelector = "[id=comment-highlight-"+(currentClassification)+"]";
+        $(spanSelector).css('color','');
         //console.log(dictHighlightedComments);
-        changeCommentHighlighting(dictHighlightedComments[targetAssociation], '');
+        //changeCommentHighlighting(dictHighlightedComments[targetAssociation], '');
     }else{
         //console.log(commentEleToHighlight);
         changeCommentHighlighting(commentEleToHighlight, '');
-    }
+    }*/
 
     //dictRangeHighlightedCode[targetAssociation] = [];
+
     dictHighlightedCommentsPosition[targetAssociation] = [];
     dictHighlightedCodeCharacterPosition[targetAssociation] = [];
 
@@ -650,6 +681,7 @@ function getSameKeysDict(dict1, dict2){
     }
     return newRefinedDict;
 }
+
 
 function checkForChangedCategory(element){
 

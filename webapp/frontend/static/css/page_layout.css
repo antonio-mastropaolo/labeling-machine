@@ -1,0 +1,119 @@
+.category-button{}
+
+.commentHighlighting{
+    background-color: yellow;
+}
+
+.selected-comment{
+    color:yellow;
+    display: block;
+}
+
+.selected-code{
+    color:#FFE5CC;
+    display: block;
+}
+
+
+.buttonWrapper{
+    padding-bottom:7px;
+    border-radius: 25px;
+    padding-right: 5px;
+    padding-left: 3px;
+}
+
+.animationLabel{
+    animation:color-me-in 4s;
+}
+
+@keyframes color-me-in {
+  /* You could think of as "step 1" */
+  0% {
+    background: red;
+  }
+  /* You could think of as "step 2" */
+  100% {
+    background: black;
+  }
+}
+
+.popUp{
+    border-style: solid;
+    position:absolute;
+    border-color: #842029;
+    padding:2px;
+    color:white;
+    /*left:2.8%;*/
+    top:82%;
+    width:16.5%;
+}
+
+.popUpCategory{
+    border-style: solid;
+    border-color: #842029;
+    position:absolute;
+    padding:2px;
+    color:white;
+    width:16.5%;
+    /*left:5%;*/
+    top:58%;
+}
+
+.button-corner-down {
+    position: fixed;
+    bottom: 0.5%;
+    text-align: center;
+    background-color: black;
+    left: 78%;
+    width: 5%;
+}
+
+.button-corner-up {
+    position: fixed;
+    bottom: 7%;
+    left: 78%;
+    text-align: center;
+    background-color: black;
+    width: 5%;
+}
+
+.textarea {
+    width:66.7%;
+    overflow: hidden;
+    overflow-y: scroll;
+    bottom:0;
+    height:11%;
+    border-style: double;
+    background-color: #404040;
+    position:fixed;
+    margin-bottom: -2px;
+}
+
+#code{
+    margin-top:-2.44%;
+}
+
+@media screen and (max-height: 1250px) {
+    #code{
+      margin-top:-3.50%;
+    }
+
+    .textarea{
+        bottom:0;
+        height:10%;
+    }
+
+
+    .button-corner-down{
+        bottom: 0.5%;
+    }
+
+    .button-corner-up{
+        bottom: 5.5%;
+    }
+
+}
+
+hr.solid {
+    border-top: 3px solid #bbb;
+}
