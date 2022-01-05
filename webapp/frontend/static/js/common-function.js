@@ -591,10 +591,12 @@ function saveCategorization(){
             flagSwitch=false;
             counterAssociations = counterAssociations - 1;
             $("#badgeCounter").text(counterAssociations);
+
+            //lock code section
+            $("#code").css('user-select','none');
         }
 
-        //lock code section
-        $("#code").css('user-select','none');
+
         reset(save=true);
     }
 
