@@ -217,24 +217,7 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     for(var j=0; j < $(spanSelector).length; j++) {
         concatenedString = concatenedString + $(spanSelector)[j].innerText;
     }
-
-    if(concatenedString.includes(';') || concatenedString.includes('{') || concatenedString.includes('}')){
-        concatenedString = '';
-        for(var j=0; j < $(spanSelector).length; j++){
-            concatenedString = previousString + $(spanSelector)[j].innerText;
-            if(concatenedString.trim().endsWith(';') || concatenedString.trim().endsWith('}') || concatenedString.trim().endsWith('{')){
-                updateTextArea('<span class="selected-code">' + concatenedString + '</span>');
-                previousString = '';
-            }else{
-                previousString = concatenedString;
-            }
-        }
-    }else{
-        updateTextArea('<span class="selected-code">' + concatenedString + '</span>');
-    }
-
-
-
+    updateTextArea('<span class="selected-code">' +concatenedString + '</span>');
 
 }
 
@@ -529,7 +512,9 @@ function saveCategorization(){
     if (isSelectedCategory()){
         //save snippet
 
-        if(selectedCodeText.trim() ==="" && resetClicked){
+        console.log(selectedCodeText);
+        console.log(resetClicked);
+        if(selectedCodeText.trim() === "" && resetClicked){
             alert("First link the given comment to the snippet!");
             return false;
         }
