@@ -77,88 +77,93 @@
         <div class="row no-gutters">
 
               <div class=" col-md-2 vh-100" style="background-color: black;">
+                  <div id="categoriesColumn" >
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="code-summary-button"
+                                style="width: 100%" > Code Summary
+                              </button>
+                          </div>
 
-                  <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="code-summary-button"
-                        style="width: 100%" > Code Summary
-                      </button>
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="expand-button"
+                                style="width: 100%" > Expand
+                              </button>
+                          </div>
+
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="rationale-button"
+                                style="width: 100%" > Rationale
+                              </button>
+                          </div>
+
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="deprecation-button"
+                                style="width: 100%" > Code Deprecation
+                              </button>
+                          </div>
+
+                          <!--<div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="usage-button"
+                                style="width: 100%" > Usage
+                              </button>
+                          </div>
+                          We decided to discard this comment category since too fine-grained
+                          -->
+
+                          <!--
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="exception-button"
+                                style="width: 100%" > Exception
+                              </button>
+                          </div>
+                          We decided to discard this comment category since too fine-grained
+                          -->
+
+                           <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="todo-button"
+                                style="width: 100%" > Work in Progress <!-- Previously: TO-DO -->
+                              </button>
+                          </div>
+
+                           <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="comment-code-button"
+                                style="width: 100%" > Commented Code
+                              </button>
+                          </div>
+
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="incomplete-button"
+                                style="width: 100%" > Incomplete Comment
+                              </button>
+                          </div>
+
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                type="submit"
+                                id="new-category-button1"
+                                style="width: 100%" > Define new category
+                              </button>
+                          </div>
                   </div>
-
-                  <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="expand-button"
-                        style="width: 100%" > Expand
-                      </button>
-                  </div>
-
-                  <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="rationale-button"
-                        style="width: 100%" > Rationale
-                      </button>
-                  </div>
-
-                  <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="deprecation-button"
-                        style="width: 100%" > Deprecation
-                      </button>
-                  </div>
-
-                  <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="usage-button"
-                        style="width: 100%" > Usage
-                      </button>
-                  </div>
-
-                  <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="exception-button"
-                        style="width: 100%" > Exception
-                      </button>
-                  </div>
-
-                   <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="todo-button"
-                        style="width: 100%" > TO-DO
-                      </button>
-                  </div>
-
-                   <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="comment-code-button"
-                        style="width: 100%" > Commented Code
-                      </button>
-                  </div>
-
-                  <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="incomplete-button"
-                        style="width: 100%" > Incomplete
-                      </button>
-                  </div>
-
-                  <div class="buttonWrapper">
-                      <button class="btn btn btn-dark category-button"
-                        type="submit"
-                        id="new-category-button"
-                        style="width: 100%" > Define new category
-                      </button>
-                  </div>
-
-                  <hr class="solid" style="position:relative; top:-15px;">
+                  <hr class="solid" style="position:relative; top:-15px;" id="topLevelLineSep">
 
                   <hr class="solid" style="position:sticky; top:90.2%;">
                   <div id='refreshButton' style="position:fixed; left:11%; top:92%;" onclick="window.location.reload();">
@@ -247,7 +252,7 @@
 
         var startTime = new Date().getTime();
 
-        var labelCategories = ["new-category-button",
+        var labelCategories = ["new-category-button1",
                                 'expand-button',
                                 'rationale-button',
                                 'deprecation-button',
@@ -378,7 +383,7 @@
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUpCategory');
                     myDiv.setAttribute('id', 'pop-up-cs');
-                    myDiv.innerHTML = '.......!';
+                    myDiv.innerHTML = 'The comment is a high-level summary for the code';
                     document.body.appendChild(myDiv);
                 }
             );
@@ -393,7 +398,7 @@
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUpCategory');
                     myDiv.setAttribute('id', 'pop-up-expand');
-                    myDiv.innerHTML = '.......!';
+                    myDiv.innerHTML = 'A verbose description of the implementation';
                     document.body.appendChild(myDiv);
                 }
             );
@@ -408,7 +413,7 @@
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUpCategory');
                     myDiv.setAttribute('id', 'pop-up-rationale');
-                    myDiv.innerHTML = '.......!';
+                    myDiv.innerHTML = 'The comment answers the question (WHY?)';
                     document.body.appendChild(myDiv);
                 }
             );
@@ -423,7 +428,7 @@
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUpCategory');
                     myDiv.setAttribute('id', 'pop-up-deprecation');
-                    myDiv.innerHTML = '.......!';
+                    myDiv.innerHTML = 'The code is deprecated';
                     document.body.appendChild(myDiv);
                 }
             );
@@ -468,7 +473,7 @@
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUpCategory');
                     myDiv.setAttribute('id', 'pop-up-todo');
-                    myDiv.innerHTML = '.......!';
+                    myDiv.innerHTML = 'The comment is complete but the code is not fully developed';
                     document.body.appendChild(myDiv);
                 }
             );
@@ -483,7 +488,7 @@
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUpCategory');
                     myDiv.setAttribute('id', 'pop-up-commented-code');
-                    myDiv.innerHTML = '.......!';
+                    myDiv.innerHTML = 'The comment refers to a piece of code that is not used anymore';
                     document.body.appendChild(myDiv);
                 }
             );
@@ -498,7 +503,7 @@
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUpCategory');
                     myDiv.setAttribute('id', 'pop-up-incomplete');
-                    myDiv.innerHTML = '.......!';
+                    myDiv.innerHTML = 'The comment is not completed';
                     document.body.appendChild(myDiv);
                 }
             );
@@ -509,25 +514,29 @@
             );
 
             //******************* New-Category **********************
-             $("#new-category-button").mouseenter(function() {
+             $("#new-category-button1").mouseenter(function() {
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUpCategory');
                     myDiv.setAttribute('id', 'pop-up-new-category');
-                    myDiv.innerHTML = '.......!';
+                    myDiv.innerHTML = 'If none of the previous categories match the new comment-to-code association';
                     document.body.appendChild(myDiv);
                 }
             );
 
-            $("#new-category-button").mouseleave(function() {
+            $("#new-category-button1").mouseleave(function() {
                     $("#pop-up-new-category").remove();
                 }
             );
+
+
+            /* --------------------------------------------------- */
 
             $("#toggleButton").click(function () {
                saveFlaggedClass();
             });
 
-            /* --------------------------------------------------- */
+
+
 
 
             //This instance need to be reviewed, therefore we start preparing the needed lists and the layout
@@ -580,8 +589,11 @@
             }
 
             $(".buttonWrapper").dblclick(function () {
-                var buttonID = this.childNodes[0].nextSibling.id;
-                addNewCommentToBeLinked(this.childNodes[0].nextSibling)
+                if(selectedCategories.length>=2){
+                    alert('No more categories can be linked!');
+                }else {
+                    addNewCommentToBeLinked(this.childNodes[0].nextSibling)
+                }
             });
 
             //Highlighting target comments
@@ -810,6 +822,26 @@
                 });
             }
         }
+
+     //handling new-category-selection if twice
+     $(document).on('dblclick', '#new-category-button2', function () {
+         if(selectedCategories.length>=2){
+            alert('No more categories can be linked!');
+        }else {
+            addNewCommentToBeLinked(this.parentElement.childNodes[0]);
+        }
+     });
+
+     $(document).on("mouseenter","#new-category-button2", function() {
+         var myDiv = document.createElement('div');
+         myDiv.setAttribute('class', 'popUpCategory');
+         myDiv.setAttribute('id', 'pop-up-new-category');
+         myDiv.innerHTML = 'If none of the previous categories match the new comment-to-code association';
+         document.body.appendChild(myDiv);
+
+     });
+
+     $(document).on("mouseleave","#new-category-button2", function() { $("#pop-up-new-category").remove(); });
 
 
     </script>

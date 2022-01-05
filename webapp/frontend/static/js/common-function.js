@@ -26,14 +26,15 @@ function ChangeSkipToNext() {
 }
 
 
-function createNewCategory() {
+function createNewCategory(id) {
     var newCategory = prompt("","Text");
-    $("#new-category-button").text(newCategory);
+    if(newCategory){ $("#"+id).text(newCategory); }
 }
 
 
 
-function moveToSelectedMethod(indexClassification){
+function moveToSelectedMethod(indexClassification, onlyAnimation=true){
+
     var arr = Array.from(comments);
     indexComment = dictHighlightedCommentsPosition[indexClassification].toString();
     var selectedComments = indexComment.split(',');
@@ -42,6 +43,23 @@ function moveToSelectedMethod(indexClassification){
     $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
         $(this).removeClass('animationLabel').dequeue();
     });
+
+    if(!onlyAnimation) {
+        resetColorHighlightingCategories();
+
+
+        highlightSelectedCategoryButton(indexClassification);
+        setTimeout(function () {
+            resetColorHighlightingCategories();
+            $("#new-category-button1").text('Define New Category');
+            try {
+                var element = document.getElementById('new-category-button2');
+                $(element).remove();
+            } catch (e) {
+            }
+        }, 1500); //in millisecond
+    }
+
 }
 
 function moveToSelectedMethodFromLine(lineNumber){
@@ -139,16 +157,7 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     var tagSelector = arr[selectedComments[0]];
     currentClassification = indexClassification;
 
-     //highlight the select button category
-    for(var i=0; i<dictSelectedCategories[currentClassification].length; i++){
-        if(!labelCategories.includes(dictSelectedCategories[currentClassification][i])){
-            //Then we have a new category defined by the tagger
-            $("#new-category-button").css('background-color','green').text(dictSelectedCategories[currentClassification][i]);
-
-        }
-        $("#"+dictSelectedCategories[currentClassification][i]).css('background-color','green');
-    }
-
+    highlightSelectedCategoryButton(currentClassification);
 
     //move down to the selected method
     $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -340,7 +349,7 @@ function reset(save=false){
 
     $("#textAreaSelectedText").text("");
     $('.category-button').css("background-color",'');
-    $("#new-category-button").text("Define New Category");
+    $("#new-category-button1").text("Define New Category");
 
     if(!save) {
         //changeCommentHighlighting(commentEleToHighlight,'', true);
@@ -358,6 +367,7 @@ function reset(save=false){
             //reset code
             spanSelector = "[id=highlight-"+(currentClassification)+"]";
             $(spanSelector).css('background-color','').attr("id","old-span");
+
         }
     }
 
@@ -400,6 +410,10 @@ function reset(save=false){
         changingToClassificationOnGoing=true; //the reviewer is about to change the classification
         flagSwitch=false;
     }
+
+    //removing #new-category-button2 if exists
+    try{ $( document.getElementById("new-category-button2").parentElement).remove();}
+    catch(ex){}
 
     commentEleToHighlight = [];
     commentIndex = [];
@@ -460,16 +474,35 @@ function updateTextArea(textToDisplay){ $("#textAreaSelectedText").append(textTo
 
 
 function addNewCommentToBeLinked(element){
+
     var retCode=checkForButtonValidity();
     if (!retCode) { return false;}
+
     //checkForChangedCategory(element);
-    if(element.id.toString() === "new-category-button"){
-        createNewCategory();
-    }
+    if(element.id.toString() === "new-category-button1")       { createNewCategory("new-category-button1"); }
+    else if (element.id.toString() === 'new-category-button2') { createNewCategory("new-category-button2"); }
+
     $(element).css('background-color','green');
     selectedCategory = element.id.toString();
-    if(selectedCategory === 'new-category-button'){ //save the new category
+    if(selectedCategory === 'new-category-button1' || selectedCategory === 'new-category-button2'){ //save the new category
         selectedCategory = $(element).text() + '-button';
+        
+        //only once
+        if(element.id.toString() === 'new-category-button1') {
+            //Add also new button for any further new category
+            var tag = document.createElement("div");
+            tag.setAttribute('class', 'buttonWrapper');
+            //tag.setAttribute('style','top:-55px; position:relative;');
+            var newButton = document.createElement('button');
+            newButton.setAttribute('class', 'btn btn btn-dark category-button')
+            newButton.setAttribute('type', 'submit');
+            newButton.setAttribute('id', 'new-category-button2');
+            newButton.setAttribute('style', 'width: 100%;');
+            newButton.innerText = 'Define new category';
+            tag.appendChild(newButton);
+            $("#categoriesColumn").append(tag);
+        }
+
     }
 
     selectedCategories.push(selectedCategory);
@@ -498,7 +531,6 @@ function saveCategorization(){
 
         if(selectedCodeText.trim() ==="" && resetClicked){
             alert("First link the given comment to the snippet!");
-            $("#"+selectedCategory).css('background-color','');
             return false;
         }
 
@@ -545,7 +577,7 @@ function saveCategorization(){
 
             //var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" +  "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
 
-            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="moveToSelectedMethod( '+ dictIndex +' ); removeAssociation(\''+ divID +'\')"></i></button></div>';
+            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ", " + false + ");" + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="moveToSelectedMethod( '+ dictIndex +', ' + true + ' ); removeAssociation(\''+ divID +'\')"></i></button></div>';
             //onclick="removeAssociation(\''+ divID +'\')">
 
             // handling list for the reviewing part
@@ -594,6 +626,7 @@ function saveCategorization(){
 
             //lock code section
             $("#code").css('user-select','none');
+
         }
 
 
@@ -637,17 +670,7 @@ function removeAssociation(divID){
     var spanSelector = "[id=comment-highlight-"+(targetAssociation)+"]";
     $(spanSelector).css('color','');
 
-    /*if(commentEleToHighlight.length === 0){
-        var spanSelector = "[id=comment-highlight-"+(currentClassification)+"]";
-        $(spanSelector).css('color','');
-        //console.log(dictHighlightedComments);
-        //changeCommentHighlighting(dictHighlightedComments[targetAssociation], '');
-    }else{
-        //console.log(commentEleToHighlight);
-        changeCommentHighlighting(commentEleToHighlight, '');
-    }*/
-
-    //dictRangeHighlightedCode[targetAssociation] = [];
+    resetColorHighlightingCategories();
 
     dictHighlightedCommentsPosition[targetAssociation] = [];
     dictHighlightedCodeCharacterPosition[targetAssociation] = [];
@@ -697,5 +720,58 @@ function checkForChangedCategory(element){
     for(var i=0;i<refinedCategories.length;i++){
         var selector="#"+refinedCategories[i];
         $(selector).css('background-color','');
+    }
+}
+
+function resetColorHighlightingCategories(){
+    //removing categories highlighting
+    var elements = document.getElementsByClassName("buttonWrapper");
+    console.log(elements);
+    for(var i=0;i<elements.length;i++){
+        //if( $(elements[i].childNodes[1]).classList);
+
+        if ( $(elements[i].childNodes[1]).hasClass('category-button')){
+            $(elements[i].childNodes[1]).css('background-color','');
+        }
+    }
+}
+
+function highlightSelectedCategoryButton(index){
+        //highlight the select button category
+    var counter = {};
+    for(var i=0; i<dictSelectedCategories[index].length; i++){
+
+        if(!labelCategories.includes(dictSelectedCategories[index][i])){
+            counter[i]=1;
+        }
+        $("#"+dictSelectedCategories[index][i]).css('background-color','green');
+    }
+
+    if(Object.keys(counter).length === 1){
+        var key1 = Number(Object.keys(counter)[0]);
+        var newCategory = dictSelectedCategories[index][key1].split('-')[0];
+        $("#new-category-button1").css('background-color','green').text(newCategory);
+
+    }else if(Object.keys(counter).length === 2 ){
+
+        var key1 = Number(Object.keys(counter)[0]);
+        var key2 = Number(Object.keys(counter)[1]);
+
+        var newCategory = dictSelectedCategories[index][key1].split('-')[0];
+        $("#new-category-button1").css('background-color','green').text(newCategory);
+
+        var tag = document.createElement("div");
+        tag.setAttribute('class', 'buttonWrapper');
+        var newButton = document.createElement('button');
+        newButton.setAttribute('class', 'btn btn btn-dark category-button')
+        newButton.setAttribute('type', 'submit');
+        newButton.setAttribute('id', 'new-category-button2');
+        newButton.setAttribute('style', 'width: 100%;');
+        newButton.innerText = 'Define new category';
+        tag.appendChild(newButton);
+        $("#categoriesColumn").append(tag);
+
+        newCategory = dictSelectedCategories[index][key2].split('-')[0];
+        $("#new-category-button2").css('background-color','green').text(newCategory);
     }
 }
