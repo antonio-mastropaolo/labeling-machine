@@ -26,9 +26,14 @@ function ChangeSkipToNext() {
 }
 
 
-function createNewCategory(id) {
-    var newCategory = prompt("","Text");
-    if(newCategory){ $("#"+id).text(newCategory); }
+function createNewCategory() {
+    var newCategoryName = prompt("Please type the new comment category name","Text");
+    var newCategoryDescription =  prompt("Please type the new comment category description","Text");
+    //if(newCategoryName && newCategoryDescription){ $("#"+id).text(newCategoryName); }
+    userDefinedNewCategoryNames.push(newCategoryName);
+    userDefinedNewCategoryDescriptions.push(newCategoryDescription);
+    return {'category_name':newCategoryName,'description':newCategoryDescription};
+
 }
 
 
@@ -44,19 +49,12 @@ function moveToSelectedMethod(indexClassification, onlyAnimation=true){
         $(this).removeClass('animationLabel').dequeue();
     });
 
+
     if(!onlyAnimation) {
         resetColorHighlightingCategories();
-
-
         highlightSelectedCategoryButton(indexClassification);
         setTimeout(function () {
             resetColorHighlightingCategories();
-            $("#new-category-button1").text('Define New Category');
-            try {
-                var element = document.getElementById('new-category-button2');
-                $(element).remove();
-            } catch (e) {
-            }
         }, 1500); //in millisecond
     }
 
@@ -332,7 +330,7 @@ function reset(save=false){
 
     $("#textAreaSelectedText").text("");
     $('.category-button').css("background-color",'');
-    $("#new-category-button1").text("Define New Category");
+    $("#new-category-button").text("Define New Category");
 
     if(!save) {
         //changeCommentHighlighting(commentEleToHighlight,'', true);
@@ -351,6 +349,11 @@ function reset(save=false){
             spanSelector = "[id=highlight-"+(currentClassification)+"]";
             $(spanSelector).css('background-color','').attr("id","old-span");
 
+        }
+
+        if(userDefinedNewCategoryNames.length>=1) {
+            userDefinedNewCategoryDescriptions.pop();
+            userDefinedNewCategoryNames.pop();
         }
     }
 
@@ -415,6 +418,7 @@ function reset(save=false){
     selectedCategories = [];
     selectedCode = [];
 
+
     unselectAll();
 }
 
@@ -455,41 +459,60 @@ function checkForButtonValidity(){
 
 function updateTextArea(textToDisplay){ $("#textAreaSelectedText").append(textToDisplay);}
 
+function removeNewAddedCategory(element){
+    onMouseLeaveEvent(element);
+    $("#"+element)[0].parentNode.remove();
+    var index = selectedCategories.indexOf(element);
+    selectedCategories[index]=null;
+    userDefinedNewCategoryNames.reverse().pop();
+    userDefinedNewCategoryDescriptions.reverse().pop();
+    // console.log('**************************');
+    // console.log(userDefinedNewCategoryNames);
+    // console.log(userDefinedNewCategoryDescriptions);
+    // console.log('**************************');
+
+}
 
 function addNewCommentToBeLinked(element){
 
     var retCode=checkForButtonValidity();
     if (!retCode) { return false;}
+    
+    if(element.id.toString() === "new-category-button") {
+        var dictRes = createNewCategory();
 
-    //checkForChangedCategory(element);
-    if(element.id.toString() === "new-category-button1")       { createNewCategory("new-category-button1"); }
-    else if (element.id.toString() === 'new-category-button2') { createNewCategory("new-category-button2"); }
+        var tag = document.createElement("div");
+        var buttonID = dictRes['category_name'].replace(/ /g,'')+'-button';
+        tag.setAttribute('onmouseenter','onMouseEnterEvent("' + buttonID + '","' + dictRes['description'] + '");');
+        tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + buttonID + '" );');
+        tag.setAttribute('class', 'buttonWrapper');
 
-    $(element).css('background-color','green');
-    selectedCategory = element.id.toString();
-    if(selectedCategory === 'new-category-button1' || selectedCategory === 'new-category-button2'){ //save the new category
-        selectedCategory = $(element).text() + '-button';
-        
-        //only once
-        if(element.id.toString() === 'new-category-button1') {
-            //Add also new button for any further new category
-            var tag = document.createElement("div");
-            tag.setAttribute('class', 'buttonWrapper');
-            //tag.setAttribute('style','top:-55px; position:relative;');
-            var newButton = document.createElement('button');
-            newButton.setAttribute('class', 'btn btn btn-dark category-button')
-            newButton.setAttribute('type', 'submit');
-            newButton.setAttribute('id', 'new-category-button2');
-            newButton.setAttribute('style', 'width: 100%;');
-            newButton.innerText = 'Define new category';
-            tag.appendChild(newButton);
-            $("#categoriesColumn").append(tag);
-        }
+        var newButton = document.createElement('button');
+        newButton.setAttribute('class', 'btn btn btn-dark category-button')
+        newButton.setAttribute('type', 'submit');
+        newButton.setAttribute('id', buttonID);
+        newButton.setAttribute('style', 'width: 100%;');
+        newButton.innerText = dictRes['category_name'];
 
+        var newTrashButton =  document.createElement('i');
+        newTrashButton.setAttribute('class','far fa-trash-alt fa-1x');
+        newTrashButton.setAttribute('style','position:sticky; left:95%;');
+        newTrashButton.setAttribute('onclick','removeNewAddedCategory("' + buttonID +'");');
+
+        newButton.appendChild(newTrashButton);
+        tag.appendChild(newButton);
+        $("#categoriesColumn").append(tag);
+        selectedCategory = buttonID;
+        $(newButton).css('background-color','green');
+
+    }else{
+        $(element).css('background-color','green');
+        selectedCategory = element.id.toString();
     }
 
     selectedCategories.push(selectedCategory);
 }
+
 
 
 function isSelectedCategory(){
@@ -511,14 +534,18 @@ function saveCategorization(){
 
     if (isSelectedCategory()){
         //save snippet
-
-        console.log(selectedCodeText);
-        console.log(resetClicked);
-        if(selectedCodeText.trim() === "" && resetClicked){
+        var flag=false;
+        var childNodes = document.getElementById("textAreaSelectedText").childNodes;
+        for(var i = 0; i < childNodes.length; i++){
+            if( $(childNodes[i])[0].className === "selected-code"){
+                flag=true;
+                break;
+            }
+        }
+        if(!flag){
             alert("First link the given comment to the snippet!");
             return false;
         }
-
 
         $("#textAreaSelectedText").text("");
         for(var i=0;i<labelCategories.length;i++){
@@ -668,6 +695,7 @@ function removeAssociation(divID){
     selectedComments = [];
     selectedCategories = [];
     selectedCode = [];
+
 }
 
 function cleanDict(obj) {
@@ -693,70 +721,32 @@ function getSameKeysDict(dict1, dict2){
 }
 
 
-function checkForChangedCategory(element){
-
-    function arrayRemove(arr, value) {
-            return arr.filter(function(ele){
-                return ele != value;
-            });
-        }
-
-    var refinedCategories = arrayRemove(labelCategories, element.id.toString());
-    for(var i=0;i<refinedCategories.length;i++){
-        var selector="#"+refinedCategories[i];
-        $(selector).css('background-color','');
-    }
-}
-
 function resetColorHighlightingCategories(){
     //removing categories highlighting
     var elements = document.getElementsByClassName("buttonWrapper");
-    console.log(elements);
     for(var i=0;i<elements.length;i++){
-        //if( $(elements[i].childNodes[1]).classList);
-
-        if ( $(elements[i].childNodes[1]).hasClass('category-button')){
-            $(elements[i].childNodes[1]).css('background-color','');
-        }
+        if ( $(elements[i].childNodes[1]).hasClass('category-button')){ $(elements[i].childNodes[1]).css('background-color','');}
+        if ( $(elements[i].childNodes[0]).hasClass('category-button') ) {  $(elements[i].childNodes[0]).css('background-color','');}
     }
 }
 
 function highlightSelectedCategoryButton(index){
-        //highlight the select button category
-    var counter = {};
+    //highlight the select button category
     for(var i=0; i<dictSelectedCategories[index].length; i++){
-
-        if(!labelCategories.includes(dictSelectedCategories[index][i])){
-            counter[i]=1;
-        }
         $("#"+dictSelectedCategories[index][i]).css('background-color','green');
     }
+}
 
-    if(Object.keys(counter).length === 1){
-        var key1 = Number(Object.keys(counter)[0]);
-        var newCategory = dictSelectedCategories[index][key1].split('-')[0];
-        $("#new-category-button1").css('background-color','green').text(newCategory);
+function onMouseEnterEvent(category,description){
+    category = category.split('-')[0];
+    var myDiv = document.createElement('div');
+    myDiv.setAttribute('class', 'popUpCategory');
+    myDiv.setAttribute('id', "pop-up-"+category);
+    myDiv.innerHTML = description;
+    document.body.appendChild(myDiv);
+}
 
-    }else if(Object.keys(counter).length === 2 ){
-
-        var key1 = Number(Object.keys(counter)[0]);
-        var key2 = Number(Object.keys(counter)[1]);
-
-        var newCategory = dictSelectedCategories[index][key1].split('-')[0];
-        $("#new-category-button1").css('background-color','green').text(newCategory);
-
-        var tag = document.createElement("div");
-        tag.setAttribute('class', 'buttonWrapper');
-        var newButton = document.createElement('button');
-        newButton.setAttribute('class', 'btn btn btn-dark category-button')
-        newButton.setAttribute('type', 'submit');
-        newButton.setAttribute('id', 'new-category-button2');
-        newButton.setAttribute('style', 'width: 100%;');
-        newButton.innerText = 'Define new category';
-        tag.appendChild(newButton);
-        $("#categoriesColumn").append(tag);
-
-        newCategory = dictSelectedCategories[index][key2].split('-')[0];
-        $("#new-category-button2").css('background-color','green').text(newCategory);
-    }
+function onMouseLeaveEvent(btnCategory){
+    var category = btnCategory.split('-')[0];
+    $("#pop-up-"+category).remove();
 }

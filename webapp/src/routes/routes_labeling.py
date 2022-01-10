@@ -1,11 +1,13 @@
 import datetime
 
 from flask import render_template, request, redirect, url_for, jsonify
+from src.database.models import LabelingData, Artifact, FlaggedArtifact, UserDefinedCategory
 from src.helper.tools_labeling import *
 from src.helper.tools_common import is_signed_in, lock_artifact_by
 from src import app
 from src.helper.consts import *
 import json,re
+from dict_hash import dict_hash
 
 
 @app.route("/labeling", methods=['GET', 'POST'])
@@ -45,13 +47,31 @@ def labeling_with_artifact(target_artifact_id):
                            LabelingData.query.with_entities(LabelingData.username_tagger).filter_by(
                                artifact_id=target_artifact_id).all()}
 
+            udc = UserDefinedCategory.query.all()
+            listNameCategory = []
+            listDescriptionCategory = []
+            listID = []
+            listCategoryButton = []
+
+            for row in udc:
+                listNameCategory.append(row.categoryName)
+                listDescriptionCategory.append(row.description)
+                listID.append(row.category_id)
+                listCategoryButton.append(row.categoryButtonName)
+
+            udc_item = {'category_id': listID,
+                        'category_name': listNameCategory,
+                        'description': listDescriptionCategory,
+                        'category_button_name': listCategoryButton
+                        }
+
             lock_artifact_by(who_is_signed_in(), target_artifact_id)
 
             spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
 
-            newLinkToFileJava = '/labeling-machine/'+'/'.join(artifact_data.linkToFileJava.split('/')[5:])
-            #newLinkToFileJava = artifact_data.linkToFileJava
+            #newLinkToFileJava = '/labeling-machine/'+'/'.join(artifact_data.linkToFileJava.split('/')[5:])
+            newLinkToFileJava = artifact_data.linkToFileJava
 
             with open(newLinkToFileJava) as f:
                 javaClassText = f.read()
@@ -74,9 +94,6 @@ def labeling_with_artifact(target_artifact_id):
 
             spanListMethods = [spanListMethods[index] for index in refinedIndicisList]
             methodsName = [methodsName[index] for index in refinedIndicisList]
-
-            print(spanListMethods)
-            print(methodsName)
 
             with open(newLinkToFileJava) as f:
                 classLines = [item for item in f.readlines()]
@@ -124,7 +141,6 @@ def labeling_with_artifact(target_artifact_id):
             if (isLabeled == 1):
                 artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
                 commentPositionList = eval(artifact_label.commentPosition)
-                #rangeHighlightedCodeRev = artifact_label.rangeSelectedText
                 moveSelectionButtonList = eval(artifact_label.moveSelectionButton)
                 selectedCategories = eval(artifact_label.categories)
                 selectedCode = eval(artifact_label.code)
@@ -143,10 +159,10 @@ def labeling_with_artifact(target_artifact_id):
                                    artifact_id = target_artifact_id,
                                    artifact_data = artifact_data,
                                    artifact_class = javaClassText,
+                                   artifact_UDC = udc_item,
                                    artifact_methodsListLines = spanListMethods,
                                    artifact_methodsListBytes = spanOfCharPerMethod,
                                    artifact_label_commentPositionList = commentPositionList,
-                                   #artifact_label_rangeSelectedText = rangeHighlightedCodeRev,
                                    artifact_moveSelectionButtonList = moveSelectionButtonList,
                                    isLabeled = isLabeled,
                                    isReviewed = isReviewed,
@@ -206,6 +222,9 @@ def label():
         commentPosition = request.form['commentPosition']
         moveSelectionButton = request.form['moveToSelectedButtons']
         counterAssociations = request.form['counterAssociations']
+        userDefinedNewCategoryDescriptions = eval(request.form['userDefinedNewCategoryDescriptions'])
+        userDefinedNewCategoryNames = eval(request.form['userDefinedNewCategoryNames'])
+        print(userDefinedNewCategoryNames)
 
         if int(workingMode) == 0:
             isLabeled = 1
@@ -228,16 +247,28 @@ def label():
 
         else:
             labeling_data = LabelingData.query.filter_by(artifact_id=artifact_id).first()
+
+            #Set isChanged flag to keep track of instances that have been changed by the reviewer
+            if ( dict_hash(eval(comments)) != dict_hash(eval(labeling_data.comments))     or
+                 dict_hash(eval(categories)) != dict_hash(eval(labeling_data.categories)) or
+                 dict_hash(eval(code)) != dict_hash(eval(labeling_data.code))):
+                labeling_data.isChanged = 1
+            else:
+                labeling_data.isChanged = 0
+
             labeling_data.comments = comments
             labeling_data.reviewed_at = datetime.datetime.utcnow()
             labeling_data.elapsed_reviewing_time = duration_sec
             labeling_data.username_reviewer = who_is_signed_in()
             labeling_data.commentPosition = commentPosition
             labeling_data.moveSelectionButton = moveSelectionButton
-            #labeling_data.rangeSelectedText = rangeSelectedText
             labeling_data.code = code
             labeling_data.codeSpan = codeSpan
             labeling_data.commentSpan = commentSpan
+
+            if ():
+                labeling_data.isChanged = 1
+
             labeling_data.categories = categories
             db.session.commit()
 
@@ -246,6 +277,15 @@ def label():
         artifact.reviewed = isReviewed
         artifact.counterAssociations = counterAssociations
         db.session.commit()
+
+        if(len(userDefinedNewCategoryDescriptions)>0):
+
+            for (name, description) in zip(userDefinedNewCategoryNames, userDefinedNewCategoryDescriptions):
+                udc = UserDefinedCategory(categoryName=name, description=description, categoryButtonName= name + '-' + 'button', user=who_is_signed_in())
+                db.session.add(udc)
+                db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
+                db.session.commit()
+
 
         return jsonify('{ "status": "success" }')
 

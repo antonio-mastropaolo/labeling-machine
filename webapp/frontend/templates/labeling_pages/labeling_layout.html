@@ -73,40 +73,61 @@
 
         </div>
 
-
+{#        tag.setAttribute('onmouseenter','onMouseEnterEvent("' + buttonID + '","' + dictRes['description'] + '");');
+{#        tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + buttonID + '" );');#}
         <div class="row no-gutters">
-
+{#            change button color for default cats#}
               <div class=" col-md-2 vh-100" style="background-color: black;">
-                  <div id="categoriesColumn" >
+                  <div id="categoriesColumn" style="overflow-y: scroll; height:40%;">
+
+                       <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                      type="submit"
+                                      id="new-category-button"
+                                      onmouseenter='onMouseEnterEvent("new-category-button","If none of the previous categories match the new comment-to-code association");'
+                                      onmouseleave='onMouseLeaveEvent("new-category-button");'
+                                      style="width: 100%" > Define new category
+                              </button>
+                          </div>
+
+
                           <div class="buttonWrapper">
                               <button class="btn btn btn-dark category-button"
-                                type="submit"
-                                id="code-summary-button"
-                                style="width: 100%" > Code Summary
+                                      type="submit"
+                                      id="code-summary-button"
+                                      onmouseenter='onMouseEnterEvent("code-summary-button","The comment is a high-level summary for the code");'
+                                      onmouseleave='onMouseLeaveEvent("code-summary-button");'
+                                      style="width: 100%" > Code Summary
                               </button>
                           </div>
 
                           <div class="buttonWrapper">
                               <button class="btn btn btn-dark category-button"
-                                type="submit"
-                                id="expand-button"
-                                style="width: 100%" > Expand
+                                      type="submit"
+                                      id="expand-button"
+                                      onmouseenter='onMouseEnterEvent("expand-button","A verbose description of the implementation");'
+                                      onmouseleave='onMouseLeaveEvent("expand-button");'
+                                      style="width: 100%" > Expand
                               </button>
                           </div>
 
                           <div class="buttonWrapper">
                               <button class="btn btn btn-dark category-button"
-                                type="submit"
-                                id="rationale-button"
-                                style="width: 100%" > Rationale
+                                      type="submit"
+                                      onmouseenter='onMouseEnterEvent("rationale-button","The comment answers the question (WHY?)");'
+                                      onmouseleave='onMouseLeaveEvent("rationale-button");'
+                                      id="rationale-button"
+                                      style="width: 100%" > Rationale
                               </button>
                           </div>
 
                           <div class="buttonWrapper">
                               <button class="btn btn btn-dark category-button"
-                                type="submit"
-                                id="deprecation-button"
-                                style="width: 100%" > Code Deprecation
+                                      type="submit"
+                                      id="deprecation-button"
+                                      onmouseenter='onMouseEnterEvent("deprecation-button","The code is deprecated");'
+                                      onmouseleave='onMouseLeaveEvent("deprecation-button");'
+                                      style="width: 100%" > Code Deprecation
                               </button>
                           </div>
 
@@ -133,35 +154,35 @@
 
                            <div class="buttonWrapper">
                               <button class="btn btn btn-dark category-button"
-                                type="submit"
-                                id="todo-button"
-                                style="width: 100%" > Work in Progress <!-- Previously: TO-DO -->
+                                      type="submit"
+                                      id="todo-button"
+                                      onmouseenter='onMouseEnterEvent("todo-button","The comment is complete but the code is not fully developed");'
+                                      onmouseleave='onMouseLeaveEvent("todo-button");'
+                                      style="width: 100%" > Work in Progress <!-- Previously: TO-DO -->
                               </button>
                           </div>
 
                            <div class="buttonWrapper">
                               <button class="btn btn btn-dark category-button"
-                                type="submit"
-                                id="comment-code-button"
-                                style="width: 100%" > Commented Code
+                                      type="submit"
+                                      id="comment-code-button"
+                                      onmouseenter='onMouseEnterEvent("comment-code-button","The comment refers to a piece of code that is not used anymore");'
+                                      onmouseleave='onMouseLeaveEvent("comment-code-button");'
+                                      style="width: 100%" > Commented Code
                               </button>
                           </div>
 
                           <div class="buttonWrapper">
                               <button class="btn btn btn-dark category-button"
-                                type="submit"
-                                id="incomplete-button"
-                                style="width: 100%" > Incomplete Comment
+                                      type="submit"
+                                      id="incomplete-button"
+                                      onmouseenter='onMouseEnterEvent("incomplete-button","The comment is not completed");'
+                                      onmouseleave='onMouseLeaveEvent("incomplete-button");'
+                                      style="width: 100%" > Incomplete Comment
                               </button>
                           </div>
 
-                          <div class="buttonWrapper">
-                              <button class="btn btn btn-dark category-button"
-                                type="submit"
-                                id="new-category-button1"
-                                style="width: 100%" > Define new category
-                              </button>
-                          </div>
+
                   </div>
                   <hr class="solid" style="position:relative; top:-15px;" id="topLevelLineSep">
 
@@ -238,21 +259,23 @@
 
 
         //updating progress bar
-        var labelProgressPercentage = {{ overall_labeling_status['n_artifacts_labeled'] }}*100 / {{ overall_labeling_status['n_total_artifacts'] }};
+        var labelProgressPercentage = {{ overall_labeling_status['n_artifacts_labeled_and_reviewed'] }}*100 / {{ overall_labeling_status['n_total_artifacts'] }};
         labelProgressPercentage = Math.ceil(labelProgressPercentage);
         document.getElementById("top-progress-bar-status").style.width = labelProgressPercentage + '%';
         document.getElementById("top-progress-bar-status").innerHTML = labelProgressPercentage + '%';
 
         const methodsList = {{ artifact_methodsListLines | tojson }};
         const methodsListNames = {{ artificat_methodsName | safe }};
+        const userDefinedCategories = {{ artifact_UDC | tojson}};
         const linesList = {{ artificat_lines | tojson }};
         const isLabeled = {{ isLabeled }};
         const isReviewed = {{ isReviewed }};
         const workingMode = (isLabeled == 0 ? 0  : 1);
 
+
         var startTime = new Date().getTime();
 
-        var labelCategories = ["new-category-button1",
+        var labelCategories = ["new-category-button",
                                 'expand-button',
                                 'rationale-button',
                                 'deprecation-button',
@@ -285,7 +308,6 @@
         var dictHighlightedCode = {};
         var dictHighlightedComments = {};
         var dictHighlightedCommentsPosition = {};
-        //var dictRangeHighlightedCode = {};
         var dictHighlightedCommentsCharacterPosition = {};
         var dictHighlightedCodeCharacterPosition = {};
         var dictSelectedCategories = {};
@@ -298,6 +320,8 @@
         var selectedCode = [];
         var serializedRangeList = []
         var listSelectedSpanCode = [];
+        var userDefinedNewCategoryNames = [];
+        var userDefinedNewCategoryDescriptions = [];
         var listSelectedSpanComment = [];
         var selectedCategories = [];
         var commentsToHighlight = [];
@@ -310,12 +334,32 @@
 
         // -------------------------End-------------------------
 
+
+
         $(document).ready(function () {
 
 
             $("h1").css('color', 'white');
             $("h2").css('color', 'white');
             $('.hljs-comment').css('user-select', 'none');
+            /* User defined Categories to be added */
+             for(var i=0; i<userDefinedCategories['category_id'].length; i++) {
+
+                var tag = document.createElement("div");
+                tag.setAttribute('class', 'buttonWrapper');
+                //console.log('onMouseEnterEvent(' + userDefinedCategories['category_button_name'][i] + ',' + userDefinedCategories['description'][i] + ');');
+                tag.setAttribute('onmouseenter','onMouseEnterEvent("' + userDefinedCategories['category_button_name'][i] + '","' + userDefinedCategories['description'][i] + '");');
+                tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + userDefinedCategories['category_button_name'][i] + '" );');
+                var newButton = document.createElement('button');
+                newButton.setAttribute('class', 'btn btn btn-dark category-button')
+                newButton.setAttribute('type', 'submit');
+                newButton.setAttribute('id', userDefinedCategories['category_button_name'][i] );
+                newButton.setAttribute('style', 'width: 100%;');
+                newButton.innerText = userDefinedCategories['category_name'][i];
+                tag.appendChild(newButton);
+                $("#categoriesColumn").append(tag);
+
+             }
 
             // Filling up lines column
             for (var i = 0; i < linesList.length; i++) {
@@ -348,6 +392,8 @@
                 }
             }
 
+            /* --------------------------------------------------- */
+
             $("#refreshButton").mouseenter(function() {
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUp');
@@ -376,157 +422,6 @@
                 }
             );
 
-            /* Handling hoover for the category section */
-
-            //******************* Code summary **********************
-             $("#code-summary-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-cs');
-                    myDiv.innerHTML = 'The comment is a high-level summary for the code';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#code-summary-button").mouseleave(function() {
-                    $("#pop-up-cs").remove();
-                }
-            );
-
-            //******************* Expand **********************
-            $("#expand-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-expand');
-                    myDiv.innerHTML = 'A verbose description of the implementation';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#expand-button").mouseleave(function() {
-                    $("#pop-up-expand").remove();
-                }
-            );
-
-            //******************* Rationale **********************
-            $("#rationale-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-rationale');
-                    myDiv.innerHTML = 'The comment answers the question (WHY?)';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#rationale-button").mouseleave(function() {
-                    $("#pop-up-rationale").remove();
-                }
-            );
-
-            //******************* Deprecation **********************
-            $("#deprecation-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-deprecation');
-                    myDiv.innerHTML = 'The code is deprecated';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#deprecation-button").mouseleave(function() {
-                    $("#pop-up-deprecation").remove();
-                }
-            );
-
-            //******************* Usage **********************
-            $("#usage-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-usage');
-                    myDiv.innerHTML = '.......!';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#usage-button").mouseleave(function() {
-                    $("#pop-up-usage").remove();
-                }
-            );
-
-            //******************* Exception **********************
-            $("#exception-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-exception');
-                    myDiv.innerHTML = '.......!';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#exception-button").mouseleave(function() {
-                    $("#pop-up-exception").remove();
-                }
-            );
-
-            //******************* TO-DO **********************
-             $("#todo-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-todo');
-                    myDiv.innerHTML = 'The comment is complete but the code is not fully developed';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#todo-button").mouseleave(function() {
-                    $("#pop-up-todo").remove();
-                }
-            );
-
-            //******************* Commented Code **********************
-             $("#comment-code-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-commented-code');
-                    myDiv.innerHTML = 'The comment refers to a piece of code that is not used anymore';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#comment-code-button").mouseleave(function() {
-                    $("#pop-up-commented-code").remove();
-                }
-            );
-
-            //******************* Incomplete **********************
-             $("#incomplete-button").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-incomplete');
-                    myDiv.innerHTML = 'The comment is not completed';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#incomplete-button").mouseleave(function() {
-                    $("#pop-up-incomplete").remove();
-                }
-            );
-
-            //******************* New-Category **********************
-             $("#new-category-button1").mouseenter(function() {
-                    var myDiv = document.createElement('div');
-                    myDiv.setAttribute('class', 'popUpCategory');
-                    myDiv.setAttribute('id', 'pop-up-new-category');
-                    myDiv.innerHTML = 'If none of the previous categories match the new comment-to-code association';
-                    document.body.appendChild(myDiv);
-                }
-            );
-
-            $("#new-category-button1").mouseleave(function() {
-                    $("#pop-up-new-category").remove();
-                }
-            );
 
 
             /* --------------------------------------------------- */
@@ -534,9 +429,6 @@
             $("#toggleButton").click(function () {
                saveFlaggedClass();
             });
-
-
-
 
 
             //This instance need to be reviewed, therefore we start preparing the needed lists and the layout
@@ -588,13 +480,7 @@
                 ShowNotification('Labeling mode!', 'warning');
             }
 
-            $(".buttonWrapper").dblclick(function () {
-                if(selectedCategories.length>=2){
-                    alert('No more categories can be linked!');
-                }else {
-                    addNewCommentToBeLinked(this.childNodes[0].nextSibling)
-                }
-            });
+
 
             //Highlighting target comments
             var spanOfCharPerMethod = {{ artifact_methodsListBytes | tojson }}
@@ -779,7 +665,6 @@
             var newRefinedDict = getSameKeysDict(cleanDict(dictHighlightedCodeCharacterPosition), cleanDict(dictHighlightedCommentsCharacterPosition));
 
             if (confirm('Are you sure?')) {
-
                 var data_json = {
                     artifact_id: {{  artifact_id }},
                     code: JSON.stringify(cleanDict(dictSelectedCode)),
@@ -788,10 +673,11 @@
                     codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPosition)),
                     commentSpan: JSON.stringify(newRefinedDict),
                     commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPosition)),
-                    //rangeSelectedText: JSON.stringify(dictRangeHighlightedCode),
                     workingMode: workingMode,
                     moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton.filter(function(e){return e})) : JSON.stringify(moveSelectionButtonList.filter(function(e){return e}))),
                     counterAssociations: (isLabeled === 1 ?  Number({{ counterAssociations }}) : counterAssociations ),
+                    userDefinedNewCategoryNames:  JSON.stringify(userDefinedNewCategoryNames),
+                    userDefinedNewCategoryDescriptions:  JSON.stringify(userDefinedNewCategoryDescriptions),
                     duration:get_elapsed_seconds()
                 };
 
@@ -807,14 +693,11 @@
                     ChangeSkipToNext();
                 },1000); //in millisecond
 
-
-
             }
         }
 
         function saveFlaggedClass(){
             if (confirm('Are you sure?')) {
-                console.log('INN');
                 var data_json = {artifact_id: {{  artifact_id }}};
                 $.post("/flag", data_json, function (response, status) {
                     let response_json = $.parseJSON(response.toString());
@@ -823,25 +706,17 @@
             }
         }
 
-     //handling new-category-selection if twice
-     $(document).on('dblclick', '#new-category-button2', function () {
-         if(selectedCategories.length>=2){
-            alert('No more categories can be linked!');
-        }else {
-            addNewCommentToBeLinked(this.parentElement.childNodes[0]);
-        }
-     });
+     $(document).on('dblclick', '.buttonWrapper',function (){
+            if(selectedCategories.length>=2){
+                alert('No more categories can be linked!');
+            }else {
+                if(this.childNodes[0].nextSibling === null) {
+                    addNewCommentToBeLinked(this.childNodes[0]);
+                }
+                else{ addNewCommentToBeLinked(this.childNodes[0].nextSibling); }
+            }
 
-     $(document).on("mouseenter","#new-category-button2", function() {
-         var myDiv = document.createElement('div');
-         myDiv.setAttribute('class', 'popUpCategory');
-         myDiv.setAttribute('id', 'pop-up-new-category');
-         myDiv.innerHTML = 'If none of the previous categories match the new comment-to-code association';
-         document.body.appendChild(myDiv);
-
-     });
-
-     $(document).on("mouseleave","#new-category-button2", function() { $("#pop-up-new-category").remove(); });
+        });
 
 
     </script>

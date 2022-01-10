@@ -37,6 +37,14 @@ class LockedArtifact(db.Model):
     artifact_id = db.Column(db.Integer)
     locked_at = db.Column(db.DateTime, default=func.now())
 
+class UserDefinedCategory(db.Model):
+    __tablename__ = 'UserDefinedCategory'
+    category_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    categoryName = db.Column(db.Text)
+    description = db.Column(db.Text)
+    user = db.Column(db.Text)
+    categoryButtonName = db.Column(db.Text)
+
 
 class Artifact(db.Model):
     __tablename__ = 'Artifact'
@@ -67,4 +75,5 @@ class LabelingData(db.Model):
     elapsed_reviewing_time = db.Column(db.Integer)
     labeled_at = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())
     reviewed_at = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())
+    isChanged = db.Column(db.Integer)
 
