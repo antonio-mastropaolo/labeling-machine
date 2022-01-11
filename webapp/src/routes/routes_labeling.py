@@ -186,6 +186,21 @@ def labeling_with_artifact(target_artifact_id):
         return "Why POST?"
 
 
+@app.route("/markBrokenClass", methods=['GET', 'POST'])
+def markBrokenClass():
+
+    if request.method == 'POST':
+        if request.form['artifact_id'] == '':
+            return jsonify('{ "status": "Empty arguments" }')
+
+    try:
+        artifact = Artifact.query.filter_by(id=int(request.form['artifact_id'])).first()
+        artifact.isValid = 0
+        db.session.commit()
+    except Exception:
+        print('Already Added, we do not care')
+
+    return jsonify('{ "status": "success" }')
 
 @app.route("/flag", methods=['GET', 'POST'])
 def flagClass():

@@ -87,16 +87,27 @@ def choose_next_random_api():
     candidate_artifact_ids -= labeled_artifact_ids
 
 
-    # ############### 2. Remove APIs Locked by two at the moment
+    # ############### 2. Remove Classes Locked at the moment
     locked_artifacts = get_locked_artifacts()
-    locked_artifacts_by_2 = set(k for k, v in locked_artifacts.items() if v >= 2)
+    locked_artifacts_by_2 = set(k for k, v in locked_artifacts.items() if v >= 1)
+    print('Locked Classes: {}'.format(locked_artifacts_by_2))
     candidate_artifact_ids -= locked_artifacts_by_2
 
+    # ############### 2. Remove Classes Locked at the moment
     completed_artifacts = {row[0] for row in
                            db.session.query(Artifact.id).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).all()}
     candidate_artifact_ids -= completed_artifacts
 
     candidate_artifact_ids_list = list(candidate_artifact_ids)
+
+    # ############### 3. Remove APIs marked as broken
+    broken_artifacts = {row[0] for row in
+                            db.session.query(Artifact.id).filter(Artifact.isValid==0).all()}
+
+    print('Broken artifacts: {}'.format(broken_artifacts))
+    candidate_artifact_ids -= broken_artifacts
+
+    print(candidate_artifact_ids)
 
     if len(candidate_artifact_ids) == 0:
         return -1

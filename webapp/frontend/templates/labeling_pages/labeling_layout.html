@@ -187,11 +187,15 @@
                   <hr class="solid" style="position:relative; top:-15px;" id="topLevelLineSep">
 
                   <hr class="solid" style="position:sticky; top:90.2%;">
-                  <div id='refreshButton' style="position:fixed; left:11%; top:92%;" onclick="window.location.reload();">
-                          <i class="far fa-trash-alt fa-4x" style="color:white;"></i>
+                  <div id='refreshButton' style="position:fixed; left:12.5%; top:92%;" onclick="window.location.reload();">
+                      <i class="fas fa-sync fa-3x" style="color:white;"></i>
                   </div>
-                  <div id="toggleButton" style="position:fixed; left:2.0%; top:92%;">
-                      <i class="fas fa-info-circle fa-4x" style="color:white;"></i>
+                  <div id="removeFromDataset" style="position:fixed; left:7.2%; top:92%;" onclick="removeFromLabeling();">
+                      <i class="far fa-trash-alt fa-3x" style="color:white;"></i>
+                  </div>
+
+                  <div id="toggleButton" style="position:fixed; left:1.5%; top:92%;">
+                      <i class="fas fa-info-circle fa-3x" style="color:white;"></i>
                   </div>
 
               </div>
@@ -421,6 +425,22 @@
                     $("#popUpToggle").remove();
                 }
             );
+
+            $("#removeFromDataset").mouseenter(function() {
+                    var myDiv = document.createElement('div');
+                    myDiv.setAttribute('class', 'popUp');
+                    myDiv.setAttribute('id', 'popUpBadComment');
+                    myDiv.innerHTML = 'Flag this instance if contains non-english comments';
+                    document.body.appendChild(myDiv);
+                }
+            );
+
+            $("#removeFromDataset").mouseleave(function() {
+                    $("#popUpBadComment").remove();
+                }
+            );
+
+
 
 
 
@@ -705,6 +725,18 @@
                 });
             }
         }
+
+        function removeFromLabeling(){
+        if (confirm('Are you sure?')) {
+                var data_json = {artifact_id: {{  artifact_id }}};
+                $.post("/markBrokenClass", data_json, function (response, status) {
+                    let response_json = $.parseJSON(response.toString());
+                    ShowNotification(response_json['status'], "success", 200);
+                });
+                ChangeSkipToNext();
+        }
+
+    }
 
      $(document).on('dblclick', '.buttonWrapper',function (){
             if(selectedCategories.length>=2){
