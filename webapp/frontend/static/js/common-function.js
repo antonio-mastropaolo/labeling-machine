@@ -63,7 +63,7 @@ function moveToSelectedMethod(indexClassification, onlyAnimation=true){
 function moveToSelectedMethodFromLine(lineNumber){
     var tagSelector = $(`.row-line:contains(${lineNumber})`);
     $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-    $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
+    $(tagSelector).addClass('animationLabel').delay(5000).queue(function () {
         $(this).removeClass('animationLabel').dequeue();
     });
 }

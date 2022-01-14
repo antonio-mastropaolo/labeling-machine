@@ -6,8 +6,9 @@ from src.helper.tools_labeling import *
 from src.helper.tools_common import is_signed_in, lock_artifact_by
 from src import app
 from src.helper.consts import *
-import json,re
+import json, re
 from dict_hash import dict_hash
+import time
 
 
 @app.route("/labeling", methods=['GET', 'POST'])
@@ -23,7 +24,7 @@ def labeling():
                     N_API_NEEDS_LABELING)
             else:
                 selected_artifact_id = choose_next_random_api()
-                print('Random selected artifact: {}'.format(selected_artifact_id))
+                #print('Random selected artifact: {}'.format(selected_artifact_id))
                 if selected_artifact_id < 0:
                     return "It seems you are done. Please Wait for others [Code: {}]".format(selected_artifact_id)
                 return redirect(url_for('labeling_with_artifact', target_artifact_id=selected_artifact_id))
@@ -70,8 +71,11 @@ def labeling_with_artifact(target_artifact_id):
             spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
 
-            #newLinkToFileJava = '/labeling-machine/'+'/'.join(artifact_data.linkToFileJava.split('/')[5:])
-            newLinkToFileJava = artifact_data.linkToFileJava
+            #Ucomment the following to make it works remotely (BAR)
+            #newLinkToFileJava = '/home/luca/commentsToCode/' + artifact_data.linkToFileJava
+
+            #Locally on antonio's machine
+            newLinkToFileJava = '/Users/antonio/Labeling-Machine/labeling-machine/webapp/db/'+artifact_data.linkToFileJava
 
             with open(newLinkToFileJava) as f:
                 javaClassText = f.read()
@@ -239,7 +243,6 @@ def label():
         counterAssociations = request.form['counterAssociations']
         userDefinedNewCategoryDescriptions = eval(request.form['userDefinedNewCategoryDescriptions'])
         userDefinedNewCategoryNames = eval(request.form['userDefinedNewCategoryNames'])
-        print(userDefinedNewCategoryNames)
 
         if int(workingMode) == 0:
             isLabeled = 1
