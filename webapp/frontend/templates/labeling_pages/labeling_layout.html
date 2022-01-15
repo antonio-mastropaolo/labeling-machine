@@ -430,7 +430,7 @@
                     var myDiv = document.createElement('div');
                     myDiv.setAttribute('class', 'popUp');
                     myDiv.setAttribute('id', 'popUpBadComment');
-                    myDiv.innerHTML = 'Flag this instance if contains non-english comments';
+                    myDiv.innerHTML = 'Flag this instance if contains non-english comments or you think is broken';
                     document.body.appendChild(myDiv);
                 }
             );
@@ -727,15 +727,14 @@
         }
 
         function removeFromLabeling(){
-        if (confirm('Are you sure?')) {
-                var data_json = {artifact_id: {{  artifact_id }}};
-                $.post("/markBrokenClass", data_json, function (response, status) {
-                    let response_json = $.parseJSON(response.toString());
-                    ShowNotification(response_json['status'], "success", 200);
-                });
-                ChangeSkipToNext();
-        }
-
+            if (confirm('Are you sure?')) {
+                    var data_json = {artifact_id: {{  artifact_id }}};
+                    $.post("/markBrokenClass", data_json, function (response, status) {
+                        let response_json = $.parseJSON(response.toString());
+                        ShowNotification(response_json['status'], "success", 200);
+                    });
+                    ChangeSkipToNext();
+            }
     }
 
      $(document).on('dblclick', '.buttonWrapper',function (){

@@ -482,7 +482,8 @@ function addNewCommentToBeLinked(element){
         var dictRes = createNewCategory();
 
         var tag = document.createElement("div");
-        var buttonID = dictRes['category_name'].replace(/ /g,'')+'-button';
+        var buttonID = dictRes['category_name'].replace(/\s/g, '');+'-button';
+        //console.log(buttonID);
         tag.setAttribute('onmouseenter','onMouseEnterEvent("' + buttonID + '","' + dictRes['description'] + '");');
         tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + buttonID + '" );');
         tag.setAttribute('class', 'buttonWrapper');
@@ -516,7 +517,8 @@ function addNewCommentToBeLinked(element){
 
 
 function isSelectedCategory(){
-    if(selectedCategory=="" && isLabeled==0){
+    if(selectedCategory=="" && isLabeled==0 && selectedCategory != 'comment'){ //we accept commented code without any code snippet associated
+        console.log(selectedCategory);
         alert("First link the given comment to the snippet!");
         changeCommentHighlighting(dictHighlightedCode[counterAssociations]);
         return false;
@@ -542,7 +544,7 @@ function saveCategorization(){
                 break;
             }
         }
-        if(!flag){
+        if(!flag && selectedCategory !== 'comment-code-button'){
             alert("First link the given comment to the snippet!");
             return false;
         }
