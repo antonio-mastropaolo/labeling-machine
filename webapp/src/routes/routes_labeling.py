@@ -1,4 +1,5 @@
 import datetime
+import sys
 
 from flask import render_template, request, redirect, url_for, jsonify
 from src.database.models import LabelingData, Artifact, FlaggedArtifact, UserDefinedCategory
@@ -71,11 +72,12 @@ def labeling_with_artifact(target_artifact_id):
             spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
 
-            #Ucomment the following to make it works remotely (BAR)
-            #newLinkToFileJava = '/home/luca/commentsToCode/' + artifact_data.linkToFileJava
-
-            #Locally on antonio's machine
-            newLinkToFileJava = '/Users/antonio/Labeling-Machine/labeling-machine/webapp/db/'+artifact_data.linkToFileJava
+            #this one works only on bar
+            if sys.platform=='linux':
+                newLinkToFileJava = '/home/luca/commentsToCode/' + artifact_data.linkToFileJava
+            else:
+                #Locally on antonio's machine
+                newLinkToFileJava = '/Users/antonio/Desktop/'+artifact_data.linkToFileJava
 
             with open(newLinkToFileJava) as f:
                 javaClassText = f.read()
