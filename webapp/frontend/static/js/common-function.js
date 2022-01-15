@@ -18,6 +18,13 @@ function skip_next_artifact() {
 }
 
 
+
+function escapeHtml (string) {
+  return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
 function ChangeSkipToNext() {
     $("#next-skip-btn").text("Next");
     $("#next-skip-btn").removeClass("btn-outline-success");
@@ -183,7 +190,7 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
         highlightedCommentsInReviewing.push(comments[position]);
         var lines = $(comments[position]).text().split('\n');
         for (var k = 0; k < lines.length; k++) {
-            updateTextArea('<span class="selected-comment">' + lines[k] + '</span>');
+            updateTextArea('<span class="selected-comment">' + escapeHtml(lines[k]) + '</span>');
         }
 
     }
@@ -215,7 +222,7 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     for(var j=0; j < $(spanSelector).length; j++) {
         concatenedString = concatenedString + $(spanSelector)[j].innerText;
     }
-    updateTextArea('<span class="selected-code">' +concatenedString + '</span>');
+    updateTextArea('<span class="selected-code">' +escapeHtml(concatenedString) + '</span>');
 
 }
 
@@ -457,7 +464,9 @@ function checkForButtonValidity(){
     return false;
 }
 
-function updateTextArea(textToDisplay){ $("#textAreaSelectedText").append(textToDisplay);}
+function updateTextArea(textToDisplay){
+    $("#textAreaSelectedText").append(textToDisplay);
+}
 
 function removeNewAddedCategory(element){
     onMouseLeaveEvent(element);

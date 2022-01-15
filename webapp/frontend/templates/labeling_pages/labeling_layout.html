@@ -336,6 +336,18 @@
         var beginningCommentCharacterPosition = -1
         var endCommentCharacterPosition = -1
 
+
+        var entityMap = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+          '/': '&#x2F;',
+          '`': '&#x60;',
+          '=': '&#x3D;'
+        };
+
         // -------------------------End-------------------------
 
 
@@ -579,7 +591,7 @@
                 selectedCommentText = upperPartCommentSelection + lowerPartCommentSelection;
                 var lines = selectedCommentText.split('\n');
                 for (var k = 0; k < lines.length; k++) {
-                    updateTextArea('<span class="selected-comment">' + lines[k] + '</span>');
+                    updateTextArea('<span class="selected-comment">' + escapeHtml(lines[k]) + '</span>');
                 }
 
                 selectedComments.push(selectedCommentText);
@@ -631,7 +643,7 @@
                     if(isLabeled === 1 ) { $(targetTag).css('color', 'red').attr('id','comment-highlight-'+currentClassification);}
 
 
-                    updateTextArea('<span class="selected-comment">' + selectedCommentText + '</span>');
+                    updateTextArea('<span class="selected-comment">' + escapeHtml(selectedCommentText) + '</span>');
                     selectedComments.push(selectedCommentText);
 
                     beginningCommentCharacterPosition = fakeSelection4Comment(commentEleToHighlight[0][0]).start;
@@ -662,9 +674,12 @@
                                 listSelectedSpanCode.push(spanSelection);
                                 var lines = sel.text.split('\n');
                                 for (var k = 0; k < lines.length; k++) {
-                                    updateTextArea('<span class="selected-code">' + lines[k] + '</span>');
+                                    updateTextArea('<span class="selected-code">' + escapeHtml(lines[k]) + '</span>');
                                 }
+                                /*
 
+                                susott: <span class="selected-code">while ( i<mySize && j<theirSize ) {</span>
+                                 */
                                 selectedCode.push(sel.text);
                                 highlightedCodeDuringSelection.push(highlightedCodeNode);
                                 unselectAll();
