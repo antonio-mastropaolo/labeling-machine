@@ -358,10 +358,10 @@ function reset(save=false){
 
         }
 
-        if(userDefinedNewCategoryNames.length>=1) {
+        /*if(userDefinedNewCategoryNames.length>=1) {
             userDefinedNewCategoryDescriptions.pop();
             userDefinedNewCategoryNames.pop();
-        }
+        }*/
     }
 
     if(isLabeled==1 && save){

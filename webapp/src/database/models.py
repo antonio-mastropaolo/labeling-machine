@@ -74,7 +74,7 @@ class LabelingData(db.Model):
     username_reviewer = db.Column(db.Text)
     elapsed_labeling_time = db.Column(db.Integer)
     elapsed_reviewing_time = db.Column(db.Integer)
-    labeled_at = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())
-    reviewed_at = db.Column(db.DateTime(timezone=True), default=datetime.datetime.utcnow())
+    labeled_at = db.Column(db.DateTime(timezone=True))
+    reviewed_at = db.Column(db.DateTime(timezone=True))
     isChanged = db.Column(db.Integer)
 

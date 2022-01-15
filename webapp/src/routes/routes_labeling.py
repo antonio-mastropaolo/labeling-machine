@@ -258,7 +258,7 @@ def label():
             jr = LabelingData(artifact_id=artifact_id, username_tagger=who_is_signed_in(),
                                   elapsed_labeling_time=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
                                   commentSpan=commentSpan, categories=categories, commentPosition=commentPosition,
-                                  moveSelectionButton=moveSelectionButton#, rangeSelectedText=rangeSelectedText
+                                  moveSelectionButton=moveSelectionButton, labeled_at=datetime.datetime.utcnow()
                               )
 
             db.session.add(jr)
@@ -283,11 +283,9 @@ def label():
             labeling_data.commentPosition = commentPosition
             labeling_data.moveSelectionButton = moveSelectionButton
             labeling_data.code = code
+            labeling_data.reviewed_at = datetime.datetime.utcnow()
             labeling_data.codeSpan = codeSpan
             labeling_data.commentSpan = commentSpan
-
-            if ():
-                labeling_data.isChanged = 1
 
             labeling_data.categories = categories
             db.session.commit()
@@ -301,7 +299,7 @@ def label():
         if(len(userDefinedNewCategoryDescriptions)>0):
 
             for (name, description) in zip(userDefinedNewCategoryNames, userDefinedNewCategoryDescriptions):
-                udc = UserDefinedCategory(categoryName=name, description=description, categoryButtonName= name + '-' + 'button', user=who_is_signed_in())
+                udc = UserDefinedCategory(categoryName=name, description=description, categoryButtonName = name + '-' + 'button', user=who_is_signed_in())
                 db.session.add(udc)
                 db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
                 db.session.commit()
