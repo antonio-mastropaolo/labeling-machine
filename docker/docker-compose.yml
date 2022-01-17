@@ -5,8 +5,8 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    image: lm-minimal:latest
-    container_name: lm-minimal
+    image: lm-comment2code:latest
+    container_name: lm-comment2code
     restart: always
     environment:
       FLASK_ENV: development
@@ -15,6 +15,6 @@ services:
       #- inline-labeling-data:/labeling-machine/webapp/db
       - /home/antonio/inline-labeling/db/:/labeling-machine/webapp/db/
     ports:
-      - '45000:5000'
+      - '45001:5000'
 #volumes:
 #  inline-labeling-data:
