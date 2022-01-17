@@ -7,7 +7,7 @@ RUN apt-get install -y sqlite3
 # Copy contents
 COPY webapp /labeling-machine/webapp
 COPY requirements.txt /labeling-machine
-COPY data /labeling-machine/data
+#COPY data /labeling-machine/data
 
 
 # FLASK Environment variables

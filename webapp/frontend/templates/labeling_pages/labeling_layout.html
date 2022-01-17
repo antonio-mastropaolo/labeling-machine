@@ -240,8 +240,8 @@
             <div class=" col-md-2"></div>
             <div class=" col-md-8">
                 <div contenteditable="true" id="textAreaSelectedText" rows="4" cols="50" class="textarea"></div>
-                <button id="clearText" style="color:white;" type="submit" class='btn btn-dark button-corner-down' onclick="reset(); resetClicked=true;">Clear</button>
-                <button id="saveClassification" type="submit" class='btn btn-dark button-corner-up' onclick="saveCategorization(); resetClicked=true;">Save</button>
+                <button id="clearText" style="color:white;" type="submit" class='btn btn-warning button-corner-down' onclick="reset(); resetClicked=true;">Clear</button>
+                <button id="saveClassification" type="submit" class='btn btn-success button-corner-up' onclick="saveCategorization(); resetClicked=true;">Save</button>
             </div>
             <div class=" col-md-2"></div>
         </div>
@@ -452,10 +452,6 @@
                 }
             );
 
-
-
-
-
             /* --------------------------------------------------- */
 
             $("#toggleButton").click(function () {
@@ -501,8 +497,8 @@
                     $("#" + idsButton[i].replace('div-', '')).attr('disabled', 'disabled');
                 }
 
-                $("#saveClassification").removeClass("btn-dark").addClass("btn-success").text("Accept");
-                $("#clearText").removeClass("btn-dark").addClass("btn-warning").text("Change");
+                $("#saveClassification").text("Accept");
+                $("#clearText").text("Change");
 
                 $("#clearText").click(function () {
                    if(this.innerHTML.trim() === 'Change'){ this.innerHTML = 'Reset'; }

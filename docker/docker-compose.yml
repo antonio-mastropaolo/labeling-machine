@@ -11,9 +11,10 @@ services:
     environment:
       FLASK_ENV: development
     volumes:
-      #- labeling-data:/labeling-machine/webapp/db
-      - inline-labeling-data:/labeling-machine/webapp/db
+      - /home/luca/commentsToCode/cloned/:/labeling-machine/data/
+      #- inline-labeling-data:/labeling-machine/webapp/db
+      - /home/antonio/inline-labeling/db/:/labeling-machine/webapp/db/
     ports:
       - '45000:5000'
-volumes:
-  inline-labeling-data:
+#volumes:
+#  inline-labeling-data:
