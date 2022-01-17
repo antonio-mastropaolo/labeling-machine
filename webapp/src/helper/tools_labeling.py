@@ -92,13 +92,13 @@ def choose_next_random_api():
     locked = set(k for k, v in locked_artifacts.items())
     candidate_artifact_ids -= locked
 
-    # ############### 2. Remove Classes Locked at the moment
+    # ############### 2. Remove Classesfully classified artifact
     completed_artifacts = {row[0] for row in
                            db.session.query(Artifact.id).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).all()}
     candidate_artifact_ids -= completed_artifacts
 
 
-    # ############### 3. Remove APIs marked as broken
+    # ############### 3. Remove Classes marked as broken
     broken_artifacts = {row[0] for row in
                             db.session.query(Artifact.id).filter(Artifact.isValid==0).all()}
     candidate_artifact_ids -= broken_artifacts
