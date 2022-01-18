@@ -38,7 +38,6 @@ function createNewCategory() {
     var newCategoryDescription =  prompt("Please type the new comment category description","");
     if (newCategoryDescription === null || newCategoryName === null || newCategoryDescription === "" || newCategoryName === "") {
         var tag = document.createElement("div");
-        //console.log(buttonID);
         tag.setAttribute('class','alert alert-danger alert-fixed');
         tag.setAttribute('role','alert');
         tag.setAttribute('id','alertCategory')
@@ -527,7 +526,7 @@ function addNewCommentToBeLinked(element){
         var dictRes = createNewCategory();
 
         var tag = document.createElement("div");
-        var buttonID = (dictRes['category_name'].split(' ').join(''))+'-button';
+        var buttonID = (dictRes['category_name'].split(' ').join('')).toLowerCase()+'-button';
         tag.setAttribute('onmouseenter','onMouseEnterEvent("' + buttonID + '","' + dictRes['description'] + '");');
         tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + buttonID + '" );');
         tag.setAttribute('class', 'buttonWrapper');

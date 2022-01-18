@@ -248,7 +248,7 @@ def label():
         if(len(userDefinedNewCategoryDescriptions)>0):
 
             for (name, description) in zip(userDefinedNewCategoryNames, userDefinedNewCategoryDescriptions):
-                buttonID = ''.join(name.split(' ')) + '-button'
+                buttonID = (''.join(name.split(' ')) + '-button').lower()
                 udc = UserDefinedCategory(categoryName=name, description=description, categoryButtonName = buttonID, user=who_is_signed_in())
                 db.session.add(udc)
                 db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
