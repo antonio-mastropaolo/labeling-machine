@@ -35,8 +35,29 @@ function ChangeSkipToNext() {
 
 function createNewCategory() {
     var newCategoryName = prompt("Please type the new comment category name","Text");
-    var newCategoryDescription =  prompt("Please type the new comment category description","Text");
-    //if(newCategoryName && newCategoryDescription){ $("#"+id).text(newCategoryName); }
+    var newCategoryDescription =  prompt("Please type the new comment category description","");
+    if (newCategoryDescription === null || newCategoryName === null || newCategoryDescription === "" || newCategoryName === "") {
+        var tag = document.createElement("div");
+        //console.log(buttonID);
+        tag.setAttribute('class','alert alert-danger alert-fixed');
+        tag.setAttribute('role','alert');
+        tag.setAttribute('id','alertCategory')
+        tag.setAttribute('style','font-size:large; text-align:center;');
+        tag.innerText = 'Both fields must be filled!';
+
+        try{
+            $("#alertCategory").remove()
+        }catch (ex){}
+
+        $('#alert').append(tag);
+        $('#alertCategory').fadeIn(1000);
+           setTimeout(function() {
+               $('#alertCategory').fadeOut(1000);
+               }, 2000);
+
+        return;
+    }
+    //var buttonID = dictRes['category_name'].replace(/\s/g, '');+'-button';
     userDefinedNewCategoryNames.push(newCategoryName);
     userDefinedNewCategoryDescriptions.push(newCategoryDescription);
     return {'category_name':newCategoryName,'description':newCategoryDescription};
@@ -226,7 +247,7 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
 }
 
-function highlightTargetComments(elements,className, spanOfCharPerMethod){
+function highlightTargetComments(elements,className){
     var dictPosition = {}
     function look4Javadoc(comment){
         var commentLines = comment.split('\n');
@@ -469,12 +490,27 @@ function updateTextArea(textToDisplay){
 }
 
 function removeNewAddedCategory(element){
+
     onMouseLeaveEvent(element);
-    $("#"+element)[0].parentNode.remove();
-    var index = selectedCategories.indexOf(element);
-    selectedCategories[index]=null;
-    userDefinedNewCategoryNames.reverse().pop();
-    userDefinedNewCategoryDescriptions.reverse().pop();
+
+    var keys = Object.keys(dictSelectedCategories);
+    var skip=false;
+
+    keys.forEach(function(key){
+        if(dictSelectedCategories[key].includes(element)){
+            alert('This action is forbidden. Please remove first the association you made!');
+            skip=true;
+        }
+    });
+
+    if(!skip) {
+        $("#" + element)[0].parentNode.remove();
+        var index = selectedCategories.indexOf(element);
+        selectedCategories[index] = null;
+        userDefinedNewCategoryNames.reverse().pop();
+        userDefinedNewCategoryDescriptions.reverse().pop();
+    }
+
     // console.log('**************************');
     // console.log(userDefinedNewCategoryNames);
     // console.log(userDefinedNewCategoryDescriptions);
@@ -491,8 +527,7 @@ function addNewCommentToBeLinked(element){
         var dictRes = createNewCategory();
 
         var tag = document.createElement("div");
-        var buttonID = dictRes['category_name'].replace(/\s/g, '');+'-button';
-        //console.log(buttonID);
+        var buttonID = (dictRes['category_name'].split(' ').join(''))+'-button';
         tag.setAttribute('onmouseenter','onMouseEnterEvent("' + buttonID + '","' + dictRes['description'] + '");');
         tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + buttonID + '" );');
         tag.setAttribute('class', 'buttonWrapper');
@@ -553,7 +588,7 @@ function saveCategorization(){
                 break;
             }
         }
-        if(!flag && selectedCategory !== 'comment-code-button'){
+        if(!flag){
             alert("First link the given comment to the snippet!");
             return false;
         }
@@ -567,9 +602,6 @@ function saveCategorization(){
         if(isLabeled === 0) {
 
             //adding tag result to the lists we store in the DB
-            //selectedComments.push(selectedCommentText);
-            //selectedCode.push(selectedCodeText);
-            //dictRangeHighlightedCode[counterAssociations] = serializedRangeList;
 
             dictHighlightedCommentsPosition[dictIndex] = [...new Set(commentIndex)];
             dictHighlightedCodeCharacterPosition[dictIndex] = listSelectedSpanCode;
@@ -604,7 +636,7 @@ function saveCategorization(){
             //onclick="removeAssociation(\''+ divID +'\')">
 
             // handling list for the reviewing part
-            var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick=" moveToSelectedMethodFromTag([' + dictHighlightedCommentsPosition[dictIndex] + '],' +dictIndex + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + ' + </button></div>';
+            var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick=" moveToSelectedMethodFromTag([' + dictHighlightedCommentsPosition[dictIndex] + '],' +dictIndex + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '</button></div>';
             methodSelectionButton.push(moveToButton);
 
             dictIndex += 1;

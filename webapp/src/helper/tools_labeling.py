@@ -37,9 +37,11 @@ def get_overall_labeling_progress():
 
 def get_total_number_of_classes_in_db():
     return db.session.query(func.count(Artifact.id)).scalar()
+    #return 10 for test
 
 def get_total_number_of_classes_to_be_labeled():
     total = db.session.query(func.count(Artifact.id)).scalar()
+    #total = 10 for test
     labeled = get_total_number_of_labeled_classes()
     N_CLASSES_NEEDS_LABELING = total - labeled
     return N_CLASSES_NEEDS_LABELING
@@ -50,6 +52,7 @@ def get_total_number_of_labeled_classes():
 
 def get_total_number_of_reviewed_classes():
     result = Artifact.query.filter_by(reviewed=1).count()
+    #return 10 for test
     return result
 
 def get_total_number_of_labeled_and_reviewed_classes():

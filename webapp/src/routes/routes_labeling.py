@@ -22,7 +22,7 @@ def labeling():
             n_classes_reviewed = get_total_number_of_reviewed_classes()
             if n_classes_reviewed == n_classes:
                 return "We are done. All {} Classes are tagged and eventual conflicts have been resolved".format(
-                    N_API_NEEDS_LABELING)
+                    n_classes)
             else:
                 selected_artifact_id = choose_next_random_api()
                 #print('Random selected artifact: {}'.format(selected_artifact_id))
@@ -82,54 +82,6 @@ def labeling_with_artifact(target_artifact_id):
             with open(newLinkToFileJava) as f:
                 javaClassText = f.read()
 
-            pattern = r"(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)"
-            regex = re.compile(pattern, re.MULTILINE | re.DOTALL)
-            javaClassLines = javaClassText.splitlines()
-
-            refinedIndicisList = []
-            for (idx, item) in enumerate(spanListMethods):
-                start = int(item.split('-')[0])
-                end = int(item.split('-')[1])
-                method = '\n'.join(javaClassLines[start:end])
-                try:
-                    regex.search(method).group(0)
-                    refinedIndicisList.append(idx)
-                except Exception:
-                    continue
-
-
-            spanListMethods = [spanListMethods[index] for index in refinedIndicisList]
-            methodsName = [methodsName[index] for index in refinedIndicisList]
-
-            with open(newLinkToFileJava) as f:
-                classLines = [item for item in f.readlines()]
-
-            #Mapping starting and ending method's lines to bytes position respectively
-            spanOfCharPerMethod = []
-            for startEndLine in spanListMethods:
-
-                start = int(startEndLine.split('-')[0])
-                end = int(startEndLine.split('-')[1])
-                IN = False
-
-                totalBefore = 0
-                totalUntilEnd = 0
-
-                for (idx, line) in enumerate(classLines):
-                    if (idx == start - 1):
-                        IN = True
-
-                    if IN:
-                        totalUntilEnd += len(line.encode('utf-8'))
-                    else:
-                        totalBefore += len(line.encode('utf-8'))
-
-                    if (idx == end and IN):
-                        totalUntilEnd += totalBefore
-                        break
-
-                spanOfCharPerMethod.append('{}-{}'.format(totalBefore, totalUntilEnd))
-
             counterAssociations = artifact_data.counterAssociations
 
             isLabeled = 1 if artifact_data.labeled == 1 else 0
@@ -167,7 +119,6 @@ def labeling_with_artifact(target_artifact_id):
                                    artifact_class = javaClassText,
                                    artifact_UDC = udc_item,
                                    artifact_methodsListLines = spanListMethods,
-                                   artifact_methodsListBytes = spanOfCharPerMethod,
                                    artifact_label_commentPositionList = commentPositionList,
                                    artifact_moveSelectionButtonList = moveSelectionButtonList,
                                    isLabeled = isLabeled,
@@ -183,7 +134,6 @@ def labeling_with_artifact(target_artifact_id):
                                    selectedComments = selectedComments,
                                    codeSpan = codeSpan,
                                    commentSpan = commentSpan,
-                                   # existing_labeling_data = all_labels,
                                    all_taggers = ', '.join(all_taggers) if all_taggers is not None else None
                                    )
         else:
@@ -239,7 +189,6 @@ def label():
         codeSpan = request.form['codeSpan']
         commentSpan = request.form['commentSpan']
         workingMode = request.form['workingMode']
-        #rangeSelectedText = request.form['rangeSelectedText']
         commentPosition = request.form['commentPosition']
         moveSelectionButton = request.form['moveToSelectedButtons']
         counterAssociations = request.form['counterAssociations']
@@ -299,7 +248,8 @@ def label():
         if(len(userDefinedNewCategoryDescriptions)>0):
 
             for (name, description) in zip(userDefinedNewCategoryNames, userDefinedNewCategoryDescriptions):
-                udc = UserDefinedCategory(categoryName=name, description=description, categoryButtonName = name + '-' + 'button', user=who_is_signed_in())
+                buttonID = ''.join(name.split(' ')) + '-button'
+                udc = UserDefinedCategory(categoryName=name, description=description, categoryButtonName = buttonID, user=who_is_signed_in())
                 db.session.add(udc)
                 db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
                 db.session.commit()
