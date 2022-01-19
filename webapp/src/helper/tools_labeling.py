@@ -36,7 +36,8 @@ def get_overall_labeling_progress():
 
 
 def get_total_number_of_classes_in_db():
-    return db.session.query(func.count(Artifact.id)).scalar()
+    all_classes = db.session.query(func.count(Artifact.id)).filter(Artifact.isValid == 1).scalar()
+    return all_classes
     #return 10 for test
 
 def get_total_number_of_classes_to_be_labeled():
