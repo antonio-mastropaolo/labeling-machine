@@ -41,7 +41,7 @@ function createNewCategory() {
         tag.setAttribute('class','alert alert-danger alert-fixed');
         tag.setAttribute('role','alert');
         tag.setAttribute('id','alertCategory')
-        tag.setAttribute('style','font-size:large; text-align:center;');
+        tag.setAttribute('style','font-size:large; text-align:center; width:20%;');
         tag.innerText = 'Both fields must be filled!';
 
         try{
@@ -357,7 +357,7 @@ function reset(save=false){
 
     $("#textAreaSelectedText").text("");
     $('.category-button').css("background-color",'');
-    $("#new-category-button").text("Define New Category");
+    //$("#new-category-button").text("Define New Category");
 
     if(!save) {
         //changeCommentHighlighting(commentEleToHighlight,'', true);
@@ -424,10 +424,6 @@ function reset(save=false){
         flagSwitch=false;
     }
 
-    //removing #new-category-button2 if exists
-    try{ $( document.getElementById("new-category-button2").parentElement).remove();}
-    catch(ex){}
-
     commentEleToHighlight = [];
     commentIndex = [];
     serializedRangeList = [];
@@ -438,6 +434,11 @@ function reset(save=false){
     listSelectedSpanCode = [];
     listSelectedSpanComment = [];
     resetClicked = false;
+
+    // Restore original color for the no-code-button
+    noCode=false;
+    $("#no-code-button").css('background-color','#8267BE')
+
     selectedCategory = "";
     selectedCodeText = "";
     selectedCommentText = "";
@@ -508,6 +509,8 @@ function removeNewAddedCategory(element){
         selectedCategories[index] = null;
         userDefinedNewCategoryNames.reverse().pop();
         userDefinedNewCategoryDescriptions.reverse().pop();
+        userDefinedCategoryShortcuts.reverse().pop();
+        badgeCounterCategory -= 1;
     }
 
     // console.log('**************************');
@@ -525,6 +528,9 @@ function addNewCommentToBeLinked(element){
     if(element.id.toString() === "new-category-button") {
         var dictRes = createNewCategory();
 
+        var shortcut = (userDefinedCategories['category_id'].length+badgeCounterCategory);
+        userDefinedCategoryShortcuts.push(shortcut);
+        
         var tag = document.createElement("div");
         var buttonID = (dictRes['category_name'].split(' ').join('')).toLowerCase()+'-button';
         tag.setAttribute('onmouseenter','onMouseEnterEvent("' + buttonID + '","' + dictRes['description'] + '");');
@@ -535,12 +541,12 @@ function addNewCommentToBeLinked(element){
         newButton.setAttribute('class', 'btn btn btn-dark category-button')
         newButton.setAttribute('type', 'submit');
         newButton.setAttribute('id', buttonID);
-        newButton.setAttribute('style', 'width: 100%;');
-        newButton.innerText = dictRes['category_name'];
-
+        newButton.setAttribute('style', 'width: 100%; text-align: left;');
+        //newButton.innerHTML = +shortcut+'</span>'+dictRes['category_name'];
+        newButton.innerHTML = '<span style="font-size: 12px;" class="badge bg-secondary float-right position-relative">' + "ALT+CTRL+"+shortcut+'</span>'+dictRes['category_name'];
         var newTrashButton =  document.createElement('i');
         newTrashButton.setAttribute('class','far fa-trash-alt fa-1x');
-        newTrashButton.setAttribute('style','position:sticky; left:95%;');
+        newTrashButton.setAttribute('style','position:relative; left:45%; top:-5px;');
         newTrashButton.setAttribute('onclick','removeNewAddedCategory("' + buttonID +'");');
 
         newButton.appendChild(newTrashButton);
@@ -548,7 +554,7 @@ function addNewCommentToBeLinked(element){
         $("#categoriesColumn").append(tag);
         selectedCategory = buttonID;
         $(newButton).css('background-color','green');
-
+        badgeCounterCategory += 1;
     }else{
         $(element).css('background-color','green');
         selectedCategory = element.id.toString();
@@ -560,15 +566,17 @@ function addNewCommentToBeLinked(element){
 
 
 function isSelectedCategory(){
-    if(selectedCategory=="" && isLabeled==0 && selectedCategory != 'comment'){ //we accept commented code without any code snippet associated
-        console.log(selectedCategory);
-        alert("First link the given comment to the snippet!");
-        changeCommentHighlighting(dictHighlightedCode[counterAssociations]);
-        return false;
-    }else{
+    if(noCode){
         return true;
+    }else{
+        if(selectedCategory=="" && isLabeled==0){ //we accept commented code without any code snippet associated
+            alert("First link the given comment to the snippet!");
+            changeCommentHighlighting(dictHighlightedCode[counterAssociations]);
+            return false;
+        }else{
+            return true;
+        }
     }
-
 }
 
 function saveCategorization(){
@@ -582,7 +590,7 @@ function saveCategorization(){
         var flag=false;
         var childNodes = document.getElementById("textAreaSelectedText").childNodes;
         for(var i = 0; i < childNodes.length; i++){
-            if( $(childNodes[i])[0].className === "selected-code"){
+            if( $(childNodes[i])[0].className === "selected-code" || noCode){
                 flag=true;
                 break;
             }
@@ -740,6 +748,12 @@ function removeAssociation(divID){
 
 }
 
+function refreshPage(){
+    if (confirm('Are you sure?')) {
+        window.location.reload();
+    }
+}
+
 function cleanDict(obj) {
   for (var propName in obj) {
     if (obj[propName].length === 0 || obj[propName] === undefined || obj[propName] === null) {
@@ -792,3 +806,179 @@ function onMouseLeaveEvent(btnCategory){
     var category = btnCategory.split('-')[0];
     $("#pop-up-"+category).remove();
 }
+
+
+// Shortcuts implementation
+// window.addEventListener('keydown', function (event) {
+// //document.onkeyup = function myFunction(event) {
+//     let key = event.which || event.keyCode;
+//     var element;
+//     if (event.altKey && event.ctrlKey && key == 49) {
+//         console.log('opk');
+//     }
+//     if (event.altKey && key == 49) { //triggered define new category
+//         element = document.getElementById('new-category-button');
+//         shortcutForAddingCategory(element);
+//
+//     } else if (event.altKey && key == 50) {
+//         element = document.getElementById('code-summary-button');
+//         shortcutForAddingCategory(element);
+//
+//     } else if (event.altKey && key == 51) {
+//         element = document.getElementById('expand-button');
+//         shortcutForAddingCategory(element);
+//
+//     } else if (event.altKey && key == 52) {
+//         element = document.getElementById('rationale-button');
+//         shortcutForAddingCategory(element);
+//
+//     } else if (event.altKey && key == 53) {
+//         element = document.getElementById('deprecation-button');
+//         shortcutForAddingCategory(element);
+//
+//     } else if (event.altKey && key == 54) {
+//         element = document.getElementById('todo-button');
+//         shortcutForAddingCategory(element);
+//
+//     } else if (event.altKey && key == 55) {
+//         element = document.getElementById('comment-code-button');
+//         shortcutForAddingCategory(element);
+//
+//     } else if (event.altKey && key == 56) {
+//         element = document.getElementById('incomplete-button');
+//         shortcutForAddingCategory(element);
+//
+//     }
+// });
+
+function fetchUserDefinedCategoryButtonName(shortcut){
+    for(var i=0; i<userDefinedCategories['category_id'].length; i++) {
+        if( parseInt(userDefinedCategories['shortcut'][i]) === shortcut ){
+            return userDefinedCategories['category_button_name'][i];
+        }
+    }
+    // for (var j=0; j<selectedCategories.length;j++){
+    //     if (!labelCategories.includes(selectedCategories[j])){
+    //         return selectedCategories[j];
+    //     }
+    // }
+}
+
+
+function isAlreadySelectedCategory(categoryButton){
+    var color = $("#"+categoryButton).css('background-color');
+    if(color === "rgb(0, 128, 0)"){
+       return true;
+    }else{
+        return false;
+    }
+}
+
+
+function selectDeselectViaShortcut(categoryButtonName){
+    if(isAlreadySelectedCategory(categoryButtonName)){
+        if(categoryButtonName === 'no-code-button'){
+            noCode = false;
+        }else {
+            selectedCategories.pop();
+            selectedCategory = "";
+        }
+        $("#"+categoryButtonName).css('background-color','');
+    }else {
+        if (categoryButtonName === 'no-code-button'){
+            noCode = true;
+            $('#'+categoryButtonName).css('background-color','green');
+        }else {
+            var element = document.getElementById(categoryButtonName);
+            shortcutForAddingCategory(element);
+        }
+    }
+}
+
+hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt+ctrl+2, alt+ctrl+3, alt+ctrl+4, alt+ctrl+5, alt+ctrl+6, alt+ctrl+7, alt+ctrl+8, alt+s, alt+c', function (event, handler){
+     // User defined categories start here
+    var categoryButtonName;
+    switch (handler.key) {
+
+        case 'alt+1':
+            selectDeselectViaShortcut('new-category-button');
+            break;
+
+        case 'alt+2':
+            selectDeselectViaShortcut('code-summary-button');
+            break;
+
+        case 'alt+3':
+            selectDeselectViaShortcut('expand-button');
+            break;
+
+        case 'alt+4':
+            selectDeselectViaShortcut('rationale-button');
+            break;
+
+        case 'alt+5':
+            selectDeselectViaShortcut('deprecation-button');
+            break;
+
+        case 'alt+6':
+            selectDeselectViaShortcut('todo-button');
+            break;
+
+        case 'alt+7':
+            selectDeselectViaShortcut('comment-code-button');
+            break;
+
+        case 'alt+8':
+            selectDeselectViaShortcut('incomplete-button');
+            break;
+
+        case 'alt+ctrl+1':
+            categoryButtonName = fetchUserDefinedCategoryButtonName(1);
+            selectDeselectViaShortcut(categoryButtonName);
+            break;
+
+        case 'alt+ctrl+2':
+            categoryButtonName = fetchUserDefinedCategoryButtonName(2);
+            selectDeselectViaShortcut(categoryButtonName)
+            break;
+
+        case 'alt+ctrl+3':
+            categoryButtonName = fetchUserDefinedCategoryButtonName(3);
+            selectDeselectViaShortcut(categoryButtonName)
+            break;
+
+        case 'alt+ctrl+4':
+            categoryButtonName = fetchUserDefinedCategoryButtonName(4);
+            selectDeselectViaShortcut(categoryButtonName)
+            break;
+
+        case 'alt+ctrl+5':
+            categoryButtonName = fetchUserDefinedCategoryButtonName(5);
+            selectDeselectViaShortcut(categoryButtonName)
+            break;
+
+        case 'alt+ctrl+6':
+            categoryButtonName = fetchUserDefinedCategoryButtonName(6);
+            selectDeselectViaShortcut(categoryButtonName)
+            break;
+
+        case 'alt+ctrl+7':
+            categoryButtonName = fetchUserDefinedCategoryButtonName(7);
+            selectDeselectViaShortcut(categoryButtonName)
+            break;
+
+        case 'alt+ctrl+8':
+            categoryButtonName = fetchUserDefinedCategoryButtonName(8);
+            selectDeselectViaShortcut(categoryButtonName)
+            break;
+
+        case 'alt+c':
+            selectDeselectViaShortcut('no-code-button');
+            break;
+
+        // Submit shortcut
+         case 'alt+s':
+            submitClassification();
+            break;
+    }
+});

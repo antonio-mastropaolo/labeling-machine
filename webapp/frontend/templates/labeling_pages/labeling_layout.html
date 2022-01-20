@@ -7,6 +7,7 @@
     <link href="{{ url_for('static', filename='css/page_layout.css') }}" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs-themes@1.0.0/github.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
 
     <script src="{{ url_for('static', filename='js/jquery.lettering-0.6.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/common-function.js') }}"></script>
@@ -79,7 +80,7 @@
         <div class="row no-gutters">
 {#            change button color for default cats#}
               <div class=" col-md-2 vh-100" style="background-color: black;">
-                  <div id="categoriesColumn" style="overflow-y: scroll; height:40%;">
+                  <div id="categoriesColumn" style="overflow-y: scroll; height: 40vh;">
 
                        <div class="buttonWrapper">
                               <button class="btn btn btn-dark category-button"
@@ -87,18 +88,19 @@
                                       id="new-category-button"
                                       onmouseenter='onMouseEnterEvent("new-category-button","If none of the previous categories match the new comment-to-code association");'
                                       onmouseleave='onMouseLeaveEvent("new-category-button");'
-                                      style="width: 100%" > Define new category
+                                      style="width: 100%; text-align: left;">Define new category <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+1</span>
                               </button>
                           </div>
 
 
                           <div class="buttonWrapper">
+
                               <button class="btn btn btn-dark category-button"
                                       type="submit"
                                       id="code-summary-button"
                                       onmouseenter='onMouseEnterEvent("code-summary-button","The comment is a high-level summary for the code");'
                                       onmouseleave='onMouseLeaveEvent("code-summary-button");'
-                                      style="width: 100%" > Code Summary
+                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px; margin-left: -5px;" class="badge bg-success float-right position-relative">ALT+2</span> Code Summary
                               </button>
                           </div>
 
@@ -108,7 +110,7 @@
                                       id="expand-button"
                                       onmouseenter='onMouseEnterEvent("expand-button","A verbose description of the implementation");'
                                       onmouseleave='onMouseLeaveEvent("expand-button");'
-                                      style="width: 100%" > Expand
+                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+3</span> Expand
                               </button>
                           </div>
 
@@ -118,7 +120,7 @@
                                       onmouseenter='onMouseEnterEvent("rationale-button","The comment answers the question (WHY?)");'
                                       onmouseleave='onMouseLeaveEvent("rationale-button");'
                                       id="rationale-button"
-                                      style="width: 100%" > Rationale
+                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+4</span>Rationale
                               </button>
                           </div>
 
@@ -128,7 +130,7 @@
                                       id="deprecation-button"
                                       onmouseenter='onMouseEnterEvent("deprecation-button","The code is deprecated");'
                                       onmouseleave='onMouseLeaveEvent("deprecation-button");'
-                                      style="width: 100%" > Code Deprecation
+                                      style="width: 100%; text-align: left;" > <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+5</span></span>Code Deprecation
                               </button>
                           </div>
 
@@ -159,7 +161,7 @@
                                       id="todo-button"
                                       onmouseenter='onMouseEnterEvent("todo-button","The comment is complete but the code is not fully developed");'
                                       onmouseleave='onMouseLeaveEvent("todo-button");'
-                                      style="width: 100%" > Work in Progress <!-- Previously: TO-DO -->
+                                      style="width: 100%; text-align: left;" > <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+6</span>Work in Progress <!-- Previously: TO-DO -->
                               </button>
                           </div>
 
@@ -169,7 +171,7 @@
                                       id="comment-code-button"
                                       onmouseenter='onMouseEnterEvent("comment-code-button","The comment refers to a piece of code that is not used anymore");'
                                       onmouseleave='onMouseLeaveEvent("comment-code-button");'
-                                      style="width: 100%" > Commented Code
+                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+7</span>Commented Code
                               </button>
                           </div>
 
@@ -179,16 +181,25 @@
                                       id="incomplete-button"
                                       onmouseenter='onMouseEnterEvent("incomplete-button","The comment is not completed");'
                                       onmouseleave='onMouseLeaveEvent("incomplete-button");'
-                                      style="width: 100%" > Incomplete Comment
+                                      style="width: 100%; text-align: left;"><span style="font-size: 12px; margin-left: -5px;" class="badge bg-success float-right position-relative">ALT+8</span>Incomplete Comment
                               </button>
                           </div>
 
 
                   </div>
-                  <hr class="solid" style="position:relative; top:-15px;" id="topLevelLineSep">
-
+                  <div>
+                      <hr class="solid" style="position:relative; top:-10px;" id="topLevelLineSep">
+                          <button class="btn btn btn-dark category-button"
+                                  type="submit"
+                                  id="no-code-button"
+                                  onmouseenter='onMouseEnterEvent("no-code-button","No available snippet to be linked");'
+                                  onmouseleave='onMouseLeaveEvent("no-code-button");'
+                                  style="width: 100%; margin-top:-35px; text-align: left;  background-color: #8267BE; font-weight: bold;" ><span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+C</span>No Code
+                          </button>
+                      <hr class="solid" style="position:relative; top:-20px;" id="bottomLevelLineSep">
+                  </div>
                   <hr class="solid" style="position:sticky; top:90.2%;">
-                  <div id='refreshButton' style="position:fixed; left:12.5%; top:92%;" onclick="window.location.reload();">
+                  <div id='refreshButton' style="position:fixed; left:12.5%; top:92%;" onclick="refreshPage();">
                       <i class="fas fa-sync fa-3x" style="color:white;"></i>
                   </div>
                   <div id="removeFromDataset" style="position:fixed; left:7.2%; top:92%;" onclick="removeFromLabeling();">
@@ -260,7 +271,9 @@
 
         // -------------------------Start-------------------------
 
+        // highlighting
         hljs.highlightAll();
+
 
 
         //updating progress bar
@@ -290,6 +303,7 @@
                                 'code-summary-button',
                                 'comment-code-button',
                                 'incomplete-button',
+                                'no-code-button'
         ];
 
         var selectedCategory = "";
@@ -301,10 +315,12 @@
         var whereCommentBegin = -1;
         var whereCommentEnd = -1;
         var resetClicked=false;
-        var clicked = false;
+        var clicked=false;
+        var badgeCounterCategory = 1;
         var currentClassification=-1;
         var defaultColorHighlight='red';
         var flagSwitch=true;
+        var noCode=false;
         var changingToClassificationOnGoing=false;
 
         var commentEleToHighlight = [];
@@ -327,6 +343,7 @@
         var listSelectedSpanCode = [];
         var userDefinedNewCategoryNames = [];
         var userDefinedNewCategoryDescriptions = [];
+        var userDefinedCategoryShortcuts = [];
         var listSelectedSpanComment = [];
         var selectedCategories = [];
         var commentsToHighlight = [];
@@ -355,7 +372,6 @@
 
         $(document).ready(function () {
 
-
             $("h1").css('color', 'white');
             $("h2").css('color', 'white');
             $('.hljs-comment').css('user-select', 'none');
@@ -371,8 +387,9 @@
                 newButton.setAttribute('class', 'btn btn btn-dark category-button')
                 newButton.setAttribute('type', 'submit');
                 newButton.setAttribute('id', userDefinedCategories['category_button_name'][i] );
-                newButton.setAttribute('style', 'width: 100%;');
-                newButton.innerText = userDefinedCategories['category_name'][i];
+                newButton.setAttribute('style', 'width: 100%; text-align: left;');
+                //newButton.innerHTML = '<span style="font-size: 13px;" class="badge bg-success float-left position-relative"><i class="fas fa-angle-double-up"></i><b>~</b>'+(i+parseInt(userDefinedCategories['shortcut']))+'</span>'+userDefinedCategories['category_name'][i];
+                newButton.innerHTML = '<span style="font-size: 12px;" class="badge bg-success float-right position-relative">' + "ALT+CTRL+" +(i+parseInt(userDefinedCategories['shortcut'])) + '</span>' + userDefinedCategories['category_name'][i];
                 tag.appendChild(newButton);
                 $("#categoriesColumn").append(tag);
 
@@ -672,10 +689,7 @@
                                 for (var k = 0; k < lines.length; k++) {
                                     updateTextArea('<span class="selected-code">' + escapeHtml(lines[k]) + '</span>');
                                 }
-                                /*
 
-                                susott: <span class="selected-code">while ( i<mySize && j<theirSize ) {</span>
-                                 */
                                 selectedCode.push(sel.text);
                                 highlightedCodeDuringSelection.push(highlightedCodeNode);
                                 unselectAll();
@@ -693,7 +707,11 @@
 
         function submitClassification(){
 
+
             var newRefinedDict = getSameKeysDict(cleanDict(dictHighlightedCodeCharacterPosition), cleanDict(dictHighlightedCommentsCharacterPosition));
+            if (Object.keys(newRefinedDict).length === 0 ){
+                newRefinedDict = dictHighlightedCommentsCharacterPosition;
+            }
 
             if (confirm('Are you sure?')) {
                 var data_json = {
@@ -709,6 +727,7 @@
                     counterAssociations: (isLabeled === 1 ?  Number({{ counterAssociations }}) : counterAssociations ),
                     userDefinedNewCategoryNames:  JSON.stringify(userDefinedNewCategoryNames),
                     userDefinedNewCategoryDescriptions:  JSON.stringify(userDefinedNewCategoryDescriptions),
+                    categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
                     duration:get_elapsed_seconds()
                 };
 
@@ -748,17 +767,31 @@
             }
     }
 
-     $(document).on('click', '.buttonWrapper',function (){
-            if(selectedCategories.length>=2){
-                alert('No more categories can be linked!');
-            }else {
+    function shortcutForAddingCategory(element){
+        if(selectedCategories.length>=2){
+            alert('No more categories can be linked!');
+        }else {
+            addNewCommentToBeLinked(element);
+        }
+    }
+
+
+
+    $(document).on('click', '.buttonWrapper',function(){
+        if(selectedCategories.length>=2){
+            alert('No more categories can be linked!');
+        }else {
                 if(this.childNodes[0].nextSibling === null) {
                     addNewCommentToBeLinked(this.childNodes[0]);
                 }
                 else{ addNewCommentToBeLinked(this.childNodes[0].nextSibling); }
-            }
+        }
+    });
 
-        });
+    $(document).on('click', '#no-code-button', function (){
+        noCode=true;
+        $(this).css('background-color','green');
+    });
 
 
     </script>

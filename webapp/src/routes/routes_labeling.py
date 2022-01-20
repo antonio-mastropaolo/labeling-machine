@@ -54,17 +54,20 @@ def labeling_with_artifact(target_artifact_id):
             listDescriptionCategory = []
             listID = []
             listCategoryButton = []
+            listShortcuts = []
 
             for row in udc:
                 listNameCategory.append(row.categoryName)
                 listDescriptionCategory.append(row.description)
                 listID.append(row.category_id)
                 listCategoryButton.append(row.categoryButtonName)
+                listShortcuts.append(row.shortcut)
 
             udc_item = {'category_id': listID,
                         'category_name': listNameCategory,
                         'description': listDescriptionCategory,
-                        'category_button_name': listCategoryButton
+                        'category_button_name': listCategoryButton,
+                        'shortcut': listShortcuts
                         }
 
             lock_artifact_by(who_is_signed_in(), target_artifact_id)
@@ -194,6 +197,7 @@ def label():
         counterAssociations = request.form['counterAssociations']
         userDefinedNewCategoryDescriptions = eval(request.form['userDefinedNewCategoryDescriptions'])
         userDefinedNewCategoryNames = eval(request.form['userDefinedNewCategoryNames'])
+        userDefinedNewCategoryShortcuts = eval(request.form['categoryShortcuts'])
 
         if int(workingMode) == 0:
             isLabeled = 1
@@ -247,9 +251,9 @@ def label():
 
         if(len(userDefinedNewCategoryDescriptions)>0):
 
-            for (name, description) in zip(userDefinedNewCategoryNames, userDefinedNewCategoryDescriptions):
+            for (name, description, shortcut) in zip(userDefinedNewCategoryNames, userDefinedNewCategoryDescriptions, userDefinedNewCategoryShortcuts):
                 buttonID = (''.join(name.split(' ')) + '-button').lower()
-                udc = UserDefinedCategory(categoryName=name, description=description, categoryButtonName = buttonID, user=who_is_signed_in())
+                udc = UserDefinedCategory(categoryName=name, description=description, categoryButtonName = buttonID, shortcut=shortcut, user=who_is_signed_in())
                 db.session.add(udc)
                 db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
                 db.session.commit()

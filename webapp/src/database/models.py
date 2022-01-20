@@ -44,6 +44,7 @@ class UserDefinedCategory(db.Model):
     description = db.Column(db.Text)
     user = db.Column(db.Text)
     categoryButtonName = db.Column(db.Text)
+    shortcut = db.Column(db.Text)
 
 
 class Artifact(db.Model):
