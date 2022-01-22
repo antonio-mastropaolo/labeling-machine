@@ -784,16 +784,18 @@
         }
     }
 
-
-
-    $(document).on('click', '.buttonWrapper',function(){
+    $(document).on('click', '.category-button',function(){
         if(selectedCategories.length>=2){
             alert('No more categories can be linked!');
         }else {
                 if(this.childNodes[0].nextSibling === null) {
+                    console.log('1111');
+                    console.log(this.childNodes[0]);
                     addNewCommentToBeLinked(this.childNodes[0]);
                 }
-                else{ addNewCommentToBeLinked(this.childNodes[0].nextSibling); }
+                else{
+                    addNewCommentToBeLinked(this.childNodes[0].nextSibling);
+                }
         }
     });
 

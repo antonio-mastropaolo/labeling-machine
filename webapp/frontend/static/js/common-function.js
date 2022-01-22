@@ -617,19 +617,25 @@ function saveCategorization(){
             //adding tag result to the lists we store in the DB
 
             dictHighlightedCommentsPosition[dictIndex] = [...new Set(commentIndex)];
-            dictHighlightedCodeCharacterPosition[dictIndex] = listSelectedSpanCode;
-            dictHighlightedCommentsCharacterPosition[dictIndex] = listSelectedSpanComment;
+            dictHighlightedCommentsCharacterPosition[dictIndex] = [...new Set(listSelectedSpanComment)];
+            if(listSelectedSpanCode.length === 0){ dictHighlightedCodeCharacterPosition[dictIndex] = [-1];}
+            else{ dictHighlightedCodeCharacterPosition[dictIndex] = listSelectedSpanCode; }
 
             if(selectedCode.length>0) {
                 dictSelectedCode[dictIndex] = selectedCode.filter(function (e) {
                     return e
                 });
+            }else{
+                dictSelectedCode[dictIndex] = [-1];
             }
 
             if(selectedComments.length>0) {
+                selectedComments = [...new Set(selectedComments)];
                 dictSelectedComment[dictIndex] = selectedComments.filter(function (e) {
                     return e
                 });
+                selectedCommentText = dictSelectedComment[dictIndex].join('\n');
+                //console.log(selectedCommentText);
             }
 
             if(selectedCategories.length>0) {
@@ -649,18 +655,19 @@ function saveCategorization(){
                 methodIndex = retrieveMethodUnderClassification(listSelectedSpanComment);
                 methodUnderClassification = 'button-method-'+methodIndex;
                 commentsForTheMethodUnderClassification = parseInt(numberOfCommentsPerMethod[methodIndex]);
-                console.log(commentsForTheMethodUnderClassification);
+                //console.log(commentsForTheMethodUnderClassification);
             }else{
                  var items = methodUnderClassification.split('-');
                  methodIndex = items[items.length-1];
             }
 
-            console.log('Method Under Classification: ' +methodUnderClassification);
-            console.log('method index: '+methodIndex);
+            //console.log('DEBUG:');
+            // console.log('Method Under Classification: ' +methodUnderClassification);
+            // console.log('method index: '+methodIndex);
+            // console.log(comment2Method[methodIndex]);
 
             mapAssociation2Comment[divID] = getCommentLength(selectedCommentText);
-            updateComment2CodeMap(dictHighlightedCommentsCharacterPosition, dictSelectedComment, dictIndex, methodIndex);
-
+            updateComment2CodeMap(dictHighlightedCommentsCharacterPosition, selectedComments, dictIndex, methodIndex);
             if (comment2Method[methodIndex] === commentsForTheMethodUnderClassification){
                 $("#"+methodUnderClassification).css('background-color','green');
             }
@@ -675,13 +682,10 @@ function saveCategorization(){
             methodSelectionButton.push(moveToButton);
 
 
-
             dictIndex += 1;
             counterAssociations = counterAssociations + 1;
             $("#badgeCounter").text(counterAssociations);
             $("#lowerSide" ).append( $(newButton) );
-
-
 
         }
 
@@ -695,13 +699,12 @@ function saveCategorization(){
             //if (serializedRangeList.length > 0)     { dictRangeHighlightedCode[currentClassification] = serializedRangeList; }
             if (commentIndex.length > 0)            { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)];  } //duplicates deletion due to mis-selection event
             if (listSelectedSpanCode.length > 0)    { dictHighlightedCodeCharacterPosition[currentClassification] = listSelectedSpanCode; }
-            if (listSelectedSpanComment.length > 0) { dictHighlightedCommentsCharacterPosition[currentClassification] = listSelectedSpanComment; }
+            if (listSelectedSpanComment.length > 0) { dictHighlightedCommentsCharacterPosition[currentClassification] = [...new Set(listSelectedSpanComment)]; }
             if (selectedCode.length > 0)            { dictSelectedCode[currentClassification] = selectedCode.filter(function(e){return e}); }
             if (selectedComments.length > 0 )       { dictSelectedComment[currentClassification] = selectedComments.filter(function(e){return e}); }
             if (selectedCategories.length > 0)      { dictSelectedCategories[currentClassification] = [...new Set(selectedCategories)]; dictSelectedCategories[currentClassification] = dictSelectedCategories[currentClassification].filter(function(e){return e}); }
 
             $("#clearText").text('Change');
-
 
             var flagNext =false;
             for (const [key, value] of Object.entries(dictSelectedCode)) {
@@ -834,6 +837,7 @@ function resetColorHighlightingCategories(){
 function highlightSelectedCategoryButton(index){
     //highlight the select button category
     for(var i=0; i<dictSelectedCategories[index].length; i++){
+        console.log(dictSelectedCategories[index][i]);
         $("#"+dictSelectedCategories[index][i]).css('background-color','green');
     }
 }
@@ -984,24 +988,25 @@ function updateComment2CodeMap(spanOfCharPerMethod, commentsDict, indexAssociati
     var start, end;
 
     var currentItemSpan = spanOfCharPerMethod[indexAssociation];
-    var currentItemComment = commentsDict[indexAssociation];
-
+    // var currentItemComment = commentsDict[indexAssociation];
+    // console.log(currentItemComment);
+    // console.log(currentItemSpan);
+    console.log(commentsDict);
     for (var k = 0; k < currentItemSpan.length; k++) {
 
-        for (var j=0; j<selectedComments.length; j++) {
+        for (var j=0; j<commentsDict.length; j++) {
 
-            if (currentItemComment[k].trimLeft().trimRight() !== selectedComments[j].trimLeft().trimRight()) {
-                continue;
-            }
+            // if (currentItemComment[k].trimLeft().trimRight() !== commentsDict[j].trimLeft().trimRight()) {
+            //     continue;
+            // }
 
             start = currentItemSpan[k].split('-')[0];
             end = currentItemSpan[k].split('-')[1];
 
 
-
             var len = -1;
-            if (currentItemComment[k].trimLeft().startsWith('//')) {
-                len = getCommentLength(currentItemComment[k]);
+            if (commentsDict[k].trimLeft().startsWith('//')) {
+                len = getCommentLength(commentsDict[k]);
             }
 
             if (len > 0) {
