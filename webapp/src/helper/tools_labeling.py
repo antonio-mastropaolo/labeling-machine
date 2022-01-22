@@ -86,8 +86,7 @@ def choose_next_random_api():
     candidate_artifact_ids = {row[0] for row in db.session.query(Artifact.id).all()}
 
     # ############### 1. Remove Already Labeled By Me
-    labeled_artifact_ids = {row[0] for row in
-                            db.session.query(distinct(LabelingData.artifact_id)).filter(LabelingData.username_tagger == who_is_signed_in()).all()}
+    labeled_artifact_ids = {row[0] for row in db.session.query(distinct(LabelingData.artifact_id)).filter(LabelingData.username_tagger == who_is_signed_in()).all()}
     candidate_artifact_ids -= labeled_artifact_ids
 
 
@@ -96,22 +95,33 @@ def choose_next_random_api():
     locked = set(k for k, v in locked_artifacts.items())
     candidate_artifact_ids -= locked
 
-    # ############### 2. Remove Classesfully classified artifact
-    completed_artifacts = {row[0] for row in
-                           db.session.query(Artifact.id).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).all()}
+    # ############### 2. Remove Classes fully classified artifact
+    completed_artifacts = {row[0] for row in db.session.query(Artifact.id).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).all()}
     candidate_artifact_ids -= completed_artifacts
 
 
     # ############### 3. Remove Classes marked as broken
-    broken_artifacts = {row[0] for row in
-                            db.session.query(Artifact.id).filter(Artifact.isValid==0).all()}
+    broken_artifacts = {row[0] for row in db.session.query(Artifact.id).filter(Artifact.isValid==0).all()}
     candidate_artifact_ids -= broken_artifacts
 
     candidate_artifact_ids_list = list(candidate_artifact_ids)
 
+    # Instances to be reviewed that should be prioritized
+    to_be_reviewed = {row[0] for row in db.session.query(Artifact.id).filter(Artifact.labeled == 1, Artifact.reviewed == 0).all()}
+    to_be_reviewed -= labeled_artifact_ids
+    to_be_reviewed -= locked
+
+    candidate_artifact_for_reviewing = list(to_be_reviewed)
+    #print(candidate_artifact_for_reviewing)
+
+
     if len(candidate_artifact_ids) == 0:
         return -1
 
-    return random.choice(candidate_artifact_ids_list)
+    else:
+        if len(candidate_artifact_for_reviewing)>0:
+            return random.choice(candidate_artifact_for_reviewing)
+        else:
+            return random.choice(candidate_artifact_ids_list)
 
 

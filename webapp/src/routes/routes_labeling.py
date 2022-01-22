@@ -74,16 +74,53 @@ def labeling_with_artifact(target_artifact_id):
 
             spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
+            numberOfCommentsPerMethod = eval(artifact_data.methodsComments)
 
             #this one works only on bar
             if sys.platform=='linux':
                 newLinkToFileJava = '/labeling-machine/data/' + '/'.join(artifact_data.linkToFileJava.split('/')[1:])
             else:
                 #Locally on antonio's machine
-                newLinkToFileJava = '/Users/antonio/Desktop/'+artifact_data.linkToFileJava
+                newLinkToFileJava = '/Users/antonio/Desktop/' +'/'.join(artifact_data.linkToFileJava.split('/')[3:])
 
             with open(newLinkToFileJava) as f:
                 javaClassText = f.read()
+
+            # Adding character ranges for each method
+            methodsRanges = []
+            for mLine in spanListMethods:
+
+                start = int(mLine.split('-')[0])
+                end = int(mLine.split('-')[1])
+
+                with open(newLinkToFileJava, encoding='utf-8') as f:
+
+                    cumLines = ''
+                    fromBeginning = ''
+                    flagBeginning = False
+
+                    for (index, line) in enumerate(f):
+                        if (index == start - 1):
+                            cumLines += line
+                            flagBeginning = True
+
+                        elif (index == end - 1):
+                            cumLines += line
+                            break
+
+                        elif not flagBeginning:
+                            fromBeginning += line
+
+                        else:
+                            cumLines += line
+
+                beginningToEnd = fromBeginning + cumLines
+
+                offset_start = len(fromBeginning.encode('utf-8')) + 4
+                offset_end = len(beginningToEnd.encode('utf-8'))
+
+                methodsRanges.append( '{}-{}'.format(offset_start, offset_end))
+
 
             counterAssociations = artifact_data.counterAssociations
 
@@ -109,8 +146,12 @@ def labeling_with_artifact(target_artifact_id):
                 codeSpan = eval(artifact_label.codeSpan)
                 commentSpan = eval(artifact_label.commentSpan)
 
+
+
             linesList = []
             linesMethodsString = ''
+
+
 
             for (line_index, line) in enumerate(javaClassText.splitlines()):
                 linesList.append(line_index)
@@ -121,13 +162,15 @@ def labeling_with_artifact(target_artifact_id):
                                    artifact_data = artifact_data,
                                    artifact_class = javaClassText,
                                    artifact_UDC = udc_item,
+                                   artifact_methodsRanges = methodsRanges,
                                    artifact_methodsListLines = spanListMethods,
+                                   artifact_commentsPerMethod = numberOfCommentsPerMethod,
                                    artifact_label_commentPositionList = commentPositionList,
                                    artifact_moveSelectionButtonList = moveSelectionButtonList,
                                    isLabeled = isLabeled,
                                    isReviewed = isReviewed,
-                                   artificat_methodsName = methodsName,
-                                   artificat_lines = linesList,
+                                   artifact_methodsName = methodsName,
+                                   artifact_lines = linesList,
                                    counterAssociations = counterAssociations,
                                    overall_labeling_status = get_overall_labeling_progress(),
                                    user_info = get_labeling_status(who_is_signed_in()),

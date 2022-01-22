@@ -65,17 +65,23 @@ function createNewCategory() {
 
 
 
-function moveToSelectedMethod(indexClassification, onlyAnimation=true){
+function moveToSelectedMethod(indexClassification, onlyAnimation=true, methodIndex){
+
+
+    methodUnderClassification = 'button-method-'+methodIndex;
+    commentsForTheMethodUnderClassification = parseInt(numberOfCommentsPerMethod[methodIndex]);
 
     var arr = Array.from(comments);
     indexComment = dictHighlightedCommentsPosition[indexClassification].toString();
     var selectedComments = indexComment.split(',');
     var tagSelector = arr[selectedComments[0]];
-    $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-    $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
-        $(this).removeClass('animationLabel').dequeue();
-    });
-
+    try {
+        $(tagSelector)[0].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
+        $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
+            $(this).removeClass('animationLabel').dequeue();
+        });
+    }
+    catch(ex){}
 
     if(!onlyAnimation) {
         resetColorHighlightingCategories();
@@ -87,7 +93,17 @@ function moveToSelectedMethod(indexClassification, onlyAnimation=true){
 
 }
 
-function moveToSelectedMethodFromLine(lineNumber){
+function moveToSelectedMethodFromLine(lineNumber, buttonID){
+
+    for (var i=0; i<methodsList.length; i++){
+        var item = methodsList[i].split('-')[0]
+        if (parseInt(lineNumber) === parseInt(item) ){
+            commentsForTheMethodUnderClassification = parseInt(numberOfCommentsPerMethod[i]);
+        }
+    }
+
+    methodUnderClassification = buttonID;
+
     var tagSelector = $(`.row-line:contains(${lineNumber})`);
     $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
     $(tagSelector).addClass('animationLabel').delay(5000).queue(function () {
@@ -194,7 +210,7 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
     for (const [key, value] of Object.entries(dictSelectedCode)) {
           if (key === indexClassification){ continue; }
-          else{ $('#association-'+i).attr('disabled','disabled'); }
+          else{ $('#association-'+key).attr('disabled','disabled'); }
     }
 
 
@@ -273,24 +289,6 @@ function highlightTargetComments(elements,className){
 
 }
 
-function isCommentInRange(dictPosition,spanOfCharPerMethod){
-
-    var start,end;
-
-    for(var i=0;i<spanOfCharPerMethod.length;i++){
-
-        start = spanOfCharPerMethod[i].split('-')[0];
-        end = spanOfCharPerMethod[i].split('-')[1];
-
-        if(dictPosition.start >= start && dictPosition.start <= end){
-            // console.log('*****************')
-            // console.log(dictPosition);
-            // console.log('*****************\n')
-            return true;
-        }
-    }
-    return false;
-}
 
 function fakeSelection4Comment(element){
     var codeSection = document.getElementById("code");
@@ -360,10 +358,18 @@ function reset(save=false){
     //$("#new-category-button").text("Define New Category");
 
     if(!save) {
-        //changeCommentHighlighting(commentEleToHighlight,'', true);
         if(isLabeled==0){
             var spanSelector = "[id=comment-highlight-" + (dictIndex) + "]";
             $(spanSelector).css('color', '');
+
+            //Restore overlapping comments that have been deselected
+            for (const [key, value] of Object.entries(dictHighlightedCommentsPosition)) {
+               for (var i=0; i<value.length; i++){
+                   $(comments[value[i]]).css('color', 'green').attr('id','comment-highlight-'+key);
+               }
+            }
+
+
             resetHighlightedCode(dictHighlightedCode[dictIndex], dictIndex);
         }
 
@@ -426,7 +432,6 @@ function reset(save=false){
 
     commentEleToHighlight = [];
     commentIndex = [];
-    serializedRangeList = [];
     highlightedCommentsInReviewing = [];
     highlightedCodeDuringSelection = [];
     beginningCommentCharacterPosition = [];
@@ -458,7 +463,7 @@ function resetHighlightedCode(customList=null, targetItem){
 function changeCommentHighlighting(customList, color, reset=false){
     //console.log(customList);
     if(isLabeled === 0) {
-        for (var i = 0; i < customList.length; i++) {
+       for (var i = 0; i < customList.length; i++) {
             $(customList[i][0]).css('color', color);
         }
     }else if (isLabeled === 1){
@@ -579,6 +584,7 @@ function isSelectedCategory(){
     }
 }
 
+
 function saveCategorization(){
 
     dictHighlightedCode[counterAssociations] = highlightedCodeDuringSelection;
@@ -637,19 +643,45 @@ function saveCategorization(){
             var buttonID = "association" + '-' + dictIndex;
             var buttonText = "Association: #" + dictIndex;
 
+            var methodIndex = -1;
+
+            if(methodUnderClassification === ''){
+                methodIndex = retrieveMethodUnderClassification(listSelectedSpanComment);
+                methodUnderClassification = 'button-method-'+methodIndex;
+                commentsForTheMethodUnderClassification = parseInt(numberOfCommentsPerMethod[methodIndex]);
+                console.log(commentsForTheMethodUnderClassification);
+            }else{
+                 var items = methodUnderClassification.split('-');
+                 methodIndex = items[items.length-1];
+            }
+
+            console.log('Method Under Classification: ' +methodUnderClassification);
+            console.log('method index: '+methodIndex);
+
+            mapAssociation2Comment[divID] = getCommentLength(selectedCommentText);
+            updateComment2CodeMap(dictHighlightedCommentsCharacterPosition, dictSelectedComment, dictIndex, methodIndex);
+
+            if (comment2Method[methodIndex] === commentsForTheMethodUnderClassification){
+                $("#"+methodUnderClassification).css('background-color','green');
+            }
+
             //var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ");" +  "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-check fa-2x" style="position:sticky; left:95%;" </i></button></div>';
 
-            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ", " + false + ");" + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="moveToSelectedMethod( '+ dictIndex +', ' + true + ' ); removeAssociation(\''+ divID +'\')"></i></button></div>';
+            var newButton = '<div class="buttonWrapper" id="' + divID + '"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="'+ "moveToSelectedMethod(" + dictIndex + ", " + false + ", " + methodIndex +"  );" + "" + '" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '<i class="far fa-trash-alt fa-2x" style="position:sticky; left:95%;" onclick="moveToSelectedMethod( '+ dictIndex +', ' + true + ' ); removeAssociation( \'' + methodUnderClassification + '\', \''+ divID +'\',  ' + methodIndex + '  )"></i></button></div>';
             //onclick="removeAssociation(\''+ divID +'\')">
 
             // handling list for the reviewing part
             var moveToButton = '<div class="buttonWrapper" id="' + divID + '"><button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick=" moveToSelectedMethodFromTag([' + dictHighlightedCommentsPosition[dictIndex] + '],' +dictIndex + ');" style="width: 100%; display: inline-flex; align-items: left;">' + buttonText + '</button></div>';
             methodSelectionButton.push(moveToButton);
 
+
+
             dictIndex += 1;
             counterAssociations = counterAssociations + 1;
             $("#badgeCounter").text(counterAssociations);
             $("#lowerSide" ).append( $(newButton) );
+
+
 
         }
 
@@ -681,7 +713,6 @@ function saveCategorization(){
                 }
             }
 
-
             flagSwitch=false;
             counterAssociations = counterAssociations - 1;
             $("#badgeCounter").text(counterAssociations);
@@ -690,7 +721,6 @@ function saveCategorization(){
             $("#code").css('user-select','none');
 
         }
-
 
         reset(save=true);
     }
@@ -721,8 +751,8 @@ function commentWithin(text){
 }
 
 
-function removeAssociation(divID){
-    targetAssociation = divID.split('-')[2];
+function removeAssociation(method, divID, methodIndex){
+    var targetAssociation = divID.split('-')[2];
     $('#'+divID).fadeOut(300, function(){ $(this).remove();});
     counterAssociations = counterAssociations -1;
     $("#badgeCounter").text(counterAssociations);
@@ -736,6 +766,7 @@ function removeAssociation(divID){
 
     dictHighlightedCommentsPosition[targetAssociation] = [];
     dictHighlightedCodeCharacterPosition[targetAssociation] = [];
+    dictHighlightedCommentsCharacterPosition[targetAssociation] = [];
 
     dictSelectedCode[targetAssociation] = [];
     dictSelectedCategories[targetAssociation] = [];
@@ -745,6 +776,20 @@ function removeAssociation(divID){
     selectedComments = [];
     selectedCategories = [];
     selectedCode = [];
+
+    //remove association liking a comment of len
+    // console.log('MAPPA PRE: ');
+    // console.log(comment2Method[methodIndex]);
+    // console.log("Selected Comment so far: "+comment2Method[targetAssociation]);
+    // console.log('target association: '+targetAssociation);
+    // console.log('MapAss2Comment: ' +mapAssociation2Comment[divID]);
+
+    comment2Method[methodIndex] = comment2Method[methodIndex] - mapAssociation2Comment[divID];
+
+    // console.log('MAPPA AFTER: ');
+    // console.log(comment2Method[methodIndex]);
+
+    $("#"+method).css('background-color','');
 
 }
 
@@ -807,61 +852,12 @@ function onMouseLeaveEvent(btnCategory){
     $("#pop-up-"+category).remove();
 }
 
-
-// Shortcuts implementation
-// window.addEventListener('keydown', function (event) {
-// //document.onkeyup = function myFunction(event) {
-//     let key = event.which || event.keyCode;
-//     var element;
-//     if (event.altKey && event.ctrlKey && key == 49) {
-//         console.log('opk');
-//     }
-//     if (event.altKey && key == 49) { //triggered define new category
-//         element = document.getElementById('new-category-button');
-//         shortcutForAddingCategory(element);
-//
-//     } else if (event.altKey && key == 50) {
-//         element = document.getElementById('code-summary-button');
-//         shortcutForAddingCategory(element);
-//
-//     } else if (event.altKey && key == 51) {
-//         element = document.getElementById('expand-button');
-//         shortcutForAddingCategory(element);
-//
-//     } else if (event.altKey && key == 52) {
-//         element = document.getElementById('rationale-button');
-//         shortcutForAddingCategory(element);
-//
-//     } else if (event.altKey && key == 53) {
-//         element = document.getElementById('deprecation-button');
-//         shortcutForAddingCategory(element);
-//
-//     } else if (event.altKey && key == 54) {
-//         element = document.getElementById('todo-button');
-//         shortcutForAddingCategory(element);
-//
-//     } else if (event.altKey && key == 55) {
-//         element = document.getElementById('comment-code-button');
-//         shortcutForAddingCategory(element);
-//
-//     } else if (event.altKey && key == 56) {
-//         element = document.getElementById('incomplete-button');
-//         shortcutForAddingCategory(element);
-//
-//     }
-// });
-
 function fetchUserDefinedCategoryButtonName(shortcut){
     for(var i=0; i<userDefinedCategories['category_id'].length; i++) {
         if( parseInt(userDefinedCategories['shortcut'][i]) === shortcut ){
             return userDefinedCategories['category_button_name'][i];
         }
     }
-    // for (var j=0; j<selectedCategories.length;j++){
-    //     if (!labelCategories.includes(selectedCategories[j])){
-    //         return selectedCategories[j];
-    //     }
-    // }
 }
 
 
@@ -982,3 +978,68 @@ hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt
             break;
     }
 });
+
+
+function updateComment2CodeMap(spanOfCharPerMethod, commentsDict, indexAssociation, methodIndex) {
+    var start, end;
+
+    var currentItemSpan = spanOfCharPerMethod[indexAssociation];
+    var currentItemComment = commentsDict[indexAssociation];
+
+    for (var k = 0; k < currentItemSpan.length; k++) {
+
+        for (var j=0; j<selectedComments.length; j++) {
+
+            if (currentItemComment[k].trimLeft().trimRight() !== selectedComments[j].trimLeft().trimRight()) {
+                continue;
+            }
+
+            start = currentItemSpan[k].split('-')[0];
+            end = currentItemSpan[k].split('-')[1];
+
+
+
+            var len = -1;
+            if (currentItemComment[k].trimLeft().startsWith('//')) {
+                len = getCommentLength(currentItemComment[k]);
+            }
+
+            if (len > 0) {
+                //console.log('HIT');
+                comment2Method[methodIndex] = comment2Method[methodIndex] + len;
+            } else {
+                comment2Method[methodIndex] = comment2Method[methodIndex] + 1
+            }
+        }
+    }
+
+    //console.log('Updated MAP: '+comment2Method[methodIndex]);
+}
+
+function getCommentLength(comment){
+    var realLen = 0;
+    var items = comment.split('\n');
+    for (var i=0; i<items.length; i++){
+        if(items[i].trimLeft() !== ''){
+            //console.log('--> ' +items[i]);
+            realLen += 1;
+        }
+    }
+    return realLen;
+}
+
+function retrieveMethodUnderClassification(charSpanComments){
+    // we focus only on the first comment of the association is enough
+    var firstComment = charSpanComments[0];
+    var start = firstComment.split('-')[0];
+    var end = firstComment.split('-')[1];
+
+    for (var j=0; j<methodsRanges.length; j++){
+        var method_start = methodsRanges[j].split('-')[0];
+        var method_end = methodsRanges[j].split('-')[1];
+        if (start > method_start && end < method_end ){
+            // we found the target method ;)
+            return j;
+        }
+    }
+}

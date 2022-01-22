@@ -57,6 +57,7 @@ class Artifact(db.Model):
     reviewed = db.Column(db.Integer)
     counterAssociations = db.Column(db.Integer)
     isValid = db.Column(db.Integer)
+    methodsComments = db.Column(db.Integer)
 
 
 class LabelingData(db.Model):

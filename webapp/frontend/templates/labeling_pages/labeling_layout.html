@@ -283,13 +283,16 @@
         document.getElementById("top-progress-bar-status").innerHTML = labelProgressPercentage + '%';
 
         const methodsList = {{ artifact_methodsListLines | tojson }};
-        const methodsListNames = {{ artificat_methodsName | safe }};
+        const methodsListNames = {{ artifact_methodsName | safe }};
+        const numberOfCommentsPerMethod = {{ artifact_commentsPerMethod | safe  }};
         const userDefinedCategories = {{ artifact_UDC | tojson}};
-        const linesList = {{ artificat_lines | tojson }};
+        const linesList = {{ artifact_lines | tojson }};
         const isLabeled = {{ isLabeled }};
+        const methodsRanges = {{ artifact_methodsRanges | safe }};
         const isReviewed = {{ isReviewed }};
-        const workingMode = (isLabeled == 0 ? 0  : 1);
+        const workingMode = (isLabeled === 0 ? 0  : 1);
 
+        console.log(methodsRanges);
 
         var startTime = new Date().getTime();
 
@@ -309,6 +312,7 @@
         var selectedCategory = "";
         var selectedCodeText = "";
         var selectedCommentText = "";
+        var methodUnderClassification = "";
         var counterAssociations = 0;
         var currentIndexComment = -1;
         var dictIndex = 0;
@@ -318,6 +322,7 @@
         var clicked=false;
         var badgeCounterCategory = 1;
         var currentClassification=-1;
+        var commentsForTheMethodUnderClassification = 0;
         var defaultColorHighlight='red';
         var flagSwitch=true;
         var noCode=false;
@@ -328,10 +333,12 @@
 
         var dictHighlightedCode = {};
         var dictHighlightedComments = {};
+        var comment2Method = {};
         var dictHighlightedCommentsPosition = {};
         var dictHighlightedCommentsCharacterPosition = {};
         var dictHighlightedCodeCharacterPosition = {};
         var dictSelectedCategories = {};
+        var mapAssociation2Comment = {}
         var dictSelectedCode = {};
         var dictSelectedComment = {};
 
@@ -339,7 +346,6 @@
         var comments = []; //In this list we store all the comments within a given class
         var selectedComments = [];
         var selectedCode = [];
-        var serializedRangeList = []
         var listSelectedSpanCode = [];
         var userDefinedNewCategoryNames = [];
         var userDefinedNewCategoryDescriptions = [];
@@ -384,7 +390,7 @@
                 tag.setAttribute('onmouseenter','onMouseEnterEvent("' + userDefinedCategories['category_button_name'][i] + '","' + userDefinedCategories['description'][i] + '");');
                 tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + userDefinedCategories['category_button_name'][i] + '" );');
                 var newButton = document.createElement('button');
-                newButton.setAttribute('class', 'btn btn btn-dark category-button')
+                newButton.setAttribute('class', 'btn btn btn-secondary category-button')
                 newButton.setAttribute('type', 'submit');
                 newButton.setAttribute('id', userDefinedCategories['category_button_name'][i] );
                 newButton.setAttribute('style', 'width: 100%; text-align: left;');
@@ -403,13 +409,17 @@
             }
 
             for (var i = 0; i < methodsList.length; i++) {
-                var buttonID = methodsListNames[i] + "-button";
+                var buttonID = "button-method-"+i;
                 var startingLine = methodsList[i].split("-")[0];
                 var buttonText = methodsListNames[i];
-                var scorllCall = 'moveToSelectedMethodFromLine(' + startingLine + ')';
-                var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scorllCall + '" style="width: 100%; display:inline-flex; text-align: left;">' + buttonText + '</button> </div>';
+
+                var scrollCall = 'moveToSelectedMethodFromLine(' + startingLine + ',' + '\'' + buttonID + '\')';
+                var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scrollCall + '" style="width: 100%;  text-align: left;">' + buttonText + '</button> </div>';
                 //console.log(newButton);
                 $("#upperSide").append($(newButton));
+
+                //initialize comment2Method
+                comment2Method[i]=0;
             }
 
             comments = document.getElementsByClassName("hljs-comment");
@@ -633,7 +643,6 @@
                     text_point = sel.text;
                     targetTag = sel.targetTag;
                 }
-
                 if(!sel.text.trim().startsWith('//') && !sel.text.trim().startsWith('/*')) {
                     selectedCodeText = selectedCodeText + sel.text;
                 }

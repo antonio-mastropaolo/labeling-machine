@@ -30,6 +30,16 @@
     padding-left: 3px;
 }
 
+
+.count {
+  z-index: 1;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background-color: #d9534f;
+}
+
+
 .animationLabel{
     animation:color-me-in 4s;
 }
@@ -64,7 +74,7 @@
     color:white;
     width:16.5%;
     /*left:5%;*/
-    top:58%;
+    top:62%;
 }
 
 .button-corner-down {
