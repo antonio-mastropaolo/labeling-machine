@@ -292,7 +292,6 @@
         const isReviewed = {{ isReviewed }};
         const workingMode = (isLabeled === 0 ? 0  : 1);
 
-        console.log(methodsRanges);
 
         var startTime = new Date().getTime();
 
@@ -309,11 +308,14 @@
                                 'no-code-button'
         ];
 
+
+
         var selectedCategory = "";
         var selectedCodeText = "";
         var selectedCommentText = "";
         var methodUnderClassification = "";
         var counterAssociations = 0;
+        var numberOfCommentsPerClass = 0;
         var currentIndexComment = -1;
         var dictIndex = 0;
         var whereCommentBegin = -1;
@@ -371,6 +373,10 @@
           '`': '&#x60;',
           '=': '&#x3D;'
         };
+
+        for (let i = 0; i < numberOfCommentsPerMethod.length; i++) {
+            numberOfCommentsPerClass = numberOfCommentsPerClass + numberOfCommentsPerMethod[i];
+        }
 
         // -------------------------End-------------------------
 
@@ -716,6 +722,13 @@
 
         function submitClassification(){
 
+            if(isLabeled === 0) {
+                var associationsSoFar = howManyAssociations()
+                if (associationsSoFar < numberOfCommentsPerClass) {
+                    alert('Please make sure to tag each comment before submitting!');
+                    return false;
+                }
+            }
 
             var newRefinedDict = getSameKeysDict(cleanDict(dictHighlightedCodeCharacterPosition), cleanDict(dictHighlightedCommentsCharacterPosition));
             if (Object.keys(newRefinedDict).length === 0 ){
@@ -788,14 +801,13 @@
         if(selectedCategories.length>=2){
             alert('No more categories can be linked!');
         }else {
-                if(this.childNodes[0].nextSibling === null) {
-                    console.log('1111');
-                    console.log(this.childNodes[0]);
-                    addNewCommentToBeLinked(this.childNodes[0]);
-                }
-                else{
-                    addNewCommentToBeLinked(this.childNodes[0].nextSibling);
-                }
+            addNewCommentToBeLinked(this);
+            /*if(this.childNodes[0].nextSibling === null) {
+                addNewCommentToBeLinked(this.childNodes[0]);
+            }
+            else{
+                addNewCommentToBeLinked(this);
+            }*/
         }
     });
 

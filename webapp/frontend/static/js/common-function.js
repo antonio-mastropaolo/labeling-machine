@@ -74,14 +74,28 @@ function moveToSelectedMethod(indexClassification, onlyAnimation=true, methodInd
     var arr = Array.from(comments);
     indexComment = dictHighlightedCommentsPosition[indexClassification].toString();
     var selectedComments = indexComment.split(',');
-    var tagSelector = arr[selectedComments[0]];
-    try {
-        $(tagSelector)[0].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
-        $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
-            $(this).removeClass('animationLabel').dequeue();
-        });
+
+    for(var i=0; i<selectedComments.length; i++){
+        var tagSelector = arr[selectedComments[i]];
+        //console.log(tagSelector);
+        try {
+            $(tagSelector)[0].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
+            $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
+                $(this).removeClass('animationLabel').dequeue();
+            });
+        }
+        catch(ex){}
     }
-    catch(ex){}
+
+    // var tagSelector = arr[selectedComments[0]];
+    // console.log(tagSelector);
+    // try {
+    //     $(tagSelector)[0].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
+    //     $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
+    //         $(this).removeClass('animationLabel').dequeue();
+    //     });
+    // }
+    // catch(ex){}
 
     if(!onlyAnimation) {
         resetColorHighlightingCategories();
@@ -195,16 +209,22 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     var arr = Array.from(comments);
     indexComment = indexComment.toString();
     var selectedComments = indexComment.split(',');
-    var tagSelector = arr[selectedComments[0]];
+    //var tagSelector = arr[selectedComments[0]];
     currentClassification = indexClassification;
 
-    highlightSelectedCategoryButton(currentClassification);
+    for(var i=0; i<selectedComments.length; i++){
+        var tagSelector = arr[selectedComments[i]];
+        //console.log(tagSelector);
+        try {
+            $(tagSelector)[0].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
+            $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
+                $(this).removeClass('animationLabel').dequeue();
+            });
+        }
+        catch(ex){}
+    }
 
-    //move down to the selected method
-    $(tagSelector)[0].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-    $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
-        $(this).removeClass('animationLabel').dequeue();
-    });
+    highlightSelectedCategoryButton(currentClassification);
 
     //deactivating other classification buttons
 
@@ -446,6 +466,7 @@ function reset(save=false){
 
     selectedCategory = "";
     selectedCodeText = "";
+    methodUnderClassification = "";
     selectedCommentText = "";
     selectedComments = [];
     selectedCategories = [];
@@ -543,7 +564,7 @@ function addNewCommentToBeLinked(element){
         tag.setAttribute('class', 'buttonWrapper');
 
         var newButton = document.createElement('button');
-        newButton.setAttribute('class', 'btn btn btn-dark category-button')
+        newButton.setAttribute('class', 'btn btn btn-secondary category-button')
         newButton.setAttribute('type', 'submit');
         newButton.setAttribute('id', buttonID);
         newButton.setAttribute('style', 'width: 100%; text-align: left;');
@@ -660,7 +681,6 @@ function saveCategorization(){
                  var items = methodUnderClassification.split('-');
                  methodIndex = items[items.length-1];
             }
-
             //console.log('DEBUG:');
             // console.log('Method Under Classification: ' +methodUnderClassification);
             // console.log('method index: '+methodIndex);
@@ -686,6 +706,7 @@ function saveCategorization(){
             counterAssociations = counterAssociations + 1;
             $("#badgeCounter").text(counterAssociations);
             $("#lowerSide" ).append( $(newButton) );
+
 
         }
 
@@ -726,6 +747,12 @@ function saveCategorization(){
         }
 
         reset(save=true);
+
+        //check if ready to Submit
+        var associationsSoFar = howManyAssociations()
+        if(numberOfCommentsPerClass === associationsSoFar){
+            alert('Each Comment has been tagged! Ready to Submit!');
+        }
     }
 
 }
@@ -793,7 +820,7 @@ function removeAssociation(method, divID, methodIndex){
     // console.log(comment2Method[methodIndex]);
 
     $("#"+method).css('background-color','');
-
+    methodUnderClassification = "";
 }
 
 function refreshPage(){
@@ -836,8 +863,8 @@ function resetColorHighlightingCategories(){
 
 function highlightSelectedCategoryButton(index){
     //highlight the select button category
+    //console.log(dictSelectedCategories);
     for(var i=0; i<dictSelectedCategories[index].length; i++){
-        console.log(dictSelectedCategories[index][i]);
         $("#"+dictSelectedCategories[index][i]).css('background-color','green');
     }
 }
@@ -991,7 +1018,7 @@ function updateComment2CodeMap(spanOfCharPerMethod, commentsDict, indexAssociati
     // var currentItemComment = commentsDict[indexAssociation];
     // console.log(currentItemComment);
     // console.log(currentItemSpan);
-    console.log(commentsDict);
+    //console.log(commentsDict);
     for (var k = 0; k < currentItemSpan.length; k++) {
 
         for (var j=0; j<commentsDict.length; j++) {
@@ -1010,7 +1037,6 @@ function updateComment2CodeMap(spanOfCharPerMethod, commentsDict, indexAssociati
             }
 
             if (len > 0) {
-                //console.log('HIT');
                 comment2Method[methodIndex] = comment2Method[methodIndex] + len;
             } else {
                 comment2Method[methodIndex] = comment2Method[methodIndex] + 1
@@ -1036,15 +1062,24 @@ function getCommentLength(comment){
 function retrieveMethodUnderClassification(charSpanComments){
     // we focus only on the first comment of the association is enough
     var firstComment = charSpanComments[0];
-    var start = firstComment.split('-')[0];
-    var end = firstComment.split('-')[1];
+    var start = parseInt(firstComment.split('-')[0]);
+    var end = parseInt(firstComment.split('-')[1]);
+
 
     for (var j=0; j<methodsRanges.length; j++){
-        var method_start = methodsRanges[j].split('-')[0];
-        var method_end = methodsRanges[j].split('-')[1];
+        var method_start = parseInt(methodsRanges[j].split('-')[0]);
+        var method_end = parseInt(methodsRanges[j].split('-')[1]);
         if (start > method_start && end < method_end ){
             // we found the target method ;)
             return j;
         }
     }
+}
+
+function howManyAssociations(){
+    var sum = 0;
+    for (const [key, value] of Object.entries(comment2Method)) {
+        sum = sum + value;
+    }
+    return sum;
 }

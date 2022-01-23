@@ -11,13 +11,12 @@ from src.helper.tools_common import who_is_signed_in, get_locked_artifacts
 def get_labeling_status(username):  # OLD: get_user_labeling_status
     if username is None:
         return None
-
     labeling_status = {'username': username,
                        'total_n_artifact': get_total_number_of_classes_in_db(),
-                       'total_n_labeled': get_n_labeled_artifact_per_user().get(username, 0),
-                       'total_n_reviewed': get_n_reviewed_artifact_per_user().get(username, 0)
+                       'total_n_labeled': get_n_labeled_artifact_per_user().get(username,0),
+                       'total_n_reviewed': get_n_reviewed_artifact_per_user().get(username,0)
                        }
-
+    #print(labeling_status)
     return labeling_status
 
 
@@ -68,6 +67,7 @@ def get_n_labeled_artifact_per_user():
     ret = {}
     for row in result:
         ret[row[0]] = row[1]
+
     return ret
 
 def get_n_reviewed_artifact_per_user():
@@ -75,10 +75,11 @@ def get_n_reviewed_artifact_per_user():
         Return a dictionary of {username: n_labeled_artifact, ...}
     """
     ret = {}
-    result = db.session.query(LabelingData.username_tagger, func.count(Artifact.reviewed)).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).group_by(LabelingData.username_tagger).all()
+    #result = db.session.query(LabelingData.username_reviewer, func.count(Artifact.reviewed)).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).group_by(LabelingData.username_tagger).all()
+    result = db.session.query(LabelingData.username_reviewer, func.count(distinct(LabelingData.artifact_id))).group_by(LabelingData.username_reviewer).all()
     for row in result:
         ret[row[0]] = row[1]
-
+    print(result)
     return ret
 
 
