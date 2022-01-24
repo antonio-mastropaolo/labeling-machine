@@ -70,7 +70,6 @@ class LabelingData(db.Model):
     codeSpan = db.Column(db.Text)
     commentSpan = db.Column(db.Text)
     commentPosition = db.Column(db.Text)
-    rangeSelectedText = db.Column(db.Text)
     moveSelectionButton = db.Column(db.Text)
     username_tagger = db.Column(db.Text)
     username_reviewer = db.Column(db.Text)
@@ -79,5 +78,4 @@ class LabelingData(db.Model):
     labeled_at = db.Column(db.DateTime(timezone=True))
     reviewed_at = db.Column(db.DateTime(timezone=True))
     isChanged = db.Column(db.Integer)
-    validCommentsForNN = db.Column(db.Integer)
 

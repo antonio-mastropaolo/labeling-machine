@@ -390,7 +390,6 @@ function reset(save=false){
 
 
             resetHighlightedCode(dictHighlightedCode[dictIndex], dictIndex);
-            dictCommetsForNN[dictIndex] = '';
         }
 
 
@@ -588,11 +587,10 @@ function addNewCommentToBeLinked(element){
     }else{
         $(element).css('background-color','green');
         selectedCategory = element.id.toString();
-        if(selectedCategory == 'code-summary-button'){
+        if(selectedCategory === 'code-summary-button'){
             $('#network-code-button').css('background-color','green');
         }
     }
-
     selectedCategories.push(selectedCategory);
 }
 
@@ -646,7 +644,7 @@ function saveCategorization(){
 
             dictHighlightedCommentsPosition[dictIndex] = [...new Set(commentIndex)];
             dictHighlightedCommentsCharacterPosition[dictIndex] = [...new Set(listSelectedSpanComment)];
-            dictCommetsForNN[dictIndex] = isForNN;
+
             if(listSelectedSpanCode.length === 0){ dictHighlightedCodeCharacterPosition[dictIndex] = [-1];}
             else{ dictHighlightedCodeCharacterPosition[dictIndex] = listSelectedSpanCode; }
 
@@ -668,12 +666,6 @@ function saveCategorization(){
             }
 
             if(selectedCategories.length>0) {
-                if (noCode){
-                    selectedCategories.push('no-code-button');
-                }
-                if(isForNN){
-                    selectedCategories.push('network-code-button');
-                }
                 dictSelectedCategories[dictIndex] = selectedCategories.filter(function (e) {
                     return e
                 });
@@ -739,8 +731,7 @@ function saveCategorization(){
             if (selectedCode.length > 0)            { dictSelectedCode[currentClassification] = selectedCode.filter(function(e){return e}); }
             if (selectedComments.length > 0 )       { dictSelectedComment[currentClassification] = selectedComments.filter(function(e){return e}); }
             if (selectedCategories.length > 0)      { dictSelectedCategories[currentClassification] = [...new Set(selectedCategories)]; dictSelectedCategories[currentClassification] = dictSelectedCategories[currentClassification].filter(function(e){return e}); }
-            console.log(dictCommetsForNN[currentClassification]);
-            dictCommetsForNN[currentClassification] = isForNN;
+
 
             $("#clearText").text('Change');
 
@@ -820,18 +811,17 @@ function removeAssociation(method, divID, methodIndex){
     dictSelectedCode[targetAssociation] = [];
     dictSelectedCategories[targetAssociation] = [];
     dictSelectedComment[targetAssociation] = [];
-    dictCommetsForNN[targetAssociation] = '';
     methodSelectionButton[targetAssociation] = '';
     selectedComments = [];
     selectedCategories = [];
     selectedCode = [];
 
     //remove association liking a comment of len
-    console.log('MAPPA PRE: ');
-    console.log(comment2Method[methodIndex]);
-    console.log("Selected Comment so far: "+comment2Method[targetAssociation]);
-    console.log('target association: '+targetAssociation);
-    console.log('MapAss2Comment: ' +mapAssociation2Comment[divID]);
+    // console.log('MAPPA PRE: ');
+    // console.log(comment2Method[methodIndex]);
+    // console.log("Selected Comment so far: "+comment2Method[targetAssociation]);
+    // console.log('target association: '+targetAssociation);
+    // console.log('MapAss2Comment: ' +mapAssociation2Comment[divID]);
 
     comment2Method[methodIndex] = comment2Method[methodIndex] - mapAssociation2Comment[divID];
 
@@ -883,18 +873,21 @@ function resetColorHighlightingCategories(){
     for(var i=0;i<elements.length;i++){
         if ( $(elements[i].childNodes[1]).hasClass('category-button')){ $(elements[i].childNodes[1]).css('background-color','');}
         if ( $(elements[i].childNodes[0]).hasClass('category-button') ) {  $(elements[i].childNodes[0]).css('background-color','');}
+
     }
+
+    $("#no-code-button").css('background-color','#8267BE');
+    $("#network-code-button").css('background-color','#8267BE');
 }
 
 function highlightSelectedCategoryButton(index){
     //highlight the select button category
-    //console.log(dictSelectedCategories);
     for(var i=0; i<dictSelectedCategories[index].length; i++){
         $("#"+dictSelectedCategories[index][i]).css('background-color','green');
         if(dictSelectedCategories[index][i] === 'no-code-button'){
             noCode=true;
         }
-        if(dictSelectedCategories[index][i]=='network-code-button'){
+        if(dictSelectedCategories[index][i] ==='network-code-button'){
             isForNN=1;
         }
     }
@@ -934,17 +927,18 @@ function isAlreadySelectedCategory(categoryButton){
 
 
 function selectDeselectViaShortcut(categoryButtonName){
-    if(isAlreadySelectedCategory(categoryButtonName)){
 
+    if(isAlreadySelectedCategory(categoryButtonName)){
+        var index = selectedCategories.indexOf(categoryButtonName);
+        selectedCategories.splice(index, 1);
+        //selectedCategory = "";
         if(categoryButtonName === 'no-code-button'){
             noCode = false;
             $("#"+categoryButtonName).css('background-color','#8267BE');
         }else if (categoryButtonName === 'network-code-button') {
-            isForNN = 0;
-            $("#"+categoryButtonName).css('background-color','#8267BE');
+                isForNN = 0;
+                $("#"+categoryButtonName).css('background-color','#8267BE');
         } else{
-            selectedCategories.pop();
-            selectedCategory = "";
             $("#"+categoryButtonName).css('background-color','');
         }
 
@@ -953,9 +947,11 @@ function selectDeselectViaShortcut(categoryButtonName){
         if (categoryButtonName === 'no-code-button'){
             noCode = true;
             $('#'+categoryButtonName).css('background-color','green');
+            selectedCategories.push(categoryButtonName);
         }else if (categoryButtonName === 'network-code-button') {
             isForNN=1;
             $('#'+categoryButtonName).css('background-color','green');
+            selectedCategories.push(categoryButtonName);
         }else{
             var element = document.getElementById(categoryButtonName);
             shortcutForAddingCategory(element);
@@ -974,7 +970,7 @@ hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt
 
         case 'alt+2':
             selectDeselectViaShortcut('code-summary-button');
-            selectDeselectViaShortcut('network-code-button');
+            if(selectedCategories.includes('code-summary-button')){ selectDeselectViaShortcut('network-code-button'); }
             break;
 
         case 'alt+3':

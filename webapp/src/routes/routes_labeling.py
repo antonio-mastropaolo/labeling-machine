@@ -135,7 +135,6 @@ def labeling_with_artifact(target_artifact_id):
             selectedComments = []
             codeSpan = []
             commentSpan = []
-            validCommentsForNN = []
 
             if (isLabeled == 1):
                 artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
@@ -146,7 +145,6 @@ def labeling_with_artifact(target_artifact_id):
                 selectedComments = eval(artifact_label.comments)
                 codeSpan = eval(artifact_label.codeSpan)
                 commentSpan = eval(artifact_label.commentSpan)
-                validCommentsForNN = artifact_label.validCommentsForNN
 
 
             linesList = []
@@ -172,7 +170,6 @@ def labeling_with_artifact(target_artifact_id):
                                    isReviewed = isReviewed,
                                    artifact_methodsName = methodsName,
                                    artifact_lines = linesList,
-                                   validCommentsForNN = validCommentsForNN,
                                    counterAssociations = counterAssociations,
                                    overall_labeling_status = get_overall_labeling_progress(),
                                    user_info = get_labeling_status(who_is_signed_in()),
@@ -243,7 +240,6 @@ def label():
         userDefinedNewCategoryDescriptions = eval(request.form['userDefinedNewCategoryDescriptions'])
         userDefinedNewCategoryNames = eval(request.form['userDefinedNewCategoryNames'])
         userDefinedNewCategoryShortcuts = eval(request.form['categoryShortcuts'])
-        validCommentsForNN = request.form['validCommentsForNN']
 
 
         if int(workingMode) == 0:
@@ -258,7 +254,7 @@ def label():
             jr = LabelingData(artifact_id=artifact_id, username_tagger=who_is_signed_in(),
                                   elapsed_labeling_time=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
                                   commentSpan=commentSpan, categories=categories, commentPosition=commentPosition,
-                                  moveSelectionButton=moveSelectionButton, labeled_at=datetime.datetime.utcnow(), validCommentsForNN=validCommentsForNN
+                                  moveSelectionButton=moveSelectionButton, labeled_at=datetime.datetime.utcnow()
                               )
 
             db.session.add(jr)
@@ -286,7 +282,6 @@ def label():
             labeling_data.reviewed_at = datetime.datetime.utcnow()
             labeling_data.codeSpan = codeSpan
             labeling_data.commentSpan = commentSpan
-            labeling_data.validCommentsForNN = validCommentsForNN
             labeling_data.categories = categories
             db.session.commit()
 

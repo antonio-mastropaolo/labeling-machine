@@ -189,7 +189,7 @@
                   </div>
                   <div>
                       <hr class="solid" style="position:relative; top:-10px;" id="topLevelLineSep">
-                          <button class="btn btn btn-dark category-button"
+                          <button class="btn btn btn-dark"
                                   type="submit"
                                   id="no-code-button"
                                   onmouseenter='onMouseEnterEvent("no-code-button","No available snippet to be linked");'
@@ -202,7 +202,7 @@
 
                   <div>
                       <hr class="solid" style="position:relative; top:-50px;" id="topLevelLineSep">
-                          <button class="btn btn btn-dark category-button"
+                          <button class="btn btn btn-dark"
                                   type="submit"
                                   id="network-code-button"
                                   onmouseenter='onMouseEnterEvent("network-code-button","If the comment is useful for training the Comment-Generator-Network");'
@@ -533,10 +533,8 @@
                 dictSelectedCategories = {{ artificat_label_categories |tojson }};
                 dictHighlightedCodeCharacterPosition = {{ codeSpan | tojson }};
                 dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }};
-                dictCommetsForNN = {{ validCommentsForNN | safe }} ;
                 moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }}
 
-                //console.log(dictCommetsForNN);
 
                 var idsButton = [];
                 for (var i = 0; i < 100; i++) {
@@ -772,7 +770,6 @@
                     userDefinedNewCategoryNames:  JSON.stringify(userDefinedNewCategoryNames),
                     userDefinedNewCategoryDescriptions:  JSON.stringify(userDefinedNewCategoryDescriptions),
                     categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
-                    validCommentsForNN: JSON.stringify(cleanDict(dictCommetsForNN)),
                     duration:get_elapsed_seconds()
                 };
 
@@ -813,35 +810,119 @@
     }
 
     function shortcutForAddingCategory(element){
-        if(selectedCategories.length>=2){
+
+        if(selectedCategories.includes(element.id)){
+            $("#"+element.id).css('background-color','');
+            var index = selectedCategories.indexOf(element.id);
+            selectedCategories.splice(index, 1);
+
+            if(element.id === 'code-summary-button'){
+                $("#network-code-button").css('background-color','#8267BE');
+                var index = selectedCategories.indexOf("network-code-button");
+                selectedCategories.splice(index, 1);
+            }
+
+            return;
+        }
+
+        if(selectedCategories.length >= 2 && !selectedCategories.includes('no-code-button') && !selectedCategories.includes('network-code-button')) {
             alert('No more categories can be linked!');
         }else {
-            addNewCommentToBeLinked(element);
+             if (selectedCategories.length === 4){
+                alert('No more categories can be linked!');
+            }
+            if (selectedCategories.length === 3 && (selectedCategories.includes('no-code-button') && !selectedCategories.includes('network-code-button'))) {
+                alert('No more categories can be linked!');
+            }
+            if (selectedCategories.length === 3 && (!selectedCategories.includes('no-code-button') && selectedCategories.includes('network-code-button'))) {
+                alert('No more categories can be linked!');
+            }
+            if (selectedCategories.length === 3 && selectedCategories.includes('no-code-button') && selectedCategories.includes('network-code-button')) {
+                addNewCommentToBeLinked(element);
+                if(this.id === 'code-summary-button'){
+                    selectedCategories.push('network-code-button');
+                }
+            }
+            if (selectedCategories.length <= 2 && element.id !== 'no-code-button' && element.id !== 'network-code-button') {
+                addNewCommentToBeLinked(element);
+                if(this.id === 'code-summary-button'){
+                    selectedCategories.push('network-code-button');
+                }
+            }
         }
+        selectedCategories = [...new Set(selectedCategories)];
+
     }
 
     $(document).on('click', '.category-button',function(){
-        if(selectedCategories.length>=2){
+
+        if(selectedCategories.includes(this.id)){
+            $("#"+this.id).css('background-color','');
+            var index = selectedCategories.indexOf(this.id);
+            selectedCategories.splice(index, 1);
+
+            if(this.id === 'code-summary-button'){
+                $("#network-code-button").css('background-color','#8267BE');
+                var index = selectedCategories.indexOf("network-code-button");
+                selectedCategories.splice(index, 1);
+            }
+
+            return;
+        }
+
+        if(selectedCategories.length >= 2 && !selectedCategories.includes('no-code-button') && !selectedCategories.includes('network-code-button')) {
             alert('No more categories can be linked!');
         }else {
-            addNewCommentToBeLinked(this);
-            /*if(this.childNodes[0].nextSibling === null) {
-                addNewCommentToBeLinked(this.childNodes[0]);
+            if (selectedCategories.length === 4){
+                alert('No more categories can be linked!');
             }
-            else{
+            if (selectedCategories.length === 3 && (selectedCategories.includes('no-code-button') && !selectedCategories.includes('network-code-button'))) {
+                alert('No more categories can be linked!');
+            }
+            if (selectedCategories.length === 3 && (!selectedCategories.includes('no-code-button') && selectedCategories.includes('network-code-button'))) {
+                alert('No more categories can be linked!');
+            }
+            if (selectedCategories.length === 3 && selectedCategories.includes('no-code-button') && selectedCategories.includes('network-code-button')) {
                 addNewCommentToBeLinked(this);
-            }*/
+                if(this.id === 'code-summary-button'){
+                    selectedCategories.push('network-code-button');
+                }
+            }
+            if (selectedCategories.length <= 2 && this.id !== 'no-code-button' && this.id !== 'network-code-button') {
+                addNewCommentToBeLinked(this);
+                if(this.id === 'code-summary-button'){
+                    selectedCategories.push('network-code-button');
+                }
+            }
         }
+        selectedCategories = [...new Set(selectedCategories)];
     });
 
     $(document).on('click', '#no-code-button', function (){
-        noCode=true;
-        $(this).css('background-color','green');
+        if(isAlreadySelectedCategory("no-code-button")){
+            noCode=false;
+            $("#no-code-button").css('background-color','#8267BE');
+            var index = selectedCategories.indexOf("no-code-button");
+            selectedCategories.splice(index, 1);
+        }else{
+            noCode=true;
+            $(this).css('background-color','green');
+            selectedCategories.push('no-code-button');
+        }
     });
 
     $(document).on('click', '#network-code-button', function (){
-        isForNN=1;
-        $(this).css('background-color','green');
+        if(isAlreadySelectedCategory("network-code-button")){
+            isForNN=0;
+            $("#network-code-button").css('background-color','#8267BE');
+            var index = selectedCategories.indexOf('network-code-button');
+            selectedCategories.splice(index, 1);
+            console.log('selected!');
+        }else{
+            isForNN=1;
+            $(this).css('background-color','green');
+            selectedCategories.push('network-code-button');
+        }
     });
 
 
