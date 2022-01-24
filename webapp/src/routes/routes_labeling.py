@@ -78,7 +78,7 @@ def labeling_with_artifact(target_artifact_id):
 
             #this one works only on bar
             if sys.platform=='linux':
-                newLinkToFileJava = '/labeling-machine/data/' + '/'.join(artifact_data.linkToFileJava.split('/')[1:])
+                newLinkToFileJava = '/labeling-machine/data/' + '/'.join(artifact_data.linkToFileJava.split('/')[4:])
             else:
                 #Locally on antonio's machine
                 newLinkToFileJava = '/Users/antonio/Desktop/' +'/'.join(artifact_data.linkToFileJava.split('/')[3:])
