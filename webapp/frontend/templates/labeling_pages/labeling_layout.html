@@ -722,13 +722,13 @@
 
         function submitClassification(){
 
-            if(isLabeled === 0) {
+            /*if(isLabeled === 0) {
                 var associationsSoFar = howManyAssociations()
                 if (associationsSoFar < numberOfCommentsPerClass) {
                     alert('Please make sure to tag each comment before submitting!');
                     return false;
                 }
-            }
+            }*/
 
             var newRefinedDict = getSameKeysDict(cleanDict(dictHighlightedCodeCharacterPosition), cleanDict(dictHighlightedCommentsCharacterPosition));
             if (Object.keys(newRefinedDict).length === 0 ){
