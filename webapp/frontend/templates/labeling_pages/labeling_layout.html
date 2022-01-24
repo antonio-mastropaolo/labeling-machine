@@ -199,6 +199,21 @@
                       <hr class="solid" style="position:relative; top:-20px;" id="bottomLevelLineSep">
                   </div>
                   <hr class="solid" style="position:sticky; top:90.2%;">
+
+                  <div>
+                      <hr class="solid" style="position:relative; top:-50px;" id="topLevelLineSep">
+                          <button class="btn btn btn-dark category-button"
+                                  type="submit"
+                                  id="network-code-button"
+                                  onmouseenter='onMouseEnterEvent("network-code-button","If the comment is useful for training the Comment-Generator-Network");'
+                                  onmouseleave='onMouseLeaveEvent("network-code-button");'
+                                  style="width: 100%; margin-top:-95px; text-align: left;  background-color: #8267BE; font-weight: bold;" ><span style="font-size: 12px; background-color: green;" class="badge bg-success float-right position-relative">ALT+N</span>Useful for training CG Network
+                          </button>
+                      <hr class="solid" style="position:relative; top:-40px;" id="bottomLevelLineSep">
+                  </div>
+
+                  <hr class="solid" style="position:sticky; top:90.2%;">
+
                   <div id='refreshButton' style="position:fixed; left:12.5%; top:92%;" onclick="refreshPage();">
                       <i class="fas fa-sync fa-3x" style="color:white;"></i>
                   </div>
@@ -241,7 +256,7 @@
                          </div>
                     <hr class="solid">
                 </div>
-                 <div id="lowerSide" style="height: 50%;  overflow-y: scroll; position:sticky;  top:90%; width:100%; float: left;">
+                 <div id="lowerSide" style="height: 35vh;  overflow-y: scroll; position:sticky;  top:62%; width:100%; float: left;">
 
                 </div>
             </div>
@@ -305,7 +320,8 @@
                                 'code-summary-button',
                                 'comment-code-button',
                                 'incomplete-button',
-                                'no-code-button'
+                                'no-code-button',
+                                'network-code-button'
         ];
 
 
@@ -328,6 +344,7 @@
         var defaultColorHighlight='red';
         var flagSwitch=true;
         var noCode=false;
+        var isForNN=0;
         var changingToClassificationOnGoing=false;
 
         var commentEleToHighlight = [];
@@ -343,6 +360,7 @@
         var mapAssociation2Comment = {}
         var dictSelectedCode = {};
         var dictSelectedComment = {};
+        var dictCommetsForNN = {};
 
 
         var comments = []; //In this list we store all the comments within a given class
@@ -420,7 +438,7 @@
                 var buttonText = methodsListNames[i];
 
                 var scrollCall = 'moveToSelectedMethodFromLine(' + startingLine + ',' + '\'' + buttonID + '\')';
-                var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scrollCall + '" style="width: 100%;  text-align: left;">' + buttonText + '</button> </div>';
+                var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scrollCall + '" style="width: 100%;  text-align: left; white-space: normal; word-wrap: break-word;">' + buttonText + '</button> </div>';
                 //console.log(newButton);
                 $("#upperSide").append($(newButton));
 
@@ -439,6 +457,7 @@
                     dictSelectedCategories[i] = [];
                     dictSelectedCode[i] = [];
                     dictSelectedComment[i] = [];
+                    dictCommetsForNN[i] = [];
                 }
             }
 
@@ -509,13 +528,15 @@
 
                 // Loading the lists
                 dictHighlightedCommentsPosition = {{ artifact_label_commentPositionList | tojson }}
-                {#dictRangeHighlightedCode = JSON.parse({{ artifact_label_rangeSelectedText | tojson }});#}
                 dictSelectedCode = {{ selectedCode | tojson }};
                 dictSelectedComment = {{ selectedComments | tojson }};
                 dictSelectedCategories = {{ artificat_label_categories |tojson }};
-                dictHighlightedCodeCharacterPosition = {{ codeSpan | tojson }}
-                dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }}
+                dictHighlightedCodeCharacterPosition = {{ codeSpan | tojson }};
+                dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }};
+                dictCommetsForNN = {{ validCommentsForNN | safe }} ;
                 moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }}
+
+                //console.log(dictCommetsForNN);
 
                 var idsButton = [];
                 for (var i = 0; i < 100; i++) {
@@ -735,6 +756,7 @@
                 newRefinedDict = dictHighlightedCommentsCharacterPosition;
             }
 
+
             if (confirm('Are you sure?')) {
                 var data_json = {
                     artifact_id: {{  artifact_id }},
@@ -750,6 +772,7 @@
                     userDefinedNewCategoryNames:  JSON.stringify(userDefinedNewCategoryNames),
                     userDefinedNewCategoryDescriptions:  JSON.stringify(userDefinedNewCategoryDescriptions),
                     categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
+                    validCommentsForNN: JSON.stringify(cleanDict(dictCommetsForNN)),
                     duration:get_elapsed_seconds()
                 };
 
@@ -813,6 +836,11 @@
 
     $(document).on('click', '#no-code-button', function (){
         noCode=true;
+        $(this).css('background-color','green');
+    });
+
+    $(document).on('click', '#network-code-button', function (){
+        isForNN=1;
         $(this).css('background-color','green');
     });
 

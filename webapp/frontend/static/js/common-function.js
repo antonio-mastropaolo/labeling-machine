@@ -87,15 +87,6 @@ function moveToSelectedMethod(indexClassification, onlyAnimation=true, methodInd
         catch(ex){}
     }
 
-    // var tagSelector = arr[selectedComments[0]];
-    // console.log(tagSelector);
-    // try {
-    //     $(tagSelector)[0].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
-    //     $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
-    //         $(this).removeClass('animationLabel').dequeue();
-    //     });
-    // }
-    // catch(ex){}
 
     if(!onlyAnimation) {
         resetColorHighlightingCategories();
@@ -253,18 +244,20 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     //Highlight the selected code
-    for(var i=0;i<dictHighlightedCodeCharacterPosition[currentClassification].length;i++) {
+    try{
+        for(var i=0;i<dictHighlightedCodeCharacterPosition[currentClassification].length;i++) {
 
-        var start = Number(dictHighlightedCodeCharacterPosition[currentClassification][i].split('-')[0]);
-        var end = Number(dictHighlightedCodeCharacterPosition[currentClassification][i].split('-')[1]);
+            var start = Number(dictHighlightedCodeCharacterPosition[currentClassification][i].split('-')[0]);
+            var end = Number(dictHighlightedCodeCharacterPosition[currentClassification][i].split('-')[1]);
 
 
-        if (start === 0 || end === 0) {
-            continue;
+            if (start === 0 || end === 0) {
+                continue;
+            }
+
+            highlightRangeNew(start, end);
         }
-
-        highlightRangeNew(start, end);
-    }
+    }catch(ex){}
 
 
     // semi-column heuristic to reconstruct and display the highlighted code correctly
@@ -286,6 +279,12 @@ function highlightTargetComments(elements,className){
     var dictPosition = {}
     function look4Javadoc(comment){
         var commentLines = comment.split('\n');
+
+        if(commentLines.length>=2) {
+            if (commentLines[0].trim().startsWith('/*') && commentLines[1].trim().startsWith('*')) {
+                return false;
+            }
+        }
         for(var i=0;i<commentLines.length;i++){
             if(commentLines[i].trim().startsWith('*') && !commentLines[i].trim().startsWith('*/')){
                 return true
@@ -391,7 +390,9 @@ function reset(save=false){
 
 
             resetHighlightedCode(dictHighlightedCode[dictIndex], dictIndex);
+            dictCommetsForNN[dictIndex] = '';
         }
+
 
         if(isLabeled==1){
             //reset comment
@@ -460,9 +461,12 @@ function reset(save=false){
     listSelectedSpanComment = [];
     resetClicked = false;
 
-    // Restore original color for the no-code-button
+    // Restore original color for the no-code-button and network-code-button
     noCode=false;
-    $("#no-code-button").css('background-color','#8267BE')
+    $("#no-code-button").css('background-color','#8267BE');
+
+    isForNN=0;
+    $("#network-code-button").css('background-color','#8267BE');
 
     selectedCategory = "";
     selectedCodeText = "";
@@ -584,6 +588,9 @@ function addNewCommentToBeLinked(element){
     }else{
         $(element).css('background-color','green');
         selectedCategory = element.id.toString();
+        if(selectedCategory == 'code-summary-button'){
+            $('#network-code-button').css('background-color','green');
+        }
     }
 
     selectedCategories.push(selectedCategory);
@@ -639,6 +646,7 @@ function saveCategorization(){
 
             dictHighlightedCommentsPosition[dictIndex] = [...new Set(commentIndex)];
             dictHighlightedCommentsCharacterPosition[dictIndex] = [...new Set(listSelectedSpanComment)];
+            dictCommetsForNN[dictIndex] = isForNN;
             if(listSelectedSpanCode.length === 0){ dictHighlightedCodeCharacterPosition[dictIndex] = [-1];}
             else{ dictHighlightedCodeCharacterPosition[dictIndex] = listSelectedSpanCode; }
 
@@ -660,6 +668,12 @@ function saveCategorization(){
             }
 
             if(selectedCategories.length>0) {
+                if (noCode){
+                    selectedCategories.push('no-code-button');
+                }
+                if(isForNN){
+                    selectedCategories.push('network-code-button');
+                }
                 dictSelectedCategories[dictIndex] = selectedCategories.filter(function (e) {
                     return e
                 });
@@ -686,8 +700,14 @@ function saveCategorization(){
             // console.log('method index: '+methodIndex);
             // console.log(comment2Method[methodIndex]);
 
-            mapAssociation2Comment[divID] = getCommentLength(selectedCommentText);
-            updateComment2CodeMap(dictHighlightedCommentsCharacterPosition, selectedComments, dictIndex, methodIndex);
+            if(selectedCommentText.trimLeft().startsWith('/*')){
+                mapAssociation2Comment[divID] = 1
+            }else {
+                mapAssociation2Comment[divID] = getCommentLength(selectedCommentText);
+            }
+
+            //updateComment2CodeMap(dictHighlightedCommentsCharacterPosition, selectedComments, dictIndex, methodIndex);
+            comment2Method[methodIndex] = comment2Method[methodIndex] + mapAssociation2Comment[divID];
             if (comment2Method[methodIndex] === commentsForTheMethodUnderClassification){
                 $("#"+methodUnderClassification).css('background-color','green');
             }
@@ -713,19 +733,17 @@ function saveCategorization(){
         //Bringing back the change button and remove selectionButton
         if(isLabeled==1 && currentClassification>=0){
 
-            // if the reviewer didn't change anything, it will overwrite such fields
-            //if (selectedCommentText.trim() !== '' && selectedCommentText.trim() !== null)  { selectedComments.push(selectedCommentText); }
-            //if (selectedCodeText.trim() !== ''    && selectedCodeText.trim() !== null  )   { selectedCode.push(selectedCodeText); }
-            //if (selectedCategory.trim() !== ''    && selectedCategory.trim() !== null  )   { selectedCategories.push(selectedCategory);}
-            //if (serializedRangeList.length > 0)     { dictRangeHighlightedCode[currentClassification] = serializedRangeList; }
             if (commentIndex.length > 0)            { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)];  } //duplicates deletion due to mis-selection event
             if (listSelectedSpanCode.length > 0)    { dictHighlightedCodeCharacterPosition[currentClassification] = listSelectedSpanCode; }
             if (listSelectedSpanComment.length > 0) { dictHighlightedCommentsCharacterPosition[currentClassification] = [...new Set(listSelectedSpanComment)]; }
             if (selectedCode.length > 0)            { dictSelectedCode[currentClassification] = selectedCode.filter(function(e){return e}); }
             if (selectedComments.length > 0 )       { dictSelectedComment[currentClassification] = selectedComments.filter(function(e){return e}); }
             if (selectedCategories.length > 0)      { dictSelectedCategories[currentClassification] = [...new Set(selectedCategories)]; dictSelectedCategories[currentClassification] = dictSelectedCategories[currentClassification].filter(function(e){return e}); }
+            console.log(dictCommetsForNN[currentClassification]);
+            dictCommetsForNN[currentClassification] = isForNN;
 
             $("#clearText").text('Change');
+
 
             var flagNext =false;
             for (const [key, value] of Object.entries(dictSelectedCode)) {
@@ -745,15 +763,16 @@ function saveCategorization(){
             $("#code").css('user-select','none');
 
         }
-
+        //console.log('--> ' +isForNN);
         reset(save=true);
 
         //check if ready to Submit
-        var associationsSoFar = howManyAssociations()
-        if(numberOfCommentsPerClass === associationsSoFar){
-            alert('Each Comment has been tagged! Ready to Submit!');
-        }
+        // var associationsSoFar = howManyAssociations()
+        // if(numberOfCommentsPerClass === associationsSoFar){
+        //     alert('Each Comment has been tagged! Ready to Submit!');
+        // }
     }
+
 
 }
 
@@ -801,26 +820,32 @@ function removeAssociation(method, divID, methodIndex){
     dictSelectedCode[targetAssociation] = [];
     dictSelectedCategories[targetAssociation] = [];
     dictSelectedComment[targetAssociation] = [];
-
+    dictCommetsForNN[targetAssociation] = '';
     methodSelectionButton[targetAssociation] = '';
     selectedComments = [];
     selectedCategories = [];
     selectedCode = [];
 
     //remove association liking a comment of len
-    // console.log('MAPPA PRE: ');
-    // console.log(comment2Method[methodIndex]);
-    // console.log("Selected Comment so far: "+comment2Method[targetAssociation]);
-    // console.log('target association: '+targetAssociation);
-    // console.log('MapAss2Comment: ' +mapAssociation2Comment[divID]);
+    console.log('MAPPA PRE: ');
+    console.log(comment2Method[methodIndex]);
+    console.log("Selected Comment so far: "+comment2Method[targetAssociation]);
+    console.log('target association: '+targetAssociation);
+    console.log('MapAss2Comment: ' +mapAssociation2Comment[divID]);
 
     comment2Method[methodIndex] = comment2Method[methodIndex] - mapAssociation2Comment[divID];
 
-    // console.log('MAPPA AFTER: ');
-    // console.log(comment2Method[methodIndex]);
+
+    //quick fix
+    if(comment2Method[methodIndex] < 0 ){
+        comment2Method[methodIndex]=0;
+    }
+    console.log('MAPPA AFTER: ');
+    console.log(comment2Method[methodIndex]);
 
     $("#"+method).css('background-color','');
     methodUnderClassification = "";
+    isForNN=0;
 }
 
 function refreshPage(){
@@ -866,6 +891,12 @@ function highlightSelectedCategoryButton(index){
     //console.log(dictSelectedCategories);
     for(var i=0; i<dictSelectedCategories[index].length; i++){
         $("#"+dictSelectedCategories[index][i]).css('background-color','green');
+        if(dictSelectedCategories[index][i] === 'no-code-button'){
+            noCode=true;
+        }
+        if(dictSelectedCategories[index][i]=='network-code-button'){
+            isForNN=1;
+        }
     }
 }
 
@@ -904,25 +935,35 @@ function isAlreadySelectedCategory(categoryButton){
 
 function selectDeselectViaShortcut(categoryButtonName){
     if(isAlreadySelectedCategory(categoryButtonName)){
+
         if(categoryButtonName === 'no-code-button'){
             noCode = false;
-        }else {
+            $("#"+categoryButtonName).css('background-color','#8267BE');
+        }else if (categoryButtonName === 'network-code-button') {
+            isForNN = 0;
+            $("#"+categoryButtonName).css('background-color','#8267BE');
+        } else{
             selectedCategories.pop();
             selectedCategory = "";
+            $("#"+categoryButtonName).css('background-color','');
         }
-        $("#"+categoryButtonName).css('background-color','');
+
     }else {
+
         if (categoryButtonName === 'no-code-button'){
             noCode = true;
             $('#'+categoryButtonName).css('background-color','green');
-        }else {
+        }else if (categoryButtonName === 'network-code-button') {
+            isForNN=1;
+            $('#'+categoryButtonName).css('background-color','green');
+        }else{
             var element = document.getElementById(categoryButtonName);
             shortcutForAddingCategory(element);
         }
     }
 }
 
-hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt+ctrl+2, alt+ctrl+3, alt+ctrl+4, alt+ctrl+5, alt+ctrl+6, alt+ctrl+7, alt+ctrl+8, alt+s, alt+c', function (event, handler){
+hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt+ctrl+2, alt+ctrl+3, alt+ctrl+4, alt+ctrl+5, alt+ctrl+6, alt+ctrl+7, alt+ctrl+8, alt+s, alt+c, alt+n', function (event, handler){
      // User defined categories start here
     var categoryButtonName;
     switch (handler.key) {
@@ -933,6 +974,7 @@ hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt
 
         case 'alt+2':
             selectDeselectViaShortcut('code-summary-button');
+            selectDeselectViaShortcut('network-code-button');
             break;
 
         case 'alt+3':
@@ -1003,6 +1045,10 @@ hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt
             selectDeselectViaShortcut('no-code-button');
             break;
 
+        case 'alt+n':
+            selectDeselectViaShortcut('network-code-button');
+            break;
+
         // Submit shortcut
          case 'alt+s':
             submitClassification();
@@ -1011,48 +1057,12 @@ hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt
 });
 
 
-function updateComment2CodeMap(spanOfCharPerMethod, commentsDict, indexAssociation, methodIndex) {
-    var start, end;
-
-    var currentItemSpan = spanOfCharPerMethod[indexAssociation];
-    // var currentItemComment = commentsDict[indexAssociation];
-    // console.log(currentItemComment);
-    // console.log(currentItemSpan);
-    //console.log(commentsDict);
-    for (var k = 0; k < currentItemSpan.length; k++) {
-
-        for (var j=0; j<commentsDict.length; j++) {
-
-            // if (currentItemComment[k].trimLeft().trimRight() !== commentsDict[j].trimLeft().trimRight()) {
-            //     continue;
-            // }
-
-            start = currentItemSpan[k].split('-')[0];
-            end = currentItemSpan[k].split('-')[1];
-
-
-            var len = -1;
-            if (commentsDict[k].trimLeft().startsWith('//')) {
-                len = getCommentLength(commentsDict[k]);
-            }
-
-            if (len > 0) {
-                comment2Method[methodIndex] = comment2Method[methodIndex] + len;
-            } else {
-                comment2Method[methodIndex] = comment2Method[methodIndex] + 1
-            }
-        }
-    }
-
-    //console.log('Updated MAP: '+comment2Method[methodIndex]);
-}
-
 function getCommentLength(comment){
     var realLen = 0;
     var items = comment.split('\n');
     for (var i=0; i<items.length; i++){
-        if(items[i].trimLeft() !== ''){
-            //console.log('--> ' +items[i]);
+        if(items[i].trimLeft().trimRight() !== ''){
+            //console.log('item['+i+']   ' +items[i]);
             realLen += 1;
         }
     }
@@ -1083,3 +1093,57 @@ function howManyAssociations(){
     }
     return sum;
 }
+
+
+// function updateComment2CodeMap(spanOfCharPerMethod, commentsDict, indexAssociation, methodIndex) {
+//     var start, end;
+//     var visitedComment = [];
+//     var currentItemSpan = spanOfCharPerMethod[indexAssociation];
+//     // var currentItemComment = commentsDict[indexAssociation];
+//     // console.log(currentItemComment);
+//     // console.log(currentItemSpan);
+//     //console.log(commentsDict);
+//     for (var k = 0; k < currentItemSpan.length; k++) {
+//
+//         for (var j=0; j<commentsDict.length; j++) {
+//
+//             start = currentItemSpan[k].split('-')[0];
+//             end = currentItemSpan[k].split('-')[1];
+//
+//
+//             var len = -1;
+//             if (commentsDict[k].trimLeft().trimRight().startsWith('//')) {
+//                 len = getCommentLength(commentsDict[k]);
+//                 console.log('LEN: '+len);
+//             }
+//
+//             var comments = commentsDict[k].split('\n');
+//             var flagBreak = false;
+//             for (var c=0;c<comments.length;c++){
+//                 if(visitedComment.includes(comments[c])){
+//                     flagBreak=true;
+//                     break;
+//                 }
+//             }
+//
+//             if(flagBreak){
+//                 console.log('hit');
+//                 continue;
+//             }
+//
+//             if (len > 0) {
+//                 comment2Method[methodIndex] = comment2Method[methodIndex] + len;
+//             } else {
+//                 comment2Method[methodIndex] = comment2Method[methodIndex] + 1
+//             }
+//
+//             for (var c=0;c<comments.length;c++){
+//                 visitedComment.push(comments[c]);
+//             }
+//
+//
+//         }
+//     }
+//
+//     console.log('Updated MAP: '+comment2Method[methodIndex]);
+// }

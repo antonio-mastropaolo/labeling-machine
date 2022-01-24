@@ -79,4 +79,5 @@ class LabelingData(db.Model):
     labeled_at = db.Column(db.DateTime(timezone=True))
     reviewed_at = db.Column(db.DateTime(timezone=True))
     isChanged = db.Column(db.Integer)
+    validCommentsForNN = db.Column(db.Integer)
 
