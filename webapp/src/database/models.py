@@ -59,9 +59,16 @@ class Artifact(db.Model):
     isValid = db.Column(db.Integer)
     methodsComments = db.Column(db.Integer)
 
+class Conflict(db.Model):
+    __tablename__ = 'Conflict'
+    conflict_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    artifact_id = db.Column(db.Integer)
+    classification = db.Column(db.Text)
+    conflict = db.Column(db.Integer)
 
-class LabelingData(db.Model):
-    __tablename__ = 'LabelingData'
+
+class LabelingDataReviewer(db.Model):
+    __tablename__ = 'LabelingDataReviewer'
     labeling_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     artifact_id = db.Column(db.Integer)
     comments = db.Column(db.Text)
@@ -71,11 +78,22 @@ class LabelingData(db.Model):
     commentSpan = db.Column(db.Text)
     commentPosition = db.Column(db.Text)
     moveSelectionButton = db.Column(db.Text)
-    username_tagger = db.Column(db.Text)
-    username_reviewer = db.Column(db.Text)
-    elapsed_labeling_time = db.Column(db.Integer)
+    username = db.Column(db.Text)
     elapsed_reviewing_time = db.Column(db.Integer)
-    labeled_at = db.Column(db.DateTime(timezone=True))
     reviewed_at = db.Column(db.DateTime(timezone=True))
-    isChanged = db.Column(db.Integer)
 
+
+class LabelingDataLabeler(db.Model):
+    __tablename__ = 'LabelingDataLabeler'
+    labeling_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    artifact_id = db.Column(db.Integer)
+    comments = db.Column(db.Text)
+    code = db.Column(db.Text)
+    categories = db.Column(db.Text)
+    codeSpan = db.Column(db.Text)
+    commentSpan = db.Column(db.Text)
+    commentPosition = db.Column(db.Text)
+    moveSelectionButton = db.Column(db.Text)
+    username = db.Column(db.Text)
+    elapsed_labeling_time = db.Column(db.Integer)
+    labeled_at = db.Column(db.DateTime(timezone=True))

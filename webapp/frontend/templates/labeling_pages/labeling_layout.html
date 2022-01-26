@@ -222,7 +222,7 @@
                   </div>
 
                   <div id="toggleButton" style="position:fixed; left:1.5%; top:92%;">
-                      <i class="fas fa-info-circle fa-3x" style="color:white;"></i>
+                      <i id='toggleItem' class="fas fa-info-circle fa-3x" style="color:white;"></i>
                   </div>
 
               </div>
@@ -299,6 +299,7 @@
 
         const methodsList = {{ artifact_methodsListLines | tojson }};
         const methodsListNames = {{ artifact_methodsName | safe }};
+        const isFlagged = {{ isFlagged }};
         const numberOfCommentsPerMethod = {{ artifact_commentsPerMethod | safe  }};
         const userDefinedCategories = {{ artifact_UDC | tojson}};
         const linesList = {{ artifact_lines | tojson }};
@@ -350,6 +351,7 @@
         var commentEleToHighlight = [];
         var highlightedCommentsInReviewing = [];
 
+        // Creating dictionaries for the labeler
         var dictHighlightedCode = {};
         var dictHighlightedComments = {};
         var comment2Method = {};
@@ -360,8 +362,19 @@
         var mapAssociation2Comment = {}
         var dictSelectedCode = {};
         var dictSelectedComment = {};
-        var dictCommetsForNN = {};
 
+        // Creating dictionaries for the reviewer
+        var dictHighlightedCodeRev = {};
+        var dictHighlightedCommentsRev = {};
+        var comment2MethodRev = {};
+        var dictHighlightedCommentsPositionRev = {};
+        var dictHighlightedCommentsCharacterPositionRev = {};
+        var dictHighlightedCodeCharacterPositionRev = {};
+        var dictSelectedCategoriesRev = {};
+        var mapAssociation2CommentRev = {}
+        var dictSelectedCodeRev = {};
+        var dictSelectedCommentRev = {};
+        var conflicts = {};
 
         var comments = []; //In this list we store all the comments within a given class
         var selectedComments = [];
@@ -405,6 +418,7 @@
             $("h1").css('color', 'white');
             $("h2").css('color', 'white');
             $('.hljs-comment').css('user-select', 'none');
+            if(isFlagged) { $("#toggleItem").css('color','red'); }
             /* User defined Categories to be added */
              for(var i=0; i<userDefinedCategories['category_id'].length; i++) {
 
@@ -449,7 +463,7 @@
             comments = document.getElementsByClassName("hljs-comment");
 
             if (isLabeled == 0) {
-                for(var i=0;i<100;i++) {
+                for(var i=0;i<150;i++) {
                     dictHighlightedCode[i] = [];
                     dictHighlightedCommentsPosition[i] = [];
                     dictHighlightedCommentsCharacterPosition[i] = [];
@@ -457,7 +471,17 @@
                     dictSelectedCategories[i] = [];
                     dictSelectedCode[i] = [];
                     dictSelectedComment[i] = [];
-                    dictCommetsForNN[i] = [];
+                }
+            }else if (isLabeled == 1){
+                for(var i=0;i<150;i++) {
+                    dictHighlightedCodeRev[i] = [];
+                    dictHighlightedCommentsPositionRev[i] = [];
+                    dictHighlightedCommentsCharacterPositionRev[i] = [];
+                    dictHighlightedCodeCharacterPositionRev[i] = [];
+                    dictSelectedCategoriesRev[i] = [];
+                    dictSelectedCodeRev[i] = [];
+                    dictSelectedCommentRev[i] = [];
+                    conflicts[i] = []
                 }
             }
 
@@ -526,18 +550,18 @@
                 counterAssociations = Number({{ counterAssociations }});
                 $("#badgeCounter").text(counterAssociations);
 
-                // Loading the lists
+                // Loading the lists from labeler
                 dictHighlightedCommentsPosition = {{ artifact_label_commentPositionList | tojson }}
                 dictSelectedCode = {{ selectedCode | tojson }};
                 dictSelectedComment = {{ selectedComments | tojson }};
                 dictSelectedCategories = {{ artificat_label_categories |tojson }};
                 dictHighlightedCodeCharacterPosition = {{ codeSpan | tojson }};
                 dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }};
-                moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }}
+                moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }};
 
 
                 var idsButton = [];
-                for (var i = 0; i < 100; i++) {
+                for (var i = 0; i < 150; i++) {
                     try {
                         var doc = new DOMParser().parseFromString(moveSelectionButtonList[i], "text/xml");
                         var idButton = doc.getElementsByClassName("buttonWrapper")[0].id;
@@ -756,22 +780,52 @@
 
 
             if (confirm('Are you sure?')) {
-                var data_json = {
-                    artifact_id: {{  artifact_id }},
-                    code: JSON.stringify(cleanDict(dictSelectedCode)),
-                    comments: JSON.stringify(cleanDict(dictSelectedComment)),
-                    categories: JSON.stringify(cleanDict(dictSelectedCategories)),
-                    codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPosition)),
-                    commentSpan: JSON.stringify(newRefinedDict),
-                    commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPosition)),
-                    workingMode: workingMode,
-                    moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton.filter(function(e){return e})) : JSON.stringify(moveSelectionButtonList.filter(function(e){return e}))),
-                    counterAssociations: (isLabeled === 1 ?  Number({{ counterAssociations }}) : counterAssociations ),
-                    userDefinedNewCategoryNames:  JSON.stringify(userDefinedNewCategoryNames),
-                    userDefinedNewCategoryDescriptions:  JSON.stringify(userDefinedNewCategoryDescriptions),
-                    categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
-                    duration:get_elapsed_seconds()
-                };
+                var data_json = {}
+                if (isLabeled === 0) {
+                     data_json = {
+                        artifact_id: {{  artifact_id }},
+                        code: JSON.stringify(cleanDict(dictSelectedCode)),
+                        comments: JSON.stringify(cleanDict(dictSelectedComment)),
+                        categories: JSON.stringify(cleanDict(dictSelectedCategories)),
+                        codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPosition)),
+                        commentSpan: JSON.stringify(newRefinedDict),
+                        commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPosition)),
+                        workingMode: workingMode,
+                        moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton.filter(function (e) {
+                            return e
+                        })) : JSON.stringify(moveSelectionButtonList.filter(function (e) {
+                            return e
+                        }))),
+                        counterAssociations: (isLabeled === 1 ? Number({{ counterAssociations }}) : counterAssociations),
+                        userDefinedNewCategoryNames: JSON.stringify(userDefinedNewCategoryNames),
+                        userDefinedNewCategoryDescriptions: JSON.stringify(userDefinedNewCategoryDescriptions),
+                        categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
+                        duration: get_elapsed_seconds()
+                    };
+                }
+                else{
+                     data_json = {
+                        artifact_id: {{  artifact_id }},
+                        code: JSON.stringify(cleanDict(dictSelectedCodeRev)),
+                        comments: JSON.stringify(cleanDict(dictSelectedCommentRev)),
+                        categories: JSON.stringify(cleanDict(dictSelectedCategoriesRev)),
+                        codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPositionRev)),
+                        commentSpan: JSON.stringify(newRefinedDict),
+                        commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPositionRev)),
+                        workingMode: workingMode,
+                        moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton.filter(function (e) {
+                            return e
+                        })) : JSON.stringify(moveSelectionButtonList.filter(function (e) {
+                            return e
+                        }))),
+                        counterAssociations: (isLabeled === 1 ? Number({{ counterAssociations }}) : counterAssociations),
+                        userDefinedNewCategoryNames: JSON.stringify(userDefinedNewCategoryNames),
+                        userDefinedNewCategoryDescriptions: JSON.stringify(userDefinedNewCategoryDescriptions),
+                        categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
+                        conflicts: JSON.stringify(cleanDict(conflicts)),
+                        duration: get_elapsed_seconds()
+                    };
+                }
 
 
                 $.post("/label", data_json, function (response, status) {
@@ -781,10 +835,10 @@
                 });
 
                 //wait one second before moving on
-                setTimeout(function(){
+                /*setTimeout(function(){
                     ChangeSkipToNext();
                 },1000); //in millisecond
-
+                */
             }
         }
 

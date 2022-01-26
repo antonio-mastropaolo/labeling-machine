@@ -74,10 +74,8 @@ function moveToSelectedMethod(indexClassification, onlyAnimation=true, methodInd
     var arr = Array.from(comments);
     indexComment = dictHighlightedCommentsPosition[indexClassification].toString();
     var selectedComments = indexComment.split(',');
-
     for(var i=0; i<selectedComments.length; i++){
         var tagSelector = arr[selectedComments[i]];
-        //console.log(tagSelector);
         try {
             $(tagSelector)[0].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
             $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
@@ -86,7 +84,6 @@ function moveToSelectedMethod(indexClassification, onlyAnimation=true, methodInd
         }
         catch(ex){}
     }
-
 
     if(!onlyAnimation) {
         resetColorHighlightingCategories();
@@ -404,10 +401,6 @@ function reset(save=false){
 
         }
 
-        /*if(userDefinedNewCategoryNames.length>=1) {
-            userDefinedNewCategoryDescriptions.pop();
-            userDefinedNewCategoryNames.pop();
-        }*/
     }
 
     if(isLabeled==1 && save){
@@ -723,21 +716,52 @@ function saveCategorization(){
         }
 
         //Bringing back the change button and remove selectionButton
-        if(isLabeled==1 && currentClassification>=0){
+        if(isLabeled === 1 && currentClassification>=0){
 
-            if (commentIndex.length > 0)            { dictHighlightedCommentsPosition[currentClassification] = [...new Set(commentIndex)];  } //duplicates deletion due to mis-selection event
-            if (listSelectedSpanCode.length > 0)    { dictHighlightedCodeCharacterPosition[currentClassification] = listSelectedSpanCode; }
-            if (listSelectedSpanComment.length > 0) { dictHighlightedCommentsCharacterPosition[currentClassification] = [...new Set(listSelectedSpanComment)]; }
-            if (selectedCode.length > 0)            { dictSelectedCode[currentClassification] = selectedCode.filter(function(e){return e}); }
-            if (selectedComments.length > 0 )       { dictSelectedComment[currentClassification] = selectedComments.filter(function(e){return e}); }
-            if (selectedCategories.length > 0)      { dictSelectedCategories[currentClassification] = [...new Set(selectedCategories)]; dictSelectedCategories[currentClassification] = dictSelectedCategories[currentClassification].filter(function(e){return e}); }
+            if (commentIndex.length > 0)            { dictHighlightedCommentsPositionRev[currentClassification] = [...new Set(commentIndex)];  } //duplicates deletion due to mis-selection event
+            if (listSelectedSpanCode.length > 0)    { dictHighlightedCodeCharacterPositionRev[currentClassification] = listSelectedSpanCode; }
+            if (listSelectedSpanComment.length > 0) { dictHighlightedCommentsCharacterPositionRev[currentClassification] = [...new Set(listSelectedSpanComment)]; }
+            if (selectedCode.length > 0)            { dictSelectedCodeRev[currentClassification] = selectedCode.filter(function(e){return e}); }
+            if (selectedComments.length > 0 )       { dictSelectedCommentRev[currentClassification] = selectedComments.filter(function(e){return e}); }
+            if (selectedCategories.length > 0)      { dictSelectedCategoriesRev[currentClassification] = [...new Set(selectedCategories)]; dictSelectedCategoriesRev[currentClassification] = dictSelectedCategoriesRev[currentClassification].filter(function(e){return e}); }
 
+            //function check4Conflict(commentLabeler, categoriesLabeler, codeLabeler, commentReviewer, categoriesReviewer, codeReviewer){
+            var isConflict = check4Conflict(dictSelectedComment[currentClassification],dictSelectedCommentRev[currentClassification],
+                                            dictSelectedCategories[currentClassification], dictSelectedCategoriesRev[currentClassification],
+                                            dictSelectedCode[currentClassification], dictSelectedCodeRev[currentClassification]);
+
+            conflicts[currentClassification]=isConflict;
+
+            if(dictHighlightedCommentsPositionRev[currentClassification].length === 0){
+                dictHighlightedCommentsPositionRev[currentClassification] = dictHighlightedCommentsPosition[currentClassification];
+            }
+
+             if(dictHighlightedCodeCharacterPositionRev[currentClassification].length === 0 ){
+                dictHighlightedCodeCharacterPositionRev[currentClassification] = dictHighlightedCodeCharacterPosition[currentClassification];
+            }
+
+            if(dictSelectedCommentRev[currentClassification].length === 0){
+                dictSelectedCommentRev[currentClassification] = dictSelectedComment[currentClassification];
+            }
+
+
+            if(dictSelectedCodeRev[currentClassification].length === 0 ){
+                dictSelectedCodeRev[currentClassification] = dictSelectedCode[currentClassification];
+            }
+
+            if(dictSelectedCategoriesRev[currentClassification].length === 0 ){
+                dictSelectedCategoriesRev[currentClassification] = dictSelectedCategories[currentClassification];
+            }
+
+            if(dictHighlightedCommentsCharacterPositionRev[currentClassification].length === 0 ){
+                dictHighlightedCommentsCharacterPositionRev[currentClassification] = dictHighlightedCommentsCharacterPosition[currentClassification];
+            }
 
             $("#clearText").text('Change');
 
 
             var flagNext =false;
-            for (const [key, value] of Object.entries(dictSelectedCode)) {
+            for (const [key, value] of Object.entries(dictSelectedCodeRev)) {
 
                 if( Number(key) === currentClassification){ flagNext = true; continue; }
                 if(flagNext){
@@ -752,6 +776,7 @@ function saveCategorization(){
 
             //lock code section
             $("#code").css('user-select','none');
+
 
         }
         //console.log('--> ' +isForNN);
@@ -1090,56 +1115,56 @@ function howManyAssociations(){
     return sum;
 }
 
+function check4Conflict(commentLabeler, commentReviewer, categoriesLabeler, categoriesReviewer, codeLabeler, codeReviewer){
 
-// function updateComment2CodeMap(spanOfCharPerMethod, commentsDict, indexAssociation, methodIndex) {
-//     var start, end;
-//     var visitedComment = [];
-//     var currentItemSpan = spanOfCharPerMethod[indexAssociation];
-//     // var currentItemComment = commentsDict[indexAssociation];
-//     // console.log(currentItemComment);
-//     // console.log(currentItemSpan);
-//     //console.log(commentsDict);
-//     for (var k = 0; k < currentItemSpan.length; k++) {
-//
-//         for (var j=0; j<commentsDict.length; j++) {
-//
-//             start = currentItemSpan[k].split('-')[0];
-//             end = currentItemSpan[k].split('-')[1];
-//
-//
-//             var len = -1;
-//             if (commentsDict[k].trimLeft().trimRight().startsWith('//')) {
-//                 len = getCommentLength(commentsDict[k]);
-//                 console.log('LEN: '+len);
-//             }
-//
-//             var comments = commentsDict[k].split('\n');
-//             var flagBreak = false;
-//             for (var c=0;c<comments.length;c++){
-//                 if(visitedComment.includes(comments[c])){
-//                     flagBreak=true;
-//                     break;
-//                 }
-//             }
-//
-//             if(flagBreak){
-//                 console.log('hit');
-//                 continue;
-//             }
-//
-//             if (len > 0) {
-//                 comment2Method[methodIndex] = comment2Method[methodIndex] + len;
-//             } else {
-//                 comment2Method[methodIndex] = comment2Method[methodIndex] + 1
-//             }
-//
-//             for (var c=0;c<comments.length;c++){
-//                 visitedComment.push(comments[c]);
-//             }
-//
-//
-//         }
-//     }
-//
-//     console.log('Updated MAP: '+comment2Method[methodIndex]);
-// }
+    var refinedCommentLabeler = commentLabeler.join('\n');
+    refinedCommentLabeler = refinedCommentLabeler.replace(/\n\r?/g, '');
+
+    var refinedCommentReviewer = commentReviewer.join('\n');
+    refinedCommentReviewer = refinedCommentReviewer.replace(/\n\r?/g, '');
+
+    var refinedCodeLabeler = codeLabeler.join('\n');
+    refinedCodeLabeler = refinedCodeLabeler.replace(/\n\r?/g, '');
+
+    var refinedCodeReviewer = codeReviewer.join('\n');
+    refinedCodeReviewer = refinedCodeReviewer.replace(/\n\r?/g, '');
+
+
+    function _compareArrays(arr1,arr2){
+          if(!(arr1 != null && arr2 != null && arr1.length == arr2.length)) {
+            return false;
+          }
+
+          /* copy the arrays so that the original arrays are not affected when we set the indices to "undefined" */
+          arr1 = [].concat(arr1);
+          arr2 = [].concat(arr2);
+
+          return arr1.every(function(element, index) {
+            return arr2.some(function(e, i) {
+              return e === element && (arr2[i] = undefined, true);
+            });
+          });
+    }
+
+    // Check conflict for comments
+    if (refinedCommentLabeler !== refinedCommentReviewer && refinedCommentReviewer !== ''){
+        //console.log('hit1');
+        return 1;
+    }
+
+    // Check conflict for code
+    if (refinedCodeLabeler !== refinedCodeReviewer && refinedCommentReviewer !== ''){
+        //console.log('hit2');
+        return 1;
+    }
+
+    // Check conflict for categories
+
+
+    if (categoriesReviewer.length > 0 ){
+        //console.log('hit3');
+        return (_compareArrays(categoriesLabeler, categoriesReviewer) ? 0 : 1) //return 1 if they are the same, so we negate
+    } else{
+        return 0;
+    }
+}

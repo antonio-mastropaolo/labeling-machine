@@ -2,7 +2,7 @@ import datetime
 import sys
 
 from flask import render_template, request, redirect, url_for, jsonify
-from src.database.models import LabelingData, Artifact, FlaggedArtifact, UserDefinedCategory
+from src.database.models import LabelingDataLabeler, LabelingDataReviewer, Artifact, UserDefinedCategory, Conflict, FlaggedArtifact
 from src.helper.tools_labeling import *
 from src.helper.tools_common import is_signed_in, lock_artifact_by
 from src import app
@@ -46,8 +46,11 @@ def labeling_with_artifact(target_artifact_id):
             target_artifact_id = int(target_artifact_id)
             artifact_data = Artifact.query.filter_by(id=target_artifact_id).first()
             all_taggers = {row[0] for row in
-                           LabelingData.query.with_entities(LabelingData.username_tagger).filter_by(
+                           LabelingDataLabeler.query.with_entities(LabelingDataLabeler.username).filter_by(
                                artifact_id=target_artifact_id).all()}
+
+            flaggedClasses = {row[0] for row in db.session.query(FlaggedArtifact.artifact_id).all()}
+            listflaggedClasses = list(flaggedClasses)
 
             udc = UserDefinedCategory.query.all()
             listNameCategory = []
@@ -137,7 +140,7 @@ def labeling_with_artifact(target_artifact_id):
             commentSpan = []
 
             if (isLabeled == 1):
-                artifact_label = LabelingData.query.filter_by(artifact_id=target_artifact_id).first()
+                artifact_label = LabelingDataLabeler.query.filter_by(artifact_id=target_artifact_id).first()
                 commentPositionList = eval(artifact_label.commentPosition)
                 moveSelectionButtonList = eval(artifact_label.moveSelectionButton)
                 selectedCategories = eval(artifact_label.categories)
@@ -168,6 +171,7 @@ def labeling_with_artifact(target_artifact_id):
                                    artifact_moveSelectionButtonList = moveSelectionButtonList,
                                    isLabeled = isLabeled,
                                    isReviewed = isReviewed,
+                                   isFlagged = 1 if target_artifact_id in listflaggedClasses else 0,
                                    artifact_methodsName = methodsName,
                                    artifact_lines = linesList,
                                    counterAssociations = counterAssociations,
@@ -240,6 +244,7 @@ def label():
         userDefinedNewCategoryDescriptions = eval(request.form['userDefinedNewCategoryDescriptions'])
         userDefinedNewCategoryNames = eval(request.form['userDefinedNewCategoryNames'])
         userDefinedNewCategoryShortcuts = eval(request.form['categoryShortcuts'])
+        conflicts = eval(request.form['conflicts'])
 
 
         if int(workingMode) == 0:
@@ -250,40 +255,34 @@ def label():
             isReviewed = 1
 
 
-        if(int(workingMode)==0):
-            jr = LabelingData(artifact_id=artifact_id, username_tagger=who_is_signed_in(),
+        if int(workingMode)==0:
+            labeling_data_labeler = LabelingDataLabeler(artifact_id=artifact_id, username=who_is_signed_in(),
                                   elapsed_labeling_time=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
                                   commentSpan=commentSpan, categories=categories, commentPosition=commentPosition,
                                   moveSelectionButton=moveSelectionButton, labeled_at=datetime.datetime.utcnow()
                               )
 
-            db.session.add(jr)
+            db.session.add(labeling_data_labeler)
             db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
             db.session.commit()
 
         else:
-            labeling_data = LabelingData.query.filter_by(artifact_id=artifact_id).first()
+            labeling_data_reviewer = LabelingDataReviewer(artifact_id=artifact_id, username=who_is_signed_in(),
+                                  elapsed_reviewing_time=duration_sec, code=code, comments=comments, codeSpan=codeSpan,
+                                  commentSpan=commentSpan, categories=categories, commentPosition=commentPosition,
+                                  moveSelectionButton=moveSelectionButton, reviewed_at=datetime.datetime.utcnow()
+                              )
 
-            #Set isChanged flag to keep track of instances that have been changed by the reviewer
-            if ( dict_hash(eval(comments)) != dict_hash(eval(labeling_data.comments))     or
-                 dict_hash(eval(categories)) != dict_hash(eval(labeling_data.categories)) or
-                 dict_hash(eval(code)) != dict_hash(eval(labeling_data.code))):
-                labeling_data.isChanged = 1
-            else:
-                labeling_data.isChanged = 0
-
-            labeling_data.comments = comments
-            labeling_data.reviewed_at = datetime.datetime.utcnow()
-            labeling_data.elapsed_reviewing_time = duration_sec
-            labeling_data.username_reviewer = who_is_signed_in()
-            labeling_data.commentPosition = commentPosition
-            labeling_data.moveSelectionButton = moveSelectionButton
-            labeling_data.code = code
-            labeling_data.reviewed_at = datetime.datetime.utcnow()
-            labeling_data.codeSpan = codeSpan
-            labeling_data.commentSpan = commentSpan
-            labeling_data.categories = categories
+            db.session.add(labeling_data_reviewer)
+            db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
             db.session.commit()
+            for key, value in conflicts.items():
+                conflictInstance = Conflict(classification=key, artifact_id=artifact_id, conflict=value)
+                db.session.add(conflictInstance)
+                db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
+                db.session.commit()
+
+
 
         artifact = Artifact.query.filter_by(id=artifact_id).first()
         artifact.labeled = isLabeled

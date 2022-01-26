@@ -3,7 +3,7 @@ import random
 from sqlalchemy import func, distinct, select
 
 from src import db
-from src.database.models import LabelingData, Artifact, FlaggedArtifact
+from src.database.models import LabelingDataLabeler, LabelingDataReviewer, Artifact, FlaggedArtifact
 from src.helper.consts import N_API_NEEDS_LABELING
 from src.helper.tools_common import who_is_signed_in, get_locked_artifacts
 
@@ -63,7 +63,7 @@ def get_n_labeled_artifact_per_user():
     """
     Return a dictionary of {username: n_labeled_artifact, ...}
     """
-    result = db.session.query(LabelingData.username_tagger, func.count(distinct(LabelingData.artifact_id))).group_by(LabelingData.username_tagger).all()
+    result = db.session.query(LabelingDataLabeler.username, func.count(distinct(LabelingDataLabeler.artifact_id))).group_by(LabelingDataLabeler.username).all()
     ret = {}
     for row in result:
         ret[row[0]] = row[1]
@@ -76,7 +76,7 @@ def get_n_reviewed_artifact_per_user():
     """
     ret = {}
     #result = db.session.query(LabelingData.username_reviewer, func.count(Artifact.reviewed)).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).group_by(LabelingData.username_tagger).all()
-    result = db.session.query(LabelingData.username_reviewer, func.count(distinct(LabelingData.artifact_id))).group_by(LabelingData.username_reviewer).all()
+    result = db.session.query(LabelingDataReviewer.username, func.count(distinct(LabelingDataReviewer.artifact_id))).group_by(LabelingDataReviewer.username).all()
     for row in result:
         ret[row[0]] = row[1]
     print(result)
@@ -87,9 +87,9 @@ def choose_next_random_api():
     candidate_artifact_ids = {row[0] for row in db.session.query(Artifact.id).all()}
 
     # ############### 1. Remove Already Labeled By Me
-    labeled_artifact_ids = {row[0] for row in db.session.query(distinct(LabelingData.artifact_id)).filter(LabelingData.username_tagger == who_is_signed_in()).all()}
+    labeled_artifact_ids = {row[0] for row in db.session.query(distinct(LabelingDataLabeler.artifact_id)).filter(LabelingDataLabeler.username == who_is_signed_in()).all()}
     candidate_artifact_ids -= labeled_artifact_ids
-
+    #print(list(sorted(labeled_artifact_ids)))
 
     # ############### 2. Remove Classes Locked at the moment
     locked_artifacts = get_locked_artifacts()
@@ -97,9 +97,9 @@ def choose_next_random_api():
     candidate_artifact_ids -= locked
 
     # ############### 2. Remove Classes fully classified artifact
-    completed_artifacts = {row[0] for row in db.session.query(Artifact.id).join(LabelingData, Artifact.id == LabelingData.artifact_id).filter(Artifact.reviewed==1).all()}
+    completed_artifacts = {row[0] for row in db.session.query(LabelingDataLabeler.artifact_id).join(LabelingDataReviewer, LabelingDataLabeler.artifact_id == LabelingDataReviewer.artifact_id).all()}
     candidate_artifact_ids -= completed_artifacts
-
+    #print(list(sorted(completed_artifacts)))
 
     # ############### 3. Remove Classes marked as broken
     broken_artifacts = {row[0] for row in db.session.query(Artifact.id).filter(Artifact.isValid==0).all()}
