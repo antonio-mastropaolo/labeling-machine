@@ -773,59 +773,72 @@
                 }
             }*/
 
-            var newRefinedDict = getSameKeysDict(cleanDict(dictHighlightedCodeCharacterPosition), cleanDict(dictHighlightedCommentsCharacterPosition));
-            if (Object.keys(newRefinedDict).length === 0 ){
-                newRefinedDict = dictHighlightedCommentsCharacterPosition;
-            }
+
 
 
             if (confirm('Are you sure?')) {
-                var data_json = {}
-                if (isLabeled === 0) {
+
+                var data_json = {};
+                var newRefinedDict = {};
+
+                if(isLabeled === 0 ){
+
+                    newRefinedDict = getSameKeysDict(cleanDict(dictHighlightedCodeCharacterPosition), cleanDict(dictHighlightedCommentsCharacterPosition));
+                    if (Object.keys(newRefinedDict).length === 0 ){
+                        newRefinedDict = dictHighlightedCommentsCharacterPosition;
+                    }
+
                      data_json = {
-                        artifact_id: {{  artifact_id }},
-                        code: JSON.stringify(cleanDict(dictSelectedCode)),
-                        comments: JSON.stringify(cleanDict(dictSelectedComment)),
-                        categories: JSON.stringify(cleanDict(dictSelectedCategories)),
-                        codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPosition)),
-                        commentSpan: JSON.stringify(newRefinedDict),
-                        commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPosition)),
-                        workingMode: workingMode,
-                        moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton.filter(function (e) {
-                            return e
-                        })) : JSON.stringify(moveSelectionButtonList.filter(function (e) {
-                            return e
-                        }))),
-                        counterAssociations: (isLabeled === 1 ? Number({{ counterAssociations }}) : counterAssociations),
-                        userDefinedNewCategoryNames: JSON.stringify(userDefinedNewCategoryNames),
-                        userDefinedNewCategoryDescriptions: JSON.stringify(userDefinedNewCategoryDescriptions),
-                        categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
-                        duration: get_elapsed_seconds()
-                    };
+                            artifact_id: {{  artifact_id }},
+                            code: JSON.stringify(cleanDict(dictSelectedCode)),
+                            comments: JSON.stringify(cleanDict(dictSelectedComment)),
+                            categories: JSON.stringify(cleanDict(dictSelectedCategories)),
+                            codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPosition)),
+                            commentSpan: JSON.stringify(newRefinedDict),
+                            commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPosition)),
+                            workingMode: workingMode,
+                            moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton.filter(function (e) {
+                                return e
+                            })) : JSON.stringify(moveSelectionButtonList.filter(function (e) {
+                                return e
+                            }))),
+                            counterAssociations: (isLabeled === 1 ? Number({{ counterAssociations }}) : counterAssociations),
+                            userDefinedNewCategoryNames: JSON.stringify(userDefinedNewCategoryNames),
+                            userDefinedNewCategoryDescriptions: JSON.stringify(userDefinedNewCategoryDescriptions),
+                            categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
+                            conflicts:JSON.stringify(cleanDict(conflicts)),
+                            duration: get_elapsed_seconds()
+                        };
+                }else{
+
+                    newRefinedDict = getSameKeysDict(cleanDict(dictHighlightedCodeCharacterPositionRev), cleanDict(dictHighlightedCommentsCharacterPositionRev));
+                    if (Object.keys(newRefinedDict).length === 0 ){
+                        newRefinedDict = dictHighlightedCommentsCharacterPositionRev;
+                    }
+
+                    data_json = {
+                            artifact_id: {{  artifact_id }},
+                            code: JSON.stringify(cleanDict(dictSelectedCodeRev)),
+                            comments: JSON.stringify(cleanDict(dictSelectedCommentRev)),
+                            categories: JSON.stringify(cleanDict(dictSelectedCategoriesRev)),
+                            codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPositionRev)),
+                            commentSpan: JSON.stringify(newRefinedDict),
+                            commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPositionRev)),
+                            workingMode: workingMode,
+                            moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton.filter(function (e) {
+                                return e
+                            })) : JSON.stringify(moveSelectionButtonList.filter(function (e) {
+                                return e
+                            }))),
+                            counterAssociations: (isLabeled === 1 ? Number({{ counterAssociations }}) : counterAssociations),
+                            userDefinedNewCategoryNames: JSON.stringify(userDefinedNewCategoryNames),
+                            userDefinedNewCategoryDescriptions: JSON.stringify(userDefinedNewCategoryDescriptions),
+                            categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
+                            conflicts:JSON.stringify(cleanDict(conflicts)),
+                            duration: get_elapsed_seconds()
+                        };
                 }
-                else{
-                     data_json = {
-                        artifact_id: {{  artifact_id }},
-                        code: JSON.stringify(cleanDict(dictSelectedCodeRev)),
-                        comments: JSON.stringify(cleanDict(dictSelectedCommentRev)),
-                        categories: JSON.stringify(cleanDict(dictSelectedCategoriesRev)),
-                        codeSpan: JSON.stringify(cleanDict(dictHighlightedCodeCharacterPositionRev)),
-                        commentSpan: JSON.stringify(newRefinedDict),
-                        commentPosition: JSON.stringify(cleanDict(dictHighlightedCommentsPositionRev)),
-                        workingMode: workingMode,
-                        moveToSelectedButtons: (isLabeled === 0 ? JSON.stringify(methodSelectionButton.filter(function (e) {
-                            return e
-                        })) : JSON.stringify(moveSelectionButtonList.filter(function (e) {
-                            return e
-                        }))),
-                        counterAssociations: (isLabeled === 1 ? Number({{ counterAssociations }}) : counterAssociations),
-                        userDefinedNewCategoryNames: JSON.stringify(userDefinedNewCategoryNames),
-                        userDefinedNewCategoryDescriptions: JSON.stringify(userDefinedNewCategoryDescriptions),
-                        categoryShortcuts: JSON.stringify(userDefinedCategoryShortcuts),
-                        conflicts: JSON.stringify(cleanDict(conflicts)),
-                        duration: get_elapsed_seconds()
-                    };
-                }
+            }
 
 
                 $.post("/label", data_json, function (response, status) {
@@ -839,7 +852,6 @@
                     ChangeSkipToNext();
                 },1000); //in millisecond
                 */
-            }
         }
 
         function saveFlaggedClass(){

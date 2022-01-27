@@ -399,6 +399,13 @@ function reset(save=false){
             spanSelector = "[id=highlight-"+(currentClassification)+"]";
             $(spanSelector).css('background-color','').attr("id","old-span");
 
+            //Restore overlapping comments that have been deselected
+            // for (const [key, value] of Object.entries(dictHighlightedCommentsPosition)) {
+            //    for (var i=0; i<value.length; i++){
+            //        $(comments[value[i]]).css('color', 'green').attr('id','comment-highlight-'+key);
+            //    }
+            // }
+
         }
 
     }
@@ -693,7 +700,7 @@ function saveCategorization(){
 
             //updateComment2CodeMap(dictHighlightedCommentsCharacterPosition, selectedComments, dictIndex, methodIndex);
             comment2Method[methodIndex] = comment2Method[methodIndex] + mapAssociation2Comment[divID];
-            if (comment2Method[methodIndex] === commentsForTheMethodUnderClassification){
+            if (comment2Method[methodIndex] >= commentsForTheMethodUnderClassification){
                 $("#"+methodUnderClassification).css('background-color','green');
             }
 
@@ -725,6 +732,10 @@ function saveCategorization(){
             if (selectedComments.length > 0 )       { dictSelectedCommentRev[currentClassification] = selectedComments.filter(function(e){return e}); }
             if (selectedCategories.length > 0)      { dictSelectedCategoriesRev[currentClassification] = [...new Set(selectedCategories)]; dictSelectedCategoriesRev[currentClassification] = dictSelectedCategoriesRev[currentClassification].filter(function(e){return e}); }
 
+            // console.log(dictSelectedCategoriesRev[currentClassification]);
+            // console.log('before');
+            // console.log(dictSelectedCodeRev[currentClassification]);
+
             //function check4Conflict(commentLabeler, categoriesLabeler, codeLabeler, commentReviewer, categoriesReviewer, codeReviewer){
             var isConflict = check4Conflict(dictSelectedComment[currentClassification],dictSelectedCommentRev[currentClassification],
                                             dictSelectedCategories[currentClassification], dictSelectedCategoriesRev[currentClassification],
@@ -736,26 +747,37 @@ function saveCategorization(){
                 dictHighlightedCommentsPositionRev[currentClassification] = dictHighlightedCommentsPosition[currentClassification];
             }
 
-             if(dictHighlightedCodeCharacterPositionRev[currentClassification].length === 0 ){
-                dictHighlightedCodeCharacterPositionRev[currentClassification] = dictHighlightedCodeCharacterPosition[currentClassification];
+
+             if(dictSelectedCategoriesRev[currentClassification].length === 0 ){
+                dictSelectedCategoriesRev[currentClassification] = dictSelectedCategories[currentClassification];
             }
 
             if(dictSelectedCommentRev[currentClassification].length === 0){
                 dictSelectedCommentRev[currentClassification] = dictSelectedComment[currentClassification];
             }
 
-
-            if(dictSelectedCodeRev[currentClassification].length === 0 ){
-                dictSelectedCodeRev[currentClassification] = dictSelectedCode[currentClassification];
-            }
-
-            if(dictSelectedCategoriesRev[currentClassification].length === 0 ){
-                dictSelectedCategoriesRev[currentClassification] = dictSelectedCategories[currentClassification];
-            }
-
             if(dictHighlightedCommentsCharacterPositionRev[currentClassification].length === 0 ){
                 dictHighlightedCommentsCharacterPositionRev[currentClassification] = dictHighlightedCommentsCharacterPosition[currentClassification];
             }
+
+            //Handling no-code case
+
+            if(dictSelectedCategoriesRev[currentClassification].includes('no-code-button')){
+                dictSelectedCodeRev[currentClassification]=[-1];
+                dictHighlightedCodeCharacterPositionRev[currentClassification] = [-1];
+            }else{
+                if(dictSelectedCodeRev[currentClassification].length === 0){
+                    dictSelectedCodeRev[currentClassification] = dictSelectedCode[currentClassification]
+                    dictHighlightedCodeCharacterPositionRev[currentClassification] = dictHighlightedCodeCharacterPosition[currentClassification];
+                }else{
+                    //nothing
+                }
+            }
+
+            // Done handling no code case
+
+            //console.log('after');
+            //console.log(dictSelectedCodeRev[currentClassification]);
 
             $("#clearText").text('Change');
 
