@@ -64,7 +64,9 @@ class Conflict(db.Model):
     conflict_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     artifact_id = db.Column(db.Integer)
     classification = db.Column(db.Text)
-    conflict = db.Column(db.Integer)
+    conflict_code = db.Column(db.Integer)
+    conflict_comment = db.Column(db.Integer)
+    conflict_categories = db.Column(db.Integer)
 
 
 class LabelingDataReviewer(db.Model):

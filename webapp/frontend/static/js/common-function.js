@@ -1151,6 +1151,8 @@ function check4Conflict(commentLabeler, commentReviewer, categoriesLabeler, cate
     var refinedCodeReviewer = codeReviewer.join('\n');
     refinedCodeReviewer = refinedCodeReviewer.replace(/\n\r?/g, '');
 
+    //By default we assume there are no conflicts
+    var conflictsDicts = {'code':0, 'comment':0, 'categories':0};
 
     function _compareArrays(arr1,arr2){
           if(!(arr1 != null && arr2 != null && arr1.length == arr2.length)) {
@@ -1171,13 +1173,15 @@ function check4Conflict(commentLabeler, commentReviewer, categoriesLabeler, cate
     // Check conflict for comments
     if (refinedCommentLabeler !== refinedCommentReviewer && refinedCommentReviewer !== ''){
         //console.log('hit1');
-        return 1;
+        //return 1;
+        conflictsDicts['comment']=1;
     }
 
     // Check conflict for code
     if (refinedCodeLabeler !== refinedCodeReviewer && refinedCommentReviewer !== ''){
         //console.log('hit2');
-        return 1;
+        //return 1;
+        conflictsDicts['code']=1;
     }
 
     // Check conflict for categories
@@ -1185,8 +1189,12 @@ function check4Conflict(commentLabeler, commentReviewer, categoriesLabeler, cate
 
     if (categoriesReviewer.length > 0 ){
         //console.log('hit3');
-        return (_compareArrays(categoriesLabeler, categoriesReviewer) ? 0 : 1) //return 1 if they are the same, so we negate
+        //return (_compareArrays(categoriesLabeler, categoriesReviewer) ? 0 : 1) //return 1 if they are the same, so we negate
+        conflictsDicts['categories'] = (_compareArrays(categoriesLabeler, categoriesReviewer) ? 0 : 1);
     } else{
-        return 0;
+        //return 0;
+        conflictsDicts['categories'] = 0;
     }
+
+    return conflictsDicts;
 }

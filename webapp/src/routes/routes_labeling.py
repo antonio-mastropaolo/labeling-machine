@@ -277,7 +277,8 @@ def label():
             db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
             db.session.commit()
             for key, value in conflicts.items():
-                conflictInstance = Conflict(classification=key, artifact_id=artifact_id, conflict=value)
+                conflictInstance = Conflict(classification=key, artifact_id=artifact_id,
+                                            conflict_code=value['code'],conflict_comment=value['comment'], conflict_categories=value['categories'])
                 db.session.add(conflictInstance)
                 db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
                 db.session.commit()
