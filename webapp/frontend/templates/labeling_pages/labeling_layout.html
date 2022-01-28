@@ -375,6 +375,7 @@
         var dictSelectedCodeRev = {};
         var dictSelectedCommentRev = {};
         var conflicts = {};
+        var associationsList = [];
 
         var comments = []; //In this list we store all the comments within a given class
         var selectedComments = [];
@@ -390,6 +391,7 @@
         var moveSelectionButtonList = [];
         var highlightedCodeDuringSelection = []
         var commentIndex = [];
+        var alreadyVisited = [];
         var beginningCommentCharacterPosition = -1
         var endCommentCharacterPosition = -1
 
@@ -424,7 +426,6 @@
 
                 var tag = document.createElement("div");
                 tag.setAttribute('class', 'buttonWrapper');
-                //console.log('onMouseEnterEvent(' + userDefinedCategories['category_button_name'][i] + ',' + userDefinedCategories['description'][i] + ');');
                 tag.setAttribute('onmouseenter','onMouseEnterEvent("' + userDefinedCategories['category_button_name'][i] + '","' + userDefinedCategories['description'][i] + '");');
                 tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + userDefinedCategories['category_button_name'][i] + '" );');
                 var newButton = document.createElement('button');
@@ -453,7 +454,6 @@
 
                 var scrollCall = 'moveToSelectedMethodFromLine(' + startingLine + ',' + '\'' + buttonID + '\')';
                 var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scrollCall + '" style="width: 100%;  text-align: left; white-space: normal; word-wrap: break-word;">' + buttonText + '</button> </div>';
-                //console.log(newButton);
                 $("#upperSide").append($(newButton));
 
                 //initialize comment2Method
@@ -462,7 +462,7 @@
 
             comments = document.getElementsByClassName("hljs-comment");
 
-            if (isLabeled == 0) {
+            if (isLabeled === 0) {
                 for(var i=0;i<150;i++) {
                     dictHighlightedCode[i] = [];
                     dictHighlightedCommentsPosition[i] = [];
@@ -472,7 +472,9 @@
                     dictSelectedCode[i] = [];
                     dictSelectedComment[i] = [];
                 }
-            }else if (isLabeled == 1){
+            }else if (isLabeled === 1){
+
+
                 for(var i=0;i<150;i++) {
                     dictHighlightedCodeRev[i] = [];
                     dictHighlightedCommentsPositionRev[i] = [];
@@ -559,6 +561,13 @@
                 dictHighlightedCommentsCharacterPosition = {{ commentSpan | tojson  }};
                 moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }};
 
+                for (const [key, value] of Object.entries(dictSelectedCode)) {
+                    associationsList.push(Number(key));
+                }
+
+                //Just remove the first element since it's deselected by default
+                associationsList.shift();
+
 
                 var idsButton = [];
                 for (var i = 0; i < 150; i++) {
@@ -580,6 +589,8 @@
                 $("#clearText").click(function () {
                    if(this.innerHTML.trim() === 'Change'){ this.innerHTML = 'Reset'; }
                 });
+
+
 
             } else if (isLabeled == 0 && isReviewed == 0) {
                 ShowNotification('Labeling mode!', 'warning');

@@ -214,7 +214,6 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
 
     highlightSelectedCategoryButton(currentClassification);
 
-    //deactivating other classification buttons
 
     for (const [key, value] of Object.entries(dictSelectedCode)) {
           if (key === indexClassification){ continue; }
@@ -256,9 +255,7 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
         }
     }catch(ex){}
 
-
     // semi-column heuristic to reconstruct and display the highlighted code correctly
-
 
     var spanSelector = "[id=highlight-"+(currentClassification)+"]";
     var concatenedString = ''
@@ -719,7 +716,6 @@ function saveCategorization(){
             $("#badgeCounter").text(counterAssociations);
             $("#lowerSide" ).append( $(newButton) );
 
-
         }
 
         //Bringing back the change button and remove selectionButton
@@ -781,16 +777,9 @@ function saveCategorization(){
 
             $("#clearText").text('Change');
 
-
-            var flagNext =false;
-            for (const [key, value] of Object.entries(dictSelectedCodeRev)) {
-
-                if( Number(key) === currentClassification){ flagNext = true; continue; }
-                if(flagNext){
-                    $('#association-'+key).removeAttr('disabled');
-                    break;
-                }
-            }
+            //unlock next association button
+            const elementToUnlock = associationsList.shift();
+            $('#association-'+elementToUnlock).removeAttr('disabled');
 
             flagSwitch=false;
             counterAssociations = counterAssociations - 1;
@@ -872,13 +861,12 @@ function removeAssociation(method, divID, methodIndex){
 
     comment2Method[methodIndex] = comment2Method[methodIndex] - mapAssociation2Comment[divID];
 
-
     //quick fix
     if(comment2Method[methodIndex] < 0 ){
         comment2Method[methodIndex]=0;
     }
-    console.log('MAPPA AFTER: ');
-    console.log(comment2Method[methodIndex]);
+    // console.log('MAPPA AFTER: ');
+    // console.log(comment2Method[methodIndex]);
 
     $("#"+method).css('background-color','');
     methodUnderClassification = "";
@@ -1185,8 +1173,6 @@ function check4Conflict(commentLabeler, commentReviewer, categoriesLabeler, cate
     }
 
     // Check conflict for categories
-
-
     if (categoriesReviewer.length > 0 ){
         //console.log('hit3');
         //return (_compareArrays(categoriesLabeler, categoriesReviewer) ? 0 : 1) //return 1 if they are the same, so we negate
