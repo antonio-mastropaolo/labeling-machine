@@ -47,16 +47,16 @@ def get_total_number_of_classes_to_be_labeled():
     return N_CLASSES_NEEDS_LABELING
 
 def get_total_number_of_labeled_classes():
-    result = Artifact.query.filter_by(labeled=1).count()
+    result = LabelingDataLabeler.query.count()
     return result
 
 def get_total_number_of_reviewed_classes():
-    result = Artifact.query.filter_by(reviewed=1).count()
+    result = LabelingDataReviewer.query.count()
     #return 10 for test
     return result
 
 def get_total_number_of_labeled_and_reviewed_classes():
-    result = Artifact.query.filter_by(labeled=1, reviewed=1).count()
+    result =  db.session.query(LabelingDataLabeler.artifact_id).join(LabelingDataReviewer, LabelingDataLabeler.artifact_id == LabelingDataReviewer.artifact_id).count()
     return result
 
 def get_n_labeled_artifact_per_user():
