@@ -784,8 +784,6 @@
             }*/
 
 
-
-
             if (confirm('Are you sure?')) {
 
                 var data_json = {};
@@ -850,17 +848,16 @@
                 }
             }
 
+            $.post("/label", data_json, function (response, status) {
+                let response_json = $.parseJSON(response.toString());
+                ShowNotification(response_json['status'], "success", 200);
 
-                $.post("/label", data_json, function (response, status) {
-                    let response_json = $.parseJSON(response.toString());
-                    ShowNotification(response_json['status'], "success", 200);
+            });
 
-                });
-
-                //wait one second before moving on
-                setTimeout(function(){
-                    ChangeSkipToNext();
-                },1000); //in millisecond
+            //wait one second before moving on
+            setTimeout(function(){
+                ChangeSkipToNext();
+            },1000); //in millisecond
 
         }
 
@@ -927,7 +924,6 @@
             }
         }
         selectedCategories = [...new Set(selectedCategories)];
-
     }
 
     $(document).on('click', '.category-button',function(){

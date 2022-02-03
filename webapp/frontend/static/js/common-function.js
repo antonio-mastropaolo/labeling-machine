@@ -788,6 +788,12 @@ function saveCategorization(){
             //lock code section
             $("#code").css('user-select','none');
 
+            // console.log(dictHighlightedCodeCharacterPositionRev);
+            // console.log(dictSelectedCategoriesRev);
+            // console.log(dictHighlightedCommentsCharacterPositionRev);
+            // console.log(dictSelectedCodeRev);
+            // console.log(dictSelectedCommentRev);
+            // console.log(conflicts);
 
         }
         //console.log('--> ' +isForNN);
