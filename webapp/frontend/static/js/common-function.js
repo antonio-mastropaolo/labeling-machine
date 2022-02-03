@@ -1001,7 +1001,7 @@ function selectDeselectViaShortcut(categoryButtonName){
     }
 }
 
-hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt+ctrl+2, alt+ctrl+3, alt+ctrl+4, alt+ctrl+5, alt+ctrl+6, alt+ctrl+7, alt+ctrl+8, alt+s, alt+c, alt+n', function (event, handler){
+hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+ctrl+1, alt+ctrl+2, alt+ctrl+3, alt+ctrl+4, alt+ctrl+5, alt+ctrl+6, alt+ctrl+7, alt+ctrl+8, alt+s, alt+c, alt+n', function (event, handler){
      // User defined categories start here
     var categoryButtonName;
     switch (handler.key) {
@@ -1016,26 +1016,22 @@ hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt
             break;
 
         case 'alt+3':
-            selectDeselectViaShortcut('expand-button');
-            break;
-
-        case 'alt+4':
             selectDeselectViaShortcut('rationale-button');
             break;
 
-        case 'alt+5':
+        case 'alt+4':
             selectDeselectViaShortcut('deprecation-button');
             break;
 
-        case 'alt+6':
+        case 'alt+5':
             selectDeselectViaShortcut('todo-button');
             break;
 
-        case 'alt+7':
+        case 'alt+6':
             selectDeselectViaShortcut('comment-code-button');
             break;
 
-        case 'alt+8':
+        case 'alt+7':
             selectDeselectViaShortcut('incomplete-button');
             break;
 
