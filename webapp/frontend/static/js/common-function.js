@@ -584,7 +584,7 @@ function addNewCommentToBeLinked(element){
     }else{
         $(element).css('background-color','green');
         selectedCategory = element.id.toString();
-        if(selectedCategory === 'code-summary-button'){
+        if(selectedCategory === 'code-description-button'){
             $('#network-code-button').css('background-color','green');
         }
     }
@@ -789,11 +789,11 @@ function saveCategorization(){
             $("#code").css('user-select','none');
 
             // console.log(dictHighlightedCodeCharacterPositionRev);
-            // console.log(dictSelectedCategoriesRev);
+            console.log(dictSelectedCategoriesRev);
             // console.log(dictHighlightedCommentsCharacterPositionRev);
             // console.log(dictSelectedCodeRev);
             // console.log(dictSelectedCommentRev);
-            // console.log(conflicts);
+            console.log(conflicts);
 
         }
         //console.log('--> ' +isForNN);
@@ -931,6 +931,7 @@ function highlightSelectedCategoryButton(index){
         if(dictSelectedCategories[index][i] ==='network-code-button'){
             isForNN=1;
         }
+        selectedCategories.push(dictSelectedCategories[index][i]);
     }
 }
 
@@ -1010,8 +1011,8 @@ hotkeys('alt+1, alt+2, alt+3, alt+4, alt+5, alt+6, alt+7, alt+8, alt+ctrl+1, alt
             break;
 
         case 'alt+2':
-            selectDeselectViaShortcut('code-summary-button');
-            if(selectedCategories.includes('code-summary-button')){ selectDeselectViaShortcut('network-code-button'); }
+            selectDeselectViaShortcut('code-description-button');
+            if(selectedCategories.includes('code-description-button')){ selectDeselectViaShortcut('network-code-button'); }
             break;
 
         case 'alt+3':

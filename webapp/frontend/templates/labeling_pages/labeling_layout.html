@@ -97,20 +97,10 @@
 
                               <button class="btn btn btn-dark category-button"
                                       type="submit"
-                                      id="code-summary-button"
-                                      onmouseenter='onMouseEnterEvent("code-summary-button","The comment is a high-level summary for the code");'
-                                      onmouseleave='onMouseLeaveEvent("code-summary-button");'
-                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px; margin-left: -5px;" class="badge bg-success float-right position-relative">ALT+2</span> Code Summary
-                              </button>
-                          </div>
-
-                          <div class="buttonWrapper">
-                              <button class="btn btn btn-dark category-button"
-                                      type="submit"
-                                      id="expand-button"
-                                      onmouseenter='onMouseEnterEvent("expand-button","A verbose description of the implementation");'
-                                      onmouseleave='onMouseLeaveEvent("expand-button");'
-                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+3</span> Expand
+                                      id="code-description-button"
+                                      onmouseenter='onMouseEnterEvent("code-description-button","The comment is a high-level summary for the code");'
+                                      onmouseleave='onMouseLeaveEvent("code-description-button");'
+                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px; margin-left: -5px;" class="badge bg-success float-right position-relative">ALT+2</span> Code Description
                               </button>
                           </div>
 
@@ -312,13 +302,12 @@
         var startTime = new Date().getTime();
 
         var labelCategories = ["new-category-button",
-                                'expand-button',
                                 'rationale-button',
                                 'deprecation-button',
                                 'usage-button',
                                 'exception-button',
                                 'todo-button',
-                                'code-summary-button',
+                                'code-description-button',
                                 'comment-code-button',
                                 'incomplete-button',
                                 'no-code-button',
@@ -889,7 +878,7 @@
             var index = selectedCategories.indexOf(element.id);
             selectedCategories.splice(index, 1);
 
-            if(element.id === 'code-summary-button'){
+            if(element.id === 'code-description-button'){
                 $("#network-code-button").css('background-color','#8267BE');
                 var index = selectedCategories.indexOf("network-code-button");
                 selectedCategories.splice(index, 1);
@@ -912,13 +901,13 @@
             }
             if (selectedCategories.length === 3 && selectedCategories.includes('no-code-button') && selectedCategories.includes('network-code-button')) {
                 addNewCommentToBeLinked(element);
-                if(this.id === 'code-summary-button'){
+                if(this.id === 'code-description-button'){
                     selectedCategories.push('network-code-button');
                 }
             }
             if (selectedCategories.length <= 2 && element.id !== 'no-code-button' && element.id !== 'network-code-button') {
                 addNewCommentToBeLinked(element);
-                if(this.id === 'code-summary-button'){
+                if(this.id === 'code-description-button'){
                     selectedCategories.push('network-code-button');
                 }
             }
@@ -933,7 +922,7 @@
             var index = selectedCategories.indexOf(this.id);
             selectedCategories.splice(index, 1);
 
-            if(this.id === 'code-summary-button'){
+            if(this.id === 'code-description-button'){
                 $("#network-code-button").css('background-color','#8267BE');
                 var index = selectedCategories.indexOf("network-code-button");
                 selectedCategories.splice(index, 1);
@@ -956,13 +945,13 @@
             }
             if (selectedCategories.length === 3 && selectedCategories.includes('no-code-button') && selectedCategories.includes('network-code-button')) {
                 addNewCommentToBeLinked(this);
-                if(this.id === 'code-summary-button'){
+                if(this.id === 'code-description-button'){
                     selectedCategories.push('network-code-button');
                 }
             }
             if (selectedCategories.length <= 2 && this.id !== 'no-code-button' && this.id !== 'network-code-button') {
                 addNewCommentToBeLinked(this);
-                if(this.id === 'code-summary-button'){
+                if(this.id === 'code-description-button'){
                     selectedCategories.push('network-code-button');
                 }
             }
