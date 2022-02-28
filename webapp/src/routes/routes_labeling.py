@@ -78,6 +78,15 @@ def labeling_with_artifact(target_artifact_id):
             spanListMethods = eval(artifact_data.methodsListLines)
             methodsName = eval(artifact_data.methodsName)
             numberOfCommentsPerMethod = eval(artifact_data.methodsComments)
+            if(sum(numberOfCommentsPerMethod)<=10):
+                #print("hit")
+                selected_artifact_id = choose_next_random_api()
+                # print('Random selected artifact: {}'.format(selected_artifact_id))
+                if selected_artifact_id < 0:
+                    return "It seems you are done. Please Wait for others [Code: {}]".format(selected_artifact_id)
+                return redirect(url_for('labeling_with_artifact', target_artifact_id=selected_artifact_id))
+            #print("Let's have a look at this: {}".format(numberOfCommentsPerMethod))
+
 
             #this one works only on bar
             if sys.platform=='linux':
