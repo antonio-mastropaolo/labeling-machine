@@ -113,21 +113,23 @@ def choose_next_random_api():
     #print(sorted(list(broken_artifacts)))
 
     # Instances to be reviewed that should be prioritized
-    # to_be_reviewed = {row[0] for row in db.session.query(Artifact.id).filter(Artifact.labeled == 1, Artifact.reviewed == 0).all()}
-    # to_be_reviewed -= labeled_artifact_ids
-    # to_be_reviewed -= locked
+    to_be_reviewed = {row[0] for row in db.session.query(Artifact.id).filter(Artifact.labeled == 1, Artifact.reviewed == 0).all()}
+    to_be_reviewed -= labeled_artifact_ids
+    to_be_reviewed -= locked
+    to_be_reviewed -= completed_artifacts
+    to_be_reviewed -= broken_artifacts
 
-    #candidate_artifact_for_reviewing = list(to_be_reviewed)
+    candidate_artifact_for_reviewing = list(to_be_reviewed)
     #print(candidate_artifact_for_reviewing)
 
-    return random.choice(candidate_artifact_ids_list)
-    # if len(candidate_artifact_ids) == 0:
-    #     return -1
-    #
-    # else:
-    #     if len(candidate_artifact_for_reviewing)>0:
-    #         return random.choice(candidate_artifact_for_reviewing)
-    #     else:
-    #         return random.choice(candidate_artifact_ids_list)
+    #return random.choice(candidate_artifact_ids_list)
+    if len(candidate_artifact_ids) == 0:
+        return -1
+
+    else:
+        if len(candidate_artifact_for_reviewing)>0:
+            return random.choice(candidate_artifact_for_reviewing)
+        else:
+            return random.choice(candidate_artifact_ids_list)
 
 
