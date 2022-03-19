@@ -86,9 +86,12 @@ def get_n_reviewed_artifact_per_user():
 def choose_next_random_api():
     candidate_artifact_ids = {row[0] for row in db.session.query(Artifact.id).all()}
 
-    # ############### 1. Remove Already Labeled By Me
+    # ############### 1. Remove Already Labeled And Reviewed By Me
     labeled_artifact_ids = {row[0] for row in db.session.query(distinct(LabelingDataLabeler.artifact_id)).filter(LabelingDataLabeler.username == who_is_signed_in()).all()}
     candidate_artifact_ids -= labeled_artifact_ids
+
+    reviewed_artifact_ids = {row[0] for row in db.session.query(distinct(LabelingDataReviewer.artifact_id)).filter(LabelingDataReviewer.username == who_is_signed_in()).all()}
+    candidate_artifact_ids -= reviewed_artifact_ids
     # print(list(sorted(labeled_artifact_ids)))
     # print(len(labeled_artifact_ids))
 
@@ -100,7 +103,6 @@ def choose_next_random_api():
     # ############### 2. Remove fully classified Classes
     completed_artifacts = {row[0] for row in db.session.query(LabelingDataLabeler.artifact_id).join(LabelingDataReviewer, LabelingDataLabeler.artifact_id == LabelingDataReviewer.artifact_id).all()}
     candidate_artifact_ids -= completed_artifacts
-    #print(list(sorted(completed_artifacts)))
     #print(len(completed_artifacts))
 
     # ############### 3. Remove Classes marked as broken
@@ -115,6 +117,7 @@ def choose_next_random_api():
     # Instances to be reviewed that should be prioritized
     to_be_reviewed = {row[0] for row in db.session.query(Artifact.id).filter(Artifact.labeled == 1, Artifact.reviewed == 0).all()}
     to_be_reviewed -= labeled_artifact_ids
+    to_be_reviewed -= reviewed_artifact_ids
     to_be_reviewed -= locked
     to_be_reviewed -= completed_artifacts
     to_be_reviewed -= broken_artifacts
