@@ -272,8 +272,8 @@ def label():
                               )
 
             db.session.add(labeling_data_labeler)
-            db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
-            db.session.commit()
+            #db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
+            #db.session.commit()
 
         else:
             labeling_data_reviewer = LabelingDataReviewer(artifact_id=artifact_id, username=who_is_signed_in(),
@@ -291,7 +291,7 @@ def label():
                 db.session.add(conflictInstance)
                 #db.session.flush()  # if you want to fetch autoincreament column of inserted row. See: https://stackoverflow.com/questions/1316952
 
-            db.session.commit()
+            #db.session.commit()
 
 
 
@@ -299,6 +299,7 @@ def label():
         artifact.labeled = isLabeled
         artifact.reviewed = isReviewed
         artifact.counterAssociations = counterAssociations
+        db.session.flush()
         db.session.commit()
 
         if(len(userDefinedNewCategoryDescriptions)>0):
