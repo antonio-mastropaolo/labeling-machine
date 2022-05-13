@@ -37,9 +37,9 @@
 
             <div class=" col-md-4">
                 <div id="progress-bar" style="text-align: center; font-size: medium; color: white;">
-                    {{ overall_labeling_status['n_artifacts_labeled_and_reviewed'] }}
+                    {{ overall_conflicting_status['n_artifacts_solved'] }}
                     out of
-                  {{ overall_labeling_status['n_total_artifacts'] }}
+                  {{ overall_conflicting_status['n_artifacts_to_be_solved'] }}
                 </div>
                 <div class="justify-content-center" style="display: flex;">
                     <div class="progress" style="width:50%;">
@@ -260,10 +260,12 @@
 
 
         //updating progress bar
-        var labelProgressPercentage = {{ overall_labeling_status['n_artifacts_labeled_and_reviewed'] }}*100 / {{ overall_labeling_status['n_total_artifacts'] }};
-        labelProgressPercentage = Math.ceil(labelProgressPercentage);
-        document.getElementById("top-progress-bar-status").style.width = labelProgressPercentage + '%';
-        document.getElementById("top-progress-bar-status").innerHTML = labelProgressPercentage + '%';
+        var conflictProgressPercentage = {{ overall_conflicting_status['n_artifacts_solved'] }}*100 / {{ overall_conflicting_status['n_artifacts_to_be_solved'] }};
+        console.log({{ overall_conflicting_status['n_artifacts_solved'] }});
+        console.log({{ overall_conflicting_status['n_artifacts_to_be_solved'] }});
+        conflictProgressPercentage = Math.ceil(conflictProgressPercentage);
+        document.getElementById("top-progress-bar-status").style.width = conflictProgressPercentage + '%';
+        document.getElementById("top-progress-bar-status").innerHTML = conflictProgressPercentage + '%';
 
         const methodsList = {{ artifact_methodsListLines | tojson }};
         const methodsListNames = {{ artifact_methodsName | safe }};

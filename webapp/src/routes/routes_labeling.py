@@ -255,7 +255,7 @@ def conflicting_with_artifact(target_artifact_id):
                                    artifact_lines = linesList,
                                    conflicts_result = conflicts,
                                    counterAssociations = counterAssociations,
-                                   overall_labeling_status = get_overall_labeling_progress(),
+                                   overall_conflicting_status = get_overall_conflicting_progress(),
                                    user_info = get_labeling_status(who_is_signed_in()),
                                    artifact_linesString = linesMethodsString,
                                    artificat_labeler_categories = lab_selectedCategories,

@@ -32,6 +32,24 @@ def get_overall_labeling_progress():
 
     return labeling_status
 
+def get_total_number_of_solved_artefacts():
+    result = {row[0] for row in db.session.query(LabelingDataNoConflicts.artifact_id).all()}
+    return result
+
+def get_total_number_of_artefacts_to_be_solved():
+    all_artefacts = {row[0] for row in db.session.query(Conflict.artifact_id).all()}
+    to_be_solved = all_artefacts - get_total_number_of_solved_artefacts()
+    print("here ",to_be_solved)
+    return set(to_be_solved)
+
+def get_overall_conflicting_progress():
+    conflicting_status = {'source_id': 0,
+                       # 'source_name': "Artifact Set",
+                       'n_artifacts_solved': len(get_total_number_of_solved_artefacts()),
+                       'n_artifacts_to_be_solved': len(get_total_number_of_artefacts_to_be_solved())
+                        }
+    return conflicting_status
+
 
 def get_total_number_of_classes_in_db():
     all_classes = db.session.query(func.count(Artifact.id)).filter(Artifact.isValid == 1).scalar()
