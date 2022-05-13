@@ -98,6 +98,9 @@ def choose_next_instance_to_be_solved():
     reviewed_artifact_ids = {row[0] for row in db.session.query(distinct(LabelingDataReviewer.artifact_id)).filter(LabelingDataReviewer.username == who_is_signed_in()).all()}
     instances -= reviewed_artifact_ids
 
+    # we also remove the flagged artefacts
+    flagged_artefacts = {row[0] for row in db.session.query(FlaggedArtifact.artifact_id).all()}
+    instances -= flagged_artefacts
 
     candidate_artifact_ids = list(instances)
 
