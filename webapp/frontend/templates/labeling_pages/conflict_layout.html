@@ -1,0 +1,973 @@
+{% extends "common_pages/common_layout.html" %}
+
+{% block headerStuff %}
+    <link href="https://cdn.jsdelivr.net/npm/highlightjs-themes@1.0.0/androidstudio.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <link href="{{ url_for('static', filename='css/artifact_common.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ url_for('static', filename='css/page_layout.css') }}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs-themes@1.0.0/github.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/highlight.min.js"></script>
+    <script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/jquery.lettering-0.6.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/common-function.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/rangy-1.3.0/rangy-core.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/rangy-1.3.0/rangy-serializer.js') }}"></script>
+
+{% endblock %}
+
+<!-- Bootstrap container -->
+ <div class="container">
+
+    {% block content %}
+
+        <div class="row no-gutters" style="background-color: black; padding-top: 10px;">
+
+                 <div class=" col-md-4">
+                    <div class="text-left">
+                        <button class="btn btn-outline-info"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick="skip_next_artifact()"
+                            style="width: 100%;"> Skip
+                        </button>
+                    </div>
+
+                 </div>
+
+            <div class=" col-md-4">
+                <div id="progress-bar" style="text-align: center; font-size: medium; color: white;">
+                    {{ overall_labeling_status['n_artifacts_labeled_and_reviewed'] }}
+                    out of
+                  {{ overall_labeling_status['n_total_artifacts'] }}
+                </div>
+                <div class="justify-content-center" style="display: flex;">
+                    <div class="progress" style="width:50%;">
+                        <div id="top-progress-bar-status" class="progress-bar" role="progressbar" style="width: 0%;"
+                             aria-valuenow="0"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                        <div id="alert"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class=" col-md-4">
+                <div class="text-right">
+                    <button class="btn btn-outline-success"
+                            type="submit"
+                            id="next-skip-btn"
+                            onclick="submitClassification();"
+                            style="width: 100%;"> Submit Classification
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="placeholder" class="row no-gutters" style="background-color: black; height: 15px;">
+
+            <div class=" col-md-12">
+                <div class="" style="position: relative; padding-left: 20px;"></div>
+            </div>
+
+        </div>
+
+{#        tag.setAttribute('onmouseenter','onMouseEnterEvent("' + buttonID + '","' + dictRes['description'] + '");');
+{#        tag.setAttribute('onmouseleave','onMouseLeaveEvent("' + buttonID + '" );');#}
+        <div class="row no-gutters">
+{#            change button color for default cats#}
+              <div class=" col-md-2 vh-100" style="background-color: black;">
+                  <div id="categoriesColumn" style="overflow-y: scroll; height: 40vh;">
+
+                       <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                      type="submit"
+                                      id="new-category-button"
+                                      onmouseenter='onMouseEnterEvent("new-category-button","If none of the previous categories match the new comment-to-code association");'
+                                      onmouseleave='onMouseLeaveEvent("new-category-button");'
+                                      style="width: 100%; text-align: left;">Define new category <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+1</span>
+                              </button>
+                          </div>
+
+
+                          <div class="buttonWrapper">
+
+                              <button class="btn btn btn-dark category-button"
+                                      type="submit"
+                                      id="code-description-button"
+                                      onmouseenter='onMouseEnterEvent("code-description-button","The comment is a high-level summary for the code");'
+                                      onmouseleave='onMouseLeaveEvent("code-description-button");'
+                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px; margin-left: -5px;" class="badge bg-success float-right position-relative">ALT+2</span> Code Description
+                              </button>
+                          </div>
+
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                      type="submit"
+                                      onmouseenter='onMouseEnterEvent("rationale-button","The comment answers the question (WHY?)");'
+                                      onmouseleave='onMouseLeaveEvent("rationale-button");'
+                                      id="rationale-button"
+                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+3</span>Rationale
+                              </button>
+                          </div>
+
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                      type="submit"
+                                      id="deprecation-button"
+                                      onmouseenter='onMouseEnterEvent("deprecation-button","The code is deprecated");'
+                                      onmouseleave='onMouseLeaveEvent("deprecation-button");'
+                                      style="width: 100%; text-align: left;" > <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+4</span></span>Code Deprecation
+                              </button>
+                          </div>
+
+                           <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                      type="submit"
+                                      id="todo-button"
+                                      onmouseenter='onMouseEnterEvent("todo-button","The comment is complete but the code is not fully developed");'
+                                      onmouseleave='onMouseLeaveEvent("todo-button");'
+                                      style="width: 100%; text-align: left;" > <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+5</span>Work in Progress <!-- Previously: TO-DO -->
+                              </button>
+                          </div>
+
+                           <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                      type="submit"
+                                      id="comment-code-button"
+                                      onmouseenter='onMouseEnterEvent("comment-code-button","The comment refers to a piece of code that is not used anymore");'
+                                      onmouseleave='onMouseLeaveEvent("comment-code-button");'
+                                      style="width: 100%; text-align: left;"> <span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+6</span>Commented Code
+                              </button>
+                          </div>
+
+                          <div class="buttonWrapper">
+                              <button class="btn btn btn-dark category-button"
+                                      type="submit"
+                                      id="incomplete-button"
+                                      onmouseenter='onMouseEnterEvent("incomplete-button","The comment is not completed");'
+                                      onmouseleave='onMouseLeaveEvent("incomplete-button");'
+                                      style="width: 100%; text-align: left;"><span style="font-size: 12px; margin-left: -5px;" class="badge bg-success float-right position-relative">ALT+7</span>Incomplete Comment
+                              </button>
+                          </div>
+
+
+                  </div>
+                  <div>
+                      <hr class="solid" style="position:relative; top:-15px;" id="topLevelLineSep">
+                          <button class="btn btn btn-dark"
+                                  type="submit"
+                                  id="no-code-button"
+                                  onmouseenter='onMouseEnterEvent("no-code-button","No available snippet to be linked");'
+                                  onmouseleave='onMouseLeaveEvent("no-code-button");'
+                                  style="width: 100%; margin-top:-35px; text-align: left;  background-color: #8267BE; font-weight: bold;" ><span style="font-size: 12px;" class="badge bg-success float-right position-relative">ALT+C</span>No Code
+                          </button>
+                      <hr class="solid" style="position:relative; top:-18px;" id="bottomLevelLineSep">
+                  </div>
+                  <hr class="solid" style="position:sticky; top:91.5%;">
+
+                  <button id='revButton' style="position:fixed; left:12.5%; top:92%; background-color: orange;" onclick="saveNewClassification('reviewer');">
+                        <span class="f-circle"><i class="fa-alph" >R</i></span>
+                  </button>
+
+                  <button id="labButton" style="position:fixed; left:7.2%; top:92%;  background-color: green;" onclick="saveNewClassification('labeler');">
+                     <span class="f-circle"><i class="fa-alph">L</i></span>
+                  </button>
+
+                  <button id="skipButton" style="position:fixed; left:1.5%; top:92%; background-color: blue;" onclick="saveNewClassification('skip');">
+                     <span class="f-circle"><i class="fa-alph">N</i></span>
+                  </button>
+
+                  <div>
+                      <hr class="solid" style="position:relative; top:-60px;" id="topLevelLineSep">
+                          <button class="btn btn btn-dark"
+                                  type="submit"
+                                  id="network-code-button"
+                                  onmouseenter='onMouseEnterEvent("network-code-button","If the comment is useful for training the Comment-Generator-Network");'
+                                  onmouseleave='onMouseLeaveEvent("network-code-button");'
+                                  style="width: 100%; margin-top:-95px; text-align: left;  background-color: #8267BE; font-weight: bold;" ><span style="font-size: 12px; background-color: green;" class="badge bg-success float-right position-relative">ALT+N</span>Useful for training CG Network
+                          </button>
+                      <hr class="solid" style="position:relative; top:-40px;" id="bottomLevelLineSep">
+                  </div>
+
+              </div>
+
+
+            <div class=" col-md-8 overflow-auto" id="codeColumn" style="height: 84.5vh;">
+
+                <div class="row-column">
+
+                    <pre id="rows-wrapper" class="rows">
+                        <code id="rows" class="lang-java" style="display:inline; float:left; overflow: scroll;"></code>
+                        <code id="code" class="lang-java">{{ artifact_class }}</code>
+                    </pre>
+
+                </div>
+
+            </div>
+
+
+            <div class=" col-md-2 no-float" id="methodsLabel" style="background-color: black;">
+
+                <div id="upperSide" style="height: 40%;  position: absolute; width:100%; float:left; overflow-y: scroll;">
+                    <!-- This Div is dyamically filled -->
+                </div>
+
+                <div id="divider" style="position: relative; top:38%; z-index:1000;">
+                     <hr class="solid">
+                         <div style="text-align: center; color: white;">
+                             <h4 style="width:100%; position:relative;">TO BE SOLVED</h4>
+                             <span id="badgeCounter" class="badge badge-secondary" style="font-size:20px;">0</span>
+                         </div>
+                    <hr class="solid">
+                </div>
+                 <div id="lowerSide" style="height: 35vh;  overflow-y: scroll; position:sticky;  top:62%; width:100%; float: left;">
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row no-gutters">
+            <div class=" col-md-2"></div>
+            <div class=" col-md-8">
+                <div contenteditable="true" id="textAreaSelectedText1" rows="4" cols="25" class="textareaLabeler"></div>
+                <div contenteditable="true" id="textAreaSelectedText2" rows="4" cols="25" class="textareaReviewer"></div>
+{#                <button id="clearText" style="color:white;" type="submit" class='btn btn-warning button-corner-down' onclick="reset(); resetClicked=true;">Clear</button>#}
+{#                <button id="saveClassification" type="submit" class='btn btn-success button-corner-up' onclick="saveCategorization(); resetClicked=true;">Save</button>#}
+            </div>
+            <div class=" col-md-2"></div>
+        </div>
+
+    {% endblock %}
+
+
+
+ </div>
+
+
+{% block scriptsStuff %}
+
+    <script>
+
+        // -------------------------Start-------------------------
+
+        // highlighting
+        hljs.highlightAll();
+
+
+        //updating progress bar
+        var labelProgressPercentage = {{ overall_labeling_status['n_artifacts_labeled_and_reviewed'] }}*100 / {{ overall_labeling_status['n_total_artifacts'] }};
+        labelProgressPercentage = Math.ceil(labelProgressPercentage);
+        document.getElementById("top-progress-bar-status").style.width = labelProgressPercentage + '%';
+        document.getElementById("top-progress-bar-status").innerHTML = labelProgressPercentage + '%';
+
+        const methodsList = {{ artifact_methodsListLines | tojson }};
+        const methodsListNames = {{ artifact_methodsName | safe }};
+        const numberOfCommentsPerMethod = {{ artifact_commentsPerMethod | safe  }};
+        const userDefinedCategories = {{ artifact_UDC | tojson}};
+        const linesList = {{ artifact_lines | tojson }};
+        const methodsRanges = {{ artifact_methodsRanges | safe }};
+
+
+        var startTime = new Date().getTime();
+
+        var labelCategories = ["new-category-button",
+                                'rationale-button',
+                                'deprecation-button',
+                                'usage-button',
+                                'exception-button',
+                                'todo-button',
+                                'code-description-button',
+                                'comment-code-button',
+                                'incomplete-button',
+                                'no-code-button',
+                                'network-code-button'
+        ];
+
+
+        var selectedCategory = "";
+        var selectedCodeText = "";
+        var selectedCommentText = "";
+        var methodUnderClassification = "";
+        var counterAssociations = 0;
+        var numberOfCommentsPerClass = 0;
+        var currentIndexComment = -1;
+        var dictIndex = 0;
+        var toBeSolved = 0;
+        var whereCommentBegin = -1;
+        var whereCommentEnd = -1;
+        var resetClicked=false;
+        var clicked=false;
+        var badgeCounterCategory = 1;
+        var currentClassification=-1;
+        var commentsForTheMethodUnderClassification = 0;
+        var defaultColorHighlight='red';
+        var flagSwitch=true;
+        var noCode=false;
+        var isForNN=0;
+        var changingToClassificationOnGoing=false;
+
+        var commentEleToHighlight = [];
+        var highlightedCommentsInReviewing = [];
+
+        // Creating dictionaries for the labeler
+        var dictHighlightedCode = {};
+        var dictHighlightedComments = {};
+        var comment2Method = {};
+        var dictHighlightedCommentsPosition = {};
+        var dictHighlightedCommentsCharacterPosition = {};
+        var dictHighlightedCodeCharacterPosition = {};
+        var dictSelectedCategories = {};
+        var mapAssociation2Comment = {}
+        var dictSelectedCode = {};
+        var dictSelectedComment = {};
+
+        // Creating dictionaries for the reviewer
+        var dictHighlightedCodeRev = {};
+        var dictHighlightedCommentsRev = {};
+        var comment2MethodRev = {};
+        var dictHighlightedCommentsPositionRev = {};
+        var dictHighlightedCommentsCharacterPositionRev = {};
+        var dictHighlightedCodeCharacterPositionRev = {};
+        var dictSelectedCategoriesRev = {};
+        var mapAssociation2CommentRev = {}
+        var dictSelectedCodeRev = {};
+        var dictSelectedCommentRev = {};
+        var resolvedConflicts = {};
+        var conflicts = {};
+        var associationsList = [];
+
+
+        var comments = []; //In this list we store all the comments within a given class
+        var selectedComments = [];
+        var selectedCode = [];
+        var listSelectedSpanCode = [];
+        var userDefinedNewCategoryNames = [];
+        var userDefinedNewCategoryDescriptions = [];
+        var userDefinedCategoryShortcuts = [];
+        var listSelectedSpanComment = [];
+        var selectedCategories = [];
+        var commentsToHighlight = [];
+        var methodSelectionButton = [];
+        var moveSelectionButtonList = [];
+        var highlightedCodeDuringSelection = []
+        var commentIndex = [];
+        var alreadyVisited = [];
+        var beginningCommentCharacterPosition = -1
+        var endCommentCharacterPosition = -1
+
+
+
+        var entityMap = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+          '/': '&#x2F;',
+          '`': '&#x60;',
+          '=': '&#x3D;'
+        };
+
+        for (let i = 0; i < numberOfCommentsPerMethod.length; i++) {
+            numberOfCommentsPerClass = numberOfCommentsPerClass + numberOfCommentsPerMethod[i];
+        }
+
+        // -------------------------End-------------------------
+
+
+
+        $(document).ready(function () {
+
+            $("h1").css('color', 'white');
+            $("h2").css('color', 'white');
+            $('.hljs-comment').css('user-select', 'none');
+
+            /* User defined Categories to be added */
+            for (var i = 0; i < userDefinedCategories['category_id'].length; i++) {
+
+                var tag = document.createElement("div");
+                tag.setAttribute('class', 'buttonWrapper');
+                tag.setAttribute('onmouseenter', 'onMouseEnterEvent("' + userDefinedCategories['category_button_name'][i] + '","' + userDefinedCategories['description'][i] + '");');
+                tag.setAttribute('onmouseleave', 'onMouseLeaveEvent("' + userDefinedCategories['category_button_name'][i] + '" );');
+                var newButton = document.createElement('button');
+                newButton.setAttribute('class', 'btn btn btn-secondary category-button')
+                newButton.setAttribute('type', 'submit');
+                newButton.setAttribute('id', userDefinedCategories['category_button_name'][i]);
+                newButton.setAttribute('style', 'width: 100%; text-align: left;');
+                //newButton.innerHTML = '<span style="font-size: 13px;" class="badge bg-success float-left position-relative"><i class="fas fa-angle-double-up"></i><b>~</b>'+(i+parseInt(userDefinedCategories['shortcut']))+'</span>'+userDefinedCategories['category_name'][i];
+                newButton.innerHTML = '<span style="font-size: 12px;" class="badge bg-success float-right position-relative">' + "ALT+CTRL+" + (i + parseInt(userDefinedCategories['shortcut'])) + '</span>' + userDefinedCategories['category_name'][i];
+                tag.appendChild(newButton);
+                $("#categoriesColumn").append(tag);
+
+            }
+
+            // Filling up lines column
+            for (var i = 0; i < linesList.length; i++) {
+                linesList[i] = linesList[i] + 1
+                var newButton = '<div style="width:100%;" class="row-line">' + linesList[i] + '</div>';
+                $("#rows").append($(newButton));
+            }
+
+            for (var i = 0; i < methodsList.length; i++) {
+                var buttonID = "button-method-" + i;
+                var startingLine = methodsList[i].split("-")[0];
+                var buttonText = methodsListNames[i];
+
+                var scrollCall = 'moveToSelectedMethodFromLine(' + startingLine + ',' + '\'' + buttonID + '\')';
+                var newButton = '<div class="buttonWrapper style="display: flex; flex-direction:row;"> <button class="btn btn btn-dark" type="submit" id="' + buttonID + '" onclick="' + scrollCall + '" style="width: 100%;  text-align: left; white-space: normal; word-wrap: break-word;">' + buttonText + '</button> </div>';
+                $("#upperSide").append($(newButton));
+
+                //initialize comment2Method
+                comment2Method[i] = 0;
+            }
+
+            comments = document.getElementsByClassName("hljs-comment");
+
+            // Labeler dictionaries
+            for (var i = 0; i < 150; i++) {
+                dictHighlightedCode[i] = [];
+                dictHighlightedCommentsPosition[i] = [];
+                dictHighlightedCommentsCharacterPosition[i] = [];
+                dictHighlightedCodeCharacterPosition[i] = [];
+                dictSelectedCategories[i] = [];
+                dictSelectedCode[i] = [];
+                dictSelectedComment[i] = [];
+            }
+
+            // Reviewer dictionaries
+            for (var i = 0; i < 150; i++) {
+                dictHighlightedCodeRev[i] = [];
+                dictHighlightedCommentsPositionRev[i] = [];
+                dictHighlightedCommentsCharacterPositionRev[i] = [];
+                dictHighlightedCodeCharacterPositionRev[i] = [];
+                dictSelectedCategoriesRev[i] = [];
+                dictSelectedCodeRev[i] = [];
+                dictSelectedCommentRev[i] = [];
+                conflicts[i] = [];
+            }
+
+            moveSelectionButtonList = {{ artifact_moveSelectionButtonList  |tojson }};
+            conflicts_results = {{ conflicts_result  |tojson }};
+
+            // Loading the lists from the labeler
+            dictHighlightedCommentsPosition = {{ artifact_labeler_commentPositionList | tojson }};
+            dictSelectedCode = {{ selectedCodeLabeler | tojson }};
+            dictSelectedComment = {{ selectedCommentsLabeler | tojson }};
+            dictSelectedCategories = {{ artificat_labeler_categories |tojson }};
+            dictHighlightedCodeCharacterPosition = {{ codeSpanLabeler | tojson }};
+            dictHighlightedCommentsCharacterPosition = {{ commentSpanLabeler | tojson  }};
+
+            // Loading the lists from the reviewer
+            dictHighlightedCommentsPositionRev = {{ artifact_reviewer_commentPositionList | tojson }};
+            dictSelectedCodeRev = {{ selectedCodeReviewer | tojson }};
+            dictSelectedCommentRev = {{ selectedCommentsReviewer | tojson }};
+            dictSelectedCategoriesRev = {{ artificat_reviewer_categories |tojson }};
+            dictHighlightedCodeCharacterPositionRev = {{ codeSpanReviewer | tojson }};
+            dictHighlightedCommentsCharacterPositionRev = {{ commentSpanReviewer | tojson  }};
+
+
+            //console.log(dictSelectedCodeRev);
+            //console.log(conflicts_results);
+
+             for (const [key, value] of Object.entries(dictSelectedCode)) {
+                 associationsList.push(Number(key));
+             }
+
+             // Grab here the first key of our dictionaries
+             currentClassification = associationsList[0];
+
+
+             // Update the budgeCounter with the # of instances to be resolved
+            toBeSolved = Object.keys(dictHighlightedCommentsCharacterPositionRev).length;
+            $("#badgeCounter").text(toBeSolved);
+
+
+
+
+            var idsButton = [];
+            for (const [key, value] of Object.entries(moveSelectionButtonList)) {
+                    var doc = new DOMParser().parseFromString(value, "text/xml");
+                    var idButton = doc.getElementsByClassName("buttonWrapper")[0].id;
+                    var indexID = "association-" + idButton.split("-")[2];
+                    if(associationsList.includes(Number(idButton.split("-")[2]))) {
+                        idsButton.push(idButton);
+                        $("#lowerSide").append($(value));
+                        document.getElementById(indexID).setAttribute('onclick', 'highlightRelevantPart(' + idButton.split("-")[2] + ')');
+                    }
+
+             }
+
+
+
+            for (var i=0;i<associationsList.length;i++) {
+                var key = associationsList[i];
+                if (key === currentClassification) {
+                    continue;
+                } else {
+                    $('#association-' + key).attr('disabled', 'disabled');
+                }
+            }
+
+
+            $("#revButton").prop('disabled', true);
+            $("#labButton").prop('disabled', true);
+            $("#skipButton").prop('disabled', true);
+
+
+            /* --------------------------------------------------- */
+
+            ShowNotification('Analyzing conflict mode!', 'warning');
+            $('#code').css('user-select', 'none');
+
+
+            //Highlighting target comments
+            highlightTargetComments(comments, 'commentHighlighting');
+
+
+        });
+
+        // This function highlight the relevant part for the conflict
+        function highlightRelevantPart(index) {
+
+                //unlock bottom-left buttons
+                $("#association-"+index).prop('disabled', true);
+                $("#revButton").removeAttr('disabled');
+                $("#labButton").removeAttr('disabled');
+                $("#skipButton").removeAttr('disabled');
+
+                // Handling comment here ///
+                var arr = Array.from(comments);
+                index = index.toString();
+                var commentPositionSelector = dictHighlightedCommentsPosition[index][0];
+
+                var tagSelector = arr[commentPositionSelector];
+
+                try {
+                    $(tagSelector)[0].scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'start'});
+                    $(tagSelector).addClass('animationLabel').delay(500).queue(function () {
+                        $(this).removeClass('animationLabel').dequeue();
+                    });
+                } catch (e) {
+                }
+
+
+
+                // Comment handling finishes here ///
+
+                if (conflicts_results[index]['conflict_categories'] === 1
+                    && conflicts_results[index]['conflict_code'] === 0
+                    && conflicts_results[index]['conflict_comment'] === 0 ) {
+
+                    displayConflictInformationForCategories(index);
+
+                    // Highlight the code, that in this case has no conflicts
+                    for (const [key, value] of Object.entries(dictHighlightedCodeCharacterPosition)) {
+                        if (key === index && value[0] !== -1) {
+                            for (var i = 0; i < value.length; i++) {
+                                var start_point = value[i].split('-')[0];
+                                var end_point = value[i].split('-')[1];
+                                highlightRange4Conflict(start_point, end_point, "#FFE5CC");
+                            }
+                        }
+                    }
+
+                    // Highlight the comment, that in this case has no conflicts
+                    for (var j = 0; j < dictSelectedComment[index].length; j++) {
+                        currentIndexComment = Number(j);
+                        // We highlight the previously made classification
+                        const position = dictHighlightedCommentsPosition[index][currentIndexComment];
+                        $(comments[position]).css('color', 'red').attr('id', 'comment-highlight-' + currentClassification);
+                    }
+
+
+                }
+
+                if (   conflicts_results[index]['conflict_categories'] === 1
+                    && conflicts_results[index]['conflict_code'] === 1
+                    && conflicts_results[index]['conflict_comment'] === 0 ) {
+
+                    displayConflictInformationForCategories(index);
+                    displayConflictInformationForCode(index);
+
+                    // Highlight the comment, that in this case has no conflicts
+                    for (var j = 0; j < dictSelectedComment[index].length; j++) {
+
+                        currentIndexComment = Number(j);
+                        // We highlight the previously made classification
+                        const position = dictHighlightedCommentsPosition[index][currentIndexComment];
+                        $(comments[position]).css('color', 'red').attr('id', 'comment-highlight-' + currentClassification);
+                    }
+
+                }
+
+                if (   conflicts_results[index]['conflict_code'] === 1
+                    && conflicts_results[index]['conflict_categories'] === 0
+                    && conflicts_results[index]['conflict_comment'] === 0) {
+
+                    displayConflictInformationForCode(index);
+
+
+                    //highlight the selected buttons categories
+                    for (var i = 0; i < dictSelectedCategories[index].length; i++) {
+                        $("#" +  dictSelectedCategories[index][i]).addClass("btn-grad");
+                    }
+
+
+                    // Highlight the comment, that in this case has no conflicts
+                    for (var j = 0; j < dictSelectedComment[index].length; j++) {
+
+                        currentIndexComment = Number(j);
+                        // We highlight the previously made classification
+                        const position = dictHighlightedCommentsPosition[index][currentIndexComment];
+                        $(comments[position]).css('color', 'red').attr('id', 'comment-highlight-' + currentClassification);
+                    }
+                }
+
+                if (   conflicts_results[index]['conflict_code'] === 1
+                    && conflicts_results[index]['conflict_categories'] === 0
+                    && conflicts_results[index]['conflict_comment'] === 1) {
+
+                    displayConflictInformationForComment(index);
+                    displayConflictInformationForCode(index);
+
+
+                     //highlight the selected buttons categories
+                    for (var i = 0; i < dictSelectedCategories[index].length; i++) {
+                        $("#" +  dictSelectedCategories[index][i]).addClass("btn-grad");
+                    }
+
+                }
+
+                if (   conflicts_results[index]['conflict_code'] === 0
+                    && conflicts_results[index]['conflict_categories'] === 1
+                    && conflicts_results[index]['conflict_comment'] === 1) {
+
+                    displayConflictInformationForComment(index);
+                    displayConflictInformationForCategories(index);
+
+                    // Highlight the code, that in this case has no conflicts
+                    for (const [key, value] of Object.entries(dictHighlightedCodeCharacterPosition)) {
+                        if (key === index && value[0] !== -1) {
+                            for (var i = 0; i < value.length; i++) {
+                                var start_point = value[i].split('-')[0];
+                                var end_point = value[i].split('-')[1];
+                                highlightRange4Conflict(start_point, end_point, "#FFE5CC");
+                            }
+                        }
+                    }
+
+                }
+
+                if (   conflicts_results[index]['conflict_code'] === 0
+                    && conflicts_results[index]['conflict_categories'] === 0
+                    && conflicts_results[index]['conflict_comment'] === 1) {
+
+                    displayConflictInformationForComment(index);
+
+
+                    //highlight the selected buttons categories
+                    for (var i = 0; i < dictSelectedCategories[index].length; i++) {
+                        $("#" +  dictSelectedCategories[index][i]).addClass("btn-grad");
+                    }
+
+
+                    // Highlight the code, that in this case has no conflicts
+                    for (const [key, value] of Object.entries(dictHighlightedCodeCharacterPosition)) {
+                        if (key === index && value[0] !== -1) {
+                            for (var i = 0; i < value.length; i++) {
+                                var start_point = value[i].split('-')[0];
+                                var end_point = value[i].split('-')[1];
+                                highlightRange4Conflict(start_point, end_point, "#FFE5CC");
+                            }
+                        }
+                    }
+                }
+
+                 if (   conflicts_results[index]['conflict_code'] === 1
+                    && conflicts_results[index]['conflict_categories'] === 1
+                    && conflicts_results[index]['conflict_comment'] === 1) {
+
+                    displayConflictInformationForComment(index);
+                    displayConflictInformationForCode(index);
+                    displayConflictInformationForCategories(index);
+                }
+
+            }
+
+
+            // Function adapted from: https://stackoverflow.com/questions/6240139/highlight-text-range-using-javascript
+            function highlightRange4Conflict(start, end, color) {
+
+                let cur = 0;
+                let replacements = [];
+
+                var selector = document.getElementById("code");
+
+                function dig(node) {
+                    if (node.nodeType === 3) {
+                        let nodeLen = (node).data.length;
+                        let next = cur + nodeLen;
+                        if (next > start && cur < end) {
+                            let pos = cur >= start ? cur : start;
+                            let len = (next < end ? next : end) - pos;
+                            if (len > 0) {
+                                if (!(pos === cur && len === nodeLen && node.parentNode &&
+                                    node.parentNode.childNodes && node.parentNode.childNodes.length === 1 &&
+                                    (node.parentNode).tagName === 'SPAN' && (node.parentNode).className === 'highlight1')) {
+
+                                    replacements.push({
+                                        node: node,
+                                        pos: pos - cur,
+                                        len: len,
+                                    });
+                                }
+                            }
+                        }
+                        cur = next;
+                    } else if (node.nodeType === 1) {
+                        let childNodes = node.childNodes;
+                        if (childNodes && childNodes.length) {
+                            for (let i = 0; i < childNodes.length; i++) {
+                                dig(childNodes[i]);
+                                if (cur >= end) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $(selector).each(function (index, element) {
+                    dig(element);
+                });
+
+
+                let highlightedSection = [];
+
+                for (let i = 0; i < replacements.length; i++) {
+                    let replacement = replacements[i];
+                    let highlight = document.createElement('span');
+                    highlight.setAttribute("id", "highlight-" + currentClassification);
+                    highlight.setAttribute("style", "background-color:" + color);
+                    //highlight.setAttribute("style", "background-color: "+color);
+                    let wordNode = replacement.node.splitText(replacement.pos);
+                    wordNode.splitText(replacement.len);
+                    let wordClone = wordNode.cloneNode(true);
+                    highlight.appendChild(wordClone);
+                    wordNode.parentNode.replaceChild(highlight, wordNode);
+                    highlightedSection.push(highlight);
+                }
+
+                unselectAll();
+                return highlightedSection;
+            }
+
+
+          function submitClassification() {
+
+                if (confirm('Are you sure?')) {
+                    var data_json = {
+                        artifact_id: {{  artifact_id }},
+                        solved: JSON.stringify(resolvedConflicts),
+                    };
+                    $.post("/conflict", data_json, function (response, status) {
+                        let response_json = $.parseJSON(response.toString());
+                        ShowNotification(response_json['status'], "success", 200);
+
+                    });
+
+                    //wait one second before moving on
+                    setTimeout(function () {
+                        ChangeSkipToNextConflict();
+                    }, 1000); //in millisecond
+
+                } else {}
+
+            }
+
+
+        function saveNewClassification(target) {
+
+            resetColorHighlightingCategories();
+
+            resetHighlightedCode(dictHighlightedCode[currentClassification], currentClassification);
+            resetHighlightedCode(dictHighlightedCodeRev[currentClassification], currentClassification);
+
+            var spanSelector = "[id=comment-highlight-" + (currentClassification) + "]";
+            $(spanSelector).css('color', '');
+
+
+            $("#textAreaSelectedText1").text("");
+             $("#textAreaSelectedText2").text("");
+
+            $('.btn-grad').removeClass('btn-grad');
+
+            if (target === "reviewer") {
+                resolvedConflicts[currentClassification] =  ["R", conflicts_results[currentClassification]];
+                //$("#revButton").prop('disabled', true);
+            }
+
+            if (target === "labeler") {
+                 resolvedConflicts[currentClassification] = ["L", conflicts_results[currentClassification]];
+                //$("#labButton").prop('disabled', true);
+            }
+
+            if (target === "skip") {
+                 resolvedConflicts[currentClassification] = ["S", conflicts_results[currentClassification]];
+                //$("#revButton").prop('disabled', true);
+            }
+
+            unselectAll();
+
+            // make the div disappears
+            $("#association-" + currentClassification).fadeOut(300, function () {
+                $(this).remove();
+            });
+
+            //unlock next association button
+            const elementToUnlock = associationsList.shift();
+            $('#association-' + elementToUnlock).removeAttr('disabled');
+
+            toBeSolved -= 1;
+            $("#badgeCounter").text(toBeSolved);
+
+            //at this stage we also have to update the overall array index for our dictionaries
+            currentClassification = associationsList[0];
+
+
+            $('#association-' + currentClassification).removeAttr('disabled');
+
+            for (var i=0;i<associationsList.length;i++) {
+                key = associationsList[i];
+                if (key === currentClassification) {
+                    continue;
+                } else {
+                    $('#association-' + key).attr('disabled', 'disabled');
+                }
+            }
+
+            if (toBeSolved === 0){
+                ShowNotification('You have resolved all the conflicts....Please submit the new classification','success', 500);
+            }
+
+
+            $("#revButton").prop('disabled', true);
+            $("#labButton").prop('disabled', true);
+            $("#skipButton").prop('disabled', true);
+
+            //console.log(resolvedConflicts);
+
+
+        }
+
+
+        function displayConflictInformationForCategories(index){
+
+            // Shared categories between labeler and reviewer
+            const filteredArray = dictSelectedCategoriesRev[index].filter(value => dictSelectedCategories[index].includes(value));
+            for (var i = 0; i < filteredArray.length; i++) {
+                const valueToRemove = filteredArray[i];
+                $("#" + filteredArray).addClass("btn-grad");
+
+                dictSelectedCategoriesRev[index] = dictSelectedCategoriesRev[index].filter(item => item !== valueToRemove);
+                dictSelectedCategories[index] = dictSelectedCategories[index].filter(item => item !== valueToRemove);
+            }
+
+
+            //highlight the selected button category
+            for (var i = 0; i < dictSelectedCategories[index].length; i++) {
+                $("#" + dictSelectedCategories[index][i]).css('background-color', 'green');
+            }
+
+
+            for (var i = 0; i < dictSelectedCategoriesRev[index].length; i++) {
+                $("#" + dictSelectedCategoriesRev[index][i]).css('background-color', 'orange');
+            }
+
+        }
+
+        function updateTextArea(textToDisplay, textArea){
+            $(textArea).append(textToDisplay);
+        }
+
+        function skip_next_artifact() {
+            if (confirm('Are you sure?')) {
+                window.location.pathname = '/conflicting';
+            }
+        }
+
+
+        function displayConflictInformationForCode(index){
+
+            for ( var j=0; j<dictHighlightedCodeCharacterPosition[index].length; j++) {
+                    var start_point = dictHighlightedCodeCharacterPosition[index][j].split('-')[0];
+                    var end_point = dictHighlightedCodeCharacterPosition[index][j].split('-')[1];
+                    highlightRange4Conflict(start_point, end_point, "#FFE5CC");
+
+                    var lines = dictSelectedCode[index][j].split('\n');
+                    for (var k = 0; k < lines.length; k++) {
+                        updateTextArea('<span class="selected-comment" style="color: #80FF00;">' + escapeHtml(lines[k]) + '</span>','#textAreaSelectedText1');
+                    }
+
+            }
+
+
+            for ( var j=0; j<dictHighlightedCodeCharacterPositionRev[index].length; j++) {
+                    var start_point = dictHighlightedCodeCharacterPositionRev[index][j].split('-')[0];
+                    var end_point = dictHighlightedCodeCharacterPositionRev[index][j].split('-')[1];
+                    highlightRange4Conflict(start_point, end_point, "#FFE5CC");
+
+                    var lines = dictSelectedCodeRev[index][j].split('\n');
+                    for (var k = 0; k < lines.length; k++) {
+                        updateTextArea('<span class="selected-comment" style="color: #FF9933;">' + escapeHtml(lines[k]) + '</span>','#textAreaSelectedText2');
+                    }
+
+            }
+
+
+        }
+
+        function displayConflictInformationForComment(index) {
+
+            for (var j = 0; j < dictHighlightedCommentsPosition[index].length; j++) {
+                 const position = dictHighlightedCommentsPosition[index][j];
+                 $(comments[position]).css('color', 'red').attr('id', 'comment-highlight-' + index);
+            }
+
+            for (var j = 0; j < dictHighlightedCommentsCharacterPosition[index].length; j++) {
+                 var lines = dictSelectedComment[index][j].split('\n');
+                 for (var k = 0; k < lines.length; k++) {
+                     updateTextArea('<span class="selected-comment" style="color: #FFFF33;">' + escapeHtml(lines[k]) + '</span>', '#textAreaSelectedText1');
+                 }
+             }
+
+             /*------------------------------------------------ */
+
+
+             for (var j = 0; j < dictHighlightedCommentsPositionRev[index].length; j++) {
+                 const position = dictHighlightedCommentsPositionRev[index][j];
+                 $(comments[position]).css('color', 'red').attr('id', 'comment-highlight-' + index);
+            }
+
+            for (var j = 0; j < dictHighlightedCommentsCharacterPositionRev[index].length; j++) {
+                 var lines = dictSelectedCommentRev[index][j].split('\n');
+                 for (var k = 0; k < lines.length; k++) {
+                     updateTextArea('<span class="selected-comment" style="color: #FFFF33;">' + escapeHtml(lines[k]) + '</span>', '#textAreaSelectedText2');
+                 }
+             }
+        }
+
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/header.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/vendor/bootstrap-confirmation.min.js') }}"></script>
+
+{% endblock %}

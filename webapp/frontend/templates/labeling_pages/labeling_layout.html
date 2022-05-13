@@ -294,7 +294,6 @@
         const userDefinedCategories = {{ artifact_UDC | tojson}};
         const linesList = {{ artifact_lines | tojson }};
         const isLabeled = {{ isLabeled }};
-        const isConflict = {{ isConlifct }};
         const methodsRanges = {{ artifact_methodsRanges | safe }};
         const isReviewed = {{ isReviewed }};
         const workingMode = (isLabeled === 0 ? 0  : 1);
@@ -525,11 +524,6 @@
             $("#toggleButton").click(function () {
                saveFlaggedClass();
             });
-
-            if (isConflict == 1){
-                ShowNotification('Reviewing mode!', 'warning');
-                $('#code').css('user-select', 'none');
-            }
 
 
             //This instance need to be reviewed, therefore we start preparing the needed lists and the layout
