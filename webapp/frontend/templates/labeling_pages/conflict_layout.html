@@ -575,12 +575,10 @@
                             }
                         }
                     }
-
                     // Highlight the comment, that in this case has no conflicts
-                    for (var j = 0; j < dictSelectedComment[index].length; j++) {
-                        currentIndexComment = Number(j);
+                    for (var j = 0; j < dictHighlightedCommentsPosition[index].length; j++) {
                         // We highlight the previously made classification
-                        const position = dictHighlightedCommentsPosition[index][currentIndexComment];
+                        const position = dictHighlightedCommentsPosition[index][j];
                         $(comments[position]).css('color', 'red').attr('id', 'comment-highlight-' + currentClassification);
                     }
 
@@ -595,11 +593,9 @@
                     displayConflictInformationForCode(index);
 
                     // Highlight the comment, that in this case has no conflicts
-                    for (var j = 0; j < dictSelectedComment[index].length; j++) {
-
-                        currentIndexComment = Number(j);
+                    for (var j = 0; j < dictHighlightedCommentsPosition[index].length; j++) {
                         // We highlight the previously made classification
-                        const position = dictHighlightedCommentsPosition[index][currentIndexComment];
+                        const position = dictHighlightedCommentsPosition[index][j];
                         $(comments[position]).css('color', 'red').attr('id', 'comment-highlight-' + currentClassification);
                     }
 
@@ -618,12 +614,10 @@
                     }
 
 
-                    // Highlight the comment, that in this case has no conflicts
-                    for (var j = 0; j < dictSelectedComment[index].length; j++) {
-
-                        currentIndexComment = Number(j);
+                   // Highlight the comment, that in this case has no conflicts
+                    for (var j = 0; j < dictHighlightedCommentsPosition[index].length; j++) {
                         // We highlight the previously made classification
-                        const position = dictHighlightedCommentsPosition[index][currentIndexComment];
+                        const position = dictHighlightedCommentsPosition[index][j];
                         $(comments[position]).css('color', 'red').attr('id', 'comment-highlight-' + currentClassification);
                     }
                 }
