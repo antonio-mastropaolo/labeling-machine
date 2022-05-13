@@ -21,8 +21,9 @@ def is_signed_in():
     else:
         session_username = session['username']
         print("Debugging: "+ session_username)
-        db_user = db.session.query(User).filter(User.username == session_username)
-        #db_user = User.query.filter_by(username=session_username).first()
+
+        #db_user = db.session.query(User).filter(User.username == session_username)
+        db_user = User.query.filter_by(username=session_username).first()
         if db_user is None:
             sign_out()
             return False

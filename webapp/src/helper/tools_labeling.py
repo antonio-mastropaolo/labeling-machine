@@ -104,7 +104,7 @@ def choose_next_instance_to_be_solved():
 
     candidate_artifact_ids = list(instances)
 
-    #print("Candidate list: ", candidate_artifact_ids)
+    print("Candidate list: ", candidate_artifact_ids)
 
     if len(candidate_artifact_ids) == 0:
         return None,None
@@ -128,7 +128,7 @@ def choose_next_instance_to_be_solved():
             #print("\t Conflict categories: {}".format(q.__dict__['conflict_categories']))
             #print("\t Conflict code: {}".format(q.__dict__['conflict_code']))
             #print("\t Conflict comment: {}".format(q.__dict__['conflict_comment']))
-            if q.__dict__['conflict_categories'] == 0 and q.__dict__['conflict_code'] == 0 and q.__dict__['conflict_comment']==1:
+            if q.__dict__['conflict_categories'] == 1 or q.__dict__['conflict_code'] == 1 or q.__dict__['conflict_comment']==1:
                 canBreak = True
                 result.append(newObject)
 
