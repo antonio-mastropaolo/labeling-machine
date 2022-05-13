@@ -99,3 +99,17 @@ class LabelingDataLabeler(db.Model):
     username = db.Column(db.Text)
     elapsed_labeling_time = db.Column(db.Integer)
     labeled_at = db.Column(db.DateTime(timezone=True))
+
+
+class LabelingDataNoConflicts(db.Model):
+    __tablename__ = 'LabelingDataNoConflicts'
+    labeling_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    artifact_id = db.Column(db.Integer)
+    username = db.Column(db.Text)
+    code = db.Column(db.Text)
+    codeSpan = db.Column(db.Text)
+    categories = db.Column(db.Text)
+    comments = db.Column(db.Text)
+    commentSpan = db.Column(db.Text)
+    classificationType = db.Column(db.Text)
+    isSolved = db.Column(db.Text)

@@ -3,10 +3,9 @@ import random
 from sqlalchemy import func, distinct, select
 
 from src import db
-from src.database.models import LabelingDataLabeler, LabelingDataReviewer, Artifact, FlaggedArtifact
+from src.database.models import LabelingDataLabeler, LabelingDataReviewer, Artifact, FlaggedArtifact, Conflict, LabelingDataNoConflicts
 from src.helper.consts import N_API_NEEDS_LABELING
 from src.helper.tools_common import who_is_signed_in, get_locked_artifacts
-
 
 def get_labeling_status(username):  # OLD: get_user_labeling_status
     if username is None:
@@ -82,8 +81,65 @@ def get_n_reviewed_artifact_per_user():
     print(result)
     return ret
 
+def choose_next_instance_to_be_solved():
+
+    solved_artefacts = {row[0] for row in db.session.query(LabelingDataNoConflicts.artifact_id).all()}
+    #print("Solved artifact: ",solved_artefacts)
+
+    #Instances needing resolution
+    instances = {row[0] for row in db.session.query(Conflict.artifact_id).all()}
+    instances -= solved_artefacts
+
+    #The user x cannot resolve conflicts he has previously labeled
+    labeled_artifact_ids = {row[0] for row in db.session.query(distinct(LabelingDataLabeler.artifact_id)).filter(LabelingDataLabeler.username == who_is_signed_in()).all()}
+    instances -= labeled_artifact_ids
+
+    # The user x cannot resolve conflicts he has previously reviewed
+    reviewed_artifact_ids = {row[0] for row in db.session.query(distinct(LabelingDataReviewer.artifact_id)).filter(LabelingDataReviewer.username == who_is_signed_in()).all()}
+    instances -= reviewed_artifact_ids
+
+
+    candidate_artifact_ids = list(instances)
+
+    #print("Candidate list: ", candidate_artifact_ids)
+
+    if len(candidate_artifact_ids) == 0:
+        return None,None
+
+    result = []
+
+    while True:
+
+        picked_artifact = random.choice(candidate_artifact_ids)
+
+        canBreak = False
+        for q in db.session.query(Conflict).filter(Conflict.artifact_id == picked_artifact).all():
+
+            newObject = {'classification':q.__dict__['classification'],
+                         'conflict_categories':q.__dict__['conflict_categories'],
+                         'conflict_code':q.__dict__['conflict_code'],
+                         'conflict_comment': q.__dict__['conflict_comment']
+                         }
+
+            #print("Classification: {}".format(q.__dict__['classification']))
+            #print("\t Conflict categories: {}".format(q.__dict__['conflict_categories']))
+            #print("\t Conflict code: {}".format(q.__dict__['conflict_code']))
+            #print("\t Conflict comment: {}".format(q.__dict__['conflict_comment']))
+            if q.__dict__['conflict_categories'] == 0 and q.__dict__['conflict_code'] == 0 and q.__dict__['conflict_comment']==1:
+                canBreak = True
+                result.append(newObject)
+
+        if canBreak:
+            break
+
+
+    return picked_artifact, result
+
+
 
 def choose_next_random_api():
+
+
     candidate_artifact_ids = {row[0] for row in db.session.query(Artifact.id).all()}
 
     # ############### 1. Remove Already Labeled And Reviewed By Me

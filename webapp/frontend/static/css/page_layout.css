@@ -107,6 +107,33 @@
     margin-bottom: -2px;
 }
 
+.textareaLabeler{
+    width:33.7%;
+    overflow: hidden;
+    overflow-y: scroll;
+    bottom:0;
+    height:11%;
+    float:left;
+    border-style: double;
+    background-color: #404040;
+    position:fixed;
+    margin-bottom: -2px;
+}
+
+.textareaReviewer{
+    width:33.3%;
+    overflow: hidden;
+    overflow-y: scroll;
+    bottom:0;
+    height:11%;
+    float:left;
+    left:50.1%;
+    border-style: double;
+    background-color: #404040;
+    position:fixed;
+    margin-bottom: -2px;
+}
+
 #code{
     margin-top:-2.44%;
 }

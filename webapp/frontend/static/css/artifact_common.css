@@ -17,6 +17,38 @@
     z-index: 1031;
 }
 
+
+.btn-grad {background-image: linear-gradient(to right, #3CA55C 0%, #B5AC49  51%, #3CA55C  100%)}
+
+.btn-grad {
+    position: sticky;
+    text-align: center;
+    transition: 0.5s;
+    background-size: 200% auto;
+    color: white;
+    box-shadow: 0 0 20px #eee;
+    border-radius: 1px;
+    display: inline-block;
+}
+
+.btn-grad:hover {
+    background-position: right center; /* change the direction of the change here */
+    color: #fff;
+    text-decoration: none;
+}
+
+
+.f-circle {
+    font-family: Arial; /* your font family here! */
+    font-weight: bold;
+    font-size: large;
+    display: block;
+    color:white;
+    border: 5px solid white;
+    border-radius: 999px;
+    padding: 6px 12px;
+}
+
 .lower-panel {
     background-color: #5a6268;
     border: 0px solid black;

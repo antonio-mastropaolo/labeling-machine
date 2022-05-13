@@ -17,8 +17,6 @@ function skip_next_artifact() {
     }
 }
 
-
-
 function escapeHtml (string) {
   return String(string).replace(/[&<>"'`=\/]/g, function (s) {
     return entityMap[s];
@@ -30,6 +28,13 @@ function ChangeSkipToNext() {
     $("#next-skip-btn").removeClass("btn-outline-success");
     $("#next-skip-btn").addClass("btn-success");
     window.location.pathname = '/labeling';
+}
+
+function ChangeSkipToNextConflict() {
+    $("#next-skip-btn").text("Next");
+    $("#next-skip-btn").removeClass("btn-outline-success");
+    $("#next-skip-btn").addClass("btn-success");
+    window.location.pathname = '/conflicting';
 }
 
 
@@ -213,7 +218,6 @@ function moveToSelectedMethodFromTag(indexComment, indexClassification) {
     }
 
     highlightSelectedCategoryButton(currentClassification);
-
 
     for (const [key, value] of Object.entries(dictSelectedCode)) {
           if (key === indexClassification){ continue; }
