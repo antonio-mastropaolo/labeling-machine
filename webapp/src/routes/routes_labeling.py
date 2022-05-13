@@ -119,31 +119,31 @@ def conflicting_with_artifact(target_artifact_id):
 
 
             for conflictItem in conflictList:
+                try:
+                    classification = str(conflictItem['classification'])
+                    rev_commentPositionList[classification] = eval(reviewer_classification.__dict__['commentPosition'])[classification]
+                    rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
+                    rev_codeSpan[classification] = eval(reviewer_classification.__dict__['codeSpan'])[classification]
+                    rev_selectedComments[classification] = eval(reviewer_classification.__dict__['comments'])[classification]
+                    rev_commentSpan[classification] = eval(reviewer_classification.__dict__['commentSpan'])[classification]
+                    rev_selectedCode[classification] = eval(reviewer_classification.__dict__['code'])[classification]
 
-                classification = str(conflictItem['classification'])
-                rev_commentPositionList[classification] = eval(reviewer_classification.__dict__['commentPosition'])[classification]
-                rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
-                rev_codeSpan[classification] = eval(reviewer_classification.__dict__['codeSpan'])[classification]
-                rev_selectedComments[classification] = eval(reviewer_classification.__dict__['comments'])[classification]
-                rev_commentSpan[classification] = eval(reviewer_classification.__dict__['commentSpan'])[classification]
-                rev_selectedCode[classification] = eval(reviewer_classification.__dict__['code'])[classification]
-
-                lab_commentPositionList[classification] = eval(labeler_classification.__dict__['commentPosition'])[classification]
-                lab_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[classification]
-                lab_codeSpan[classification] = eval(labeler_classification.__dict__['codeSpan'])[classification]
-                lab_selectedComments[classification] = eval(labeler_classification.__dict__['comments'])[classification]
-                lab_commentSpan[classification] = eval(labeler_classification.__dict__['commentSpan'])[classification]
-                lab_selectedCode[classification] = eval(labeler_classification.__dict__['code'])[classification]
-                # except Exception:
-                #     with open('broken-instances.txt','a+') as f:
-                #         f.write("{}  @ {}\n".format(target_artifact_id,classification))
-                #         (selected_artifact_id, instanceObject) = choose_next_instance_to_be_solved()
-                #         # print('Att: ',selected_artifact_id)
-                #         if selected_artifact_id == None and instanceObject == None:
-                #             return "It seems no more conflicts can be resolved on your side. Well Done!"
-                #         else:
-                #             return redirect(
-                #                 url_for('conflicting_with_artifact', target_artifact_id=selected_artifact_id))
+                    lab_commentPositionList[classification] = eval(labeler_classification.__dict__['commentPosition'])[classification]
+                    lab_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[classification]
+                    lab_codeSpan[classification] = eval(labeler_classification.__dict__['codeSpan'])[classification]
+                    lab_selectedComments[classification] = eval(labeler_classification.__dict__['comments'])[classification]
+                    lab_commentSpan[classification] = eval(labeler_classification.__dict__['commentSpan'])[classification]
+                    lab_selectedCode[classification] = eval(labeler_classification.__dict__['code'])[classification]
+                except Exception:
+                    with open('/home/antonio/inline-labeling/broken-instances.txt','a+') as f:
+                        f.write("{}  @ {}\n".format(target_artifact_id,classification))
+                        (selected_artifact_id, instanceObject) = choose_next_instance_to_be_solved()
+                        # print('Att: ',selected_artifact_id)
+                        if selected_artifact_id == None and instanceObject == None:
+                            return "It seems no more conflicts can be resolved on your side. Well Done!"
+                        else:
+                            return redirect(
+                                url_for('conflicting_with_artifact', target_artifact_id=selected_artifact_id))
 
 
             #################### the dictionaries are filled ####################
