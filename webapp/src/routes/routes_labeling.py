@@ -117,21 +117,28 @@ def conflicting_with_artifact(target_artifact_id):
 
             moveSelectionButtonList = eval(labeler_classification.__dict__['moveSelectionButton'])
 
-            for conflictItem in conflictList:
-                classification = str(conflictItem['classification'])
-                rev_commentPositionList[classification] = eval(reviewer_classification.__dict__['commentPosition'])[classification]
-                rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
-                rev_codeSpan[classification] = eval(reviewer_classification.__dict__['codeSpan'])[classification]
-                rev_selectedComments[classification] = eval(reviewer_classification.__dict__['comments'])[classification]
-                rev_commentSpan[classification] = eval(reviewer_classification.__dict__['commentSpan'])[classification]
-                rev_selectedCode[classification] = eval(reviewer_classification.__dict__['code'])[classification]
 
-                lab_commentPositionList[classification] = eval(labeler_classification.__dict__['commentPosition'])[classification]
-                lab_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[classification]
-                lab_codeSpan[classification] = eval(labeler_classification.__dict__['codeSpan'])[classification]
-                lab_selectedComments[classification] = eval(labeler_classification.__dict__['comments'])[classification]
-                lab_commentSpan[classification] = eval(labeler_classification.__dict__['commentSpan'])[classification]
-                lab_selectedCode[classification] = eval(labeler_classification.__dict__['code'])[classification]
+            for conflictItem in conflictList:
+                try:
+                    classification = str(conflictItem['classification'])
+                    rev_commentPositionList[classification] = eval(reviewer_classification.__dict__['commentPosition'])[classification]
+                    rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
+                    rev_codeSpan[classification] = eval(reviewer_classification.__dict__['codeSpan'])[classification]
+                    rev_selectedComments[classification] = eval(reviewer_classification.__dict__['comments'])[classification]
+                    rev_commentSpan[classification] = eval(reviewer_classification.__dict__['commentSpan'])[classification]
+                    rev_selectedCode[classification] = eval(reviewer_classification.__dict__['code'])[classification]
+
+                    lab_commentPositionList[classification] = eval(labeler_classification.__dict__['commentPosition'])[classification]
+                    lab_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[classification]
+                    lab_codeSpan[classification] = eval(labeler_classification.__dict__['codeSpan'])[classification]
+                    lab_selectedComments[classification] = eval(labeler_classification.__dict__['comments'])[classification]
+                    lab_commentSpan[classification] = eval(labeler_classification.__dict__['commentSpan'])[classification]
+                    lab_selectedCode[classification] = eval(labeler_classification.__dict__['code'])[classification]
+                except Exception:
+                    with open('broken-instances.txt','a+') as f:
+                        f.write("{}  @ {}\n".format(target_artifact_id,classification))
+                        return redirect(url_for('conflicting'))
+
 
             #################### the dictionaries are filled ####################
 
