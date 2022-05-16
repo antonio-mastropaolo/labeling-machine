@@ -13,9 +13,9 @@ def get_labeling_status(username):  # OLD: get_user_labeling_status
     labeling_status = {'username': username,
                        'total_n_artifact': get_total_number_of_classes_in_db(),
                        'total_n_labeled': get_n_labeled_artifact_per_user().get(username,0),
-                       'total_n_reviewed': get_n_reviewed_artifact_per_user().get(username,0)
+                       'total_n_reviewed': get_n_reviewed_artifact_per_user().get(username,0),
+                       'total_n_solved': get_n_solved_artifact_per_user().get(username, 0)
                        }
-    #print(labeling_status)
     return labeling_status
 
 
@@ -27,7 +27,11 @@ def get_overall_labeling_progress():
                        'n_artifacts_to_be_labeled': get_total_number_of_classes_to_be_labeled(),
                        'n_artifacts_reviewed': get_total_number_of_reviewed_classes(),
                        'n_artifacts_labeled_and_reviewed': get_total_number_of_labeled_and_reviewed_classes(),
-                       'n_total_artifacts': get_total_number_of_classes_in_db()
+                       'n_total_artifacts': get_total_number_of_classes_in_db(),
+                       'n_artifacts_solved': get_total_number_solved_classes(),
+                       'n_artifacts_to_be_solved': len(list(get_total_number_of_artefacts_to_be_solved())),
+                       'n_artifacts_already_solved': len(get_total_number_of_solved_artefacts())
+                       
                        }
 
     return labeling_status
@@ -38,8 +42,9 @@ def get_total_number_of_solved_artefacts():
 
 def get_total_number_of_artefacts_to_be_solved():
     all_artefacts = {row[0] for row in db.session.query(Conflict.artifact_id).all()}
+    #print(len(all_artefacts))
     to_be_solved = all_artefacts - get_total_number_of_solved_artefacts()
-    print("here ",to_be_solved)
+    #print("here ",len(to_be_solved))
     return set(to_be_solved)
 
 def get_overall_conflicting_progress():
@@ -72,6 +77,10 @@ def get_total_number_of_reviewed_classes():
     #return 10 for test
     return result
 
+def get_total_number_solved_classes():
+    result = LabelingDataNoConflicts.query.count()
+    return result
+
 def get_total_number_of_labeled_and_reviewed_classes():
     result =  db.session.query(LabelingDataLabeler.artifact_id).join(LabelingDataReviewer, LabelingDataLabeler.artifact_id == LabelingDataReviewer.artifact_id).count()
     return result
@@ -87,6 +96,15 @@ def get_n_labeled_artifact_per_user():
 
     return ret
 
+def get_n_solved_artifact_per_user():
+    result = db.session.query(LabelingDataNoConflicts.username, func.count(distinct(LabelingDataNoConflicts.artifact_id))).group_by(LabelingDataNoConflicts.username).all()
+
+    ret = {}
+    for row in result:
+        ret[row[0]] = row[1]
+    print(result)
+    return ret
+
 def get_n_reviewed_artifact_per_user():
     """
         Return a dictionary of {username: n_labeled_artifact, ...}
@@ -96,7 +114,7 @@ def get_n_reviewed_artifact_per_user():
     result = db.session.query(LabelingDataReviewer.username, func.count(distinct(LabelingDataReviewer.artifact_id))).group_by(LabelingDataReviewer.username).all()
     for row in result:
         ret[row[0]] = row[1]
-    print(result)
+    #print(result)
     return ret
 
 def choose_next_instance_to_be_solved():
@@ -122,7 +140,7 @@ def choose_next_instance_to_be_solved():
 
     candidate_artifact_ids = list(instances)
 
-    print("Candidate list: ", candidate_artifact_ids)
+    #print("Candidate list: ", candidate_artifact_ids)
 
     if len(candidate_artifact_ids) == 0:
         return None,None
