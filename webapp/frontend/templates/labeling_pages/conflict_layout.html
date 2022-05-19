@@ -904,6 +904,9 @@
 
         function displayConflictInformationForCode(index){
 
+            console.log(dictHighlightedCodeCharacterPosition[index]);
+            console.log(dictHighlightedCodeCharacterPositionRev[index]);
+
             for ( var j=0; j<dictHighlightedCodeCharacterPosition[index].length; j++) {
                     if(dictHighlightedCodeCharacterPosition[index][j] !== -1){
                         var start_point = dictHighlightedCodeCharacterPosition[index][j].split('-')[0];
@@ -920,14 +923,16 @@
 
 
             for ( var j=0; j<dictHighlightedCodeCharacterPositionRev[index].length; j++) {
+                if(dictHighlightedCodeCharacterPositionRev[index][j] !== -1) {
                     var start_point = dictHighlightedCodeCharacterPositionRev[index][j].split('-')[0];
                     var end_point = dictHighlightedCodeCharacterPositionRev[index][j].split('-')[1];
                     highlightRange4Conflict(start_point, end_point, "#FFE5CC");
 
                     var lines = dictSelectedCodeRev[index][j].split('\n');
                     for (var k = 0; k < lines.length; k++) {
-                        updateTextArea('<span class="selected-comment" style="color: #FF9933;">' + escapeHtml(lines[k]) + '</span>','#textAreaSelectedText2');
+                        updateTextArea('<span class="selected-comment" style="color: #FF9933;">' + escapeHtml(lines[k]) + '</span>', '#textAreaSelectedText2');
                     }
+                }
 
             }
 
