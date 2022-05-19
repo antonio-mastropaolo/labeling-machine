@@ -901,13 +901,15 @@
         function displayConflictInformationForCode(index){
 
             for ( var j=0; j<dictHighlightedCodeCharacterPosition[index].length; j++) {
-                    var start_point = dictHighlightedCodeCharacterPosition[index][j].split('-')[0];
-                    var end_point = dictHighlightedCodeCharacterPosition[index][j].split('-')[1];
-                    highlightRange4Conflict(start_point, end_point, "#FFE5CC");
+                    if(dictHighlightedCodeCharacterPosition[index][j] !== -1){
+                        var start_point = dictHighlightedCodeCharacterPosition[index][j].split('-')[0];
+                        var end_point = dictHighlightedCodeCharacterPosition[index][j].split('-')[1];
+                        highlightRange4Conflict(start_point, end_point, "#FFE5CC");
 
-                    var lines = dictSelectedCode[index][j].split('\n');
-                    for (var k = 0; k < lines.length; k++) {
-                        updateTextArea('<span class="selected-comment" style="color: #80FF00;">' + escapeHtml(lines[k]) + '</span>','#textAreaSelectedText1');
+                        var lines = dictSelectedCode[index][j].split('\n');
+                        for (var k = 0; k < lines.length; k++) {
+                            updateTextArea('<span class="selected-comment" style="color: #80FF00;">' + escapeHtml(lines[k]) + '</span>','#textAreaSelectedText1');
+                        }
                     }
 
             }
