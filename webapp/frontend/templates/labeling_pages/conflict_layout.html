@@ -865,15 +865,19 @@
         function displayConflictInformationForCategories(index){
 
             // Shared categories between labeler and reviewer
+
             const filteredArray = dictSelectedCategoriesRev[index].filter(value => dictSelectedCategories[index].includes(value));
             for (var i = 0; i < filteredArray.length; i++) {
                 const valueToRemove = filteredArray[i];
-                $("#" + filteredArray).addClass("btn-grad");
+                /*if (valueToRemove === "no-code-button"){
+                    $("#" + "no-code-button").addClass("btn-grad");
+                }
+                console.log(valueToRemove);*/
+                $("#" + valueToRemove).addClass("btn-grad");
 
                 dictSelectedCategoriesRev[index] = dictSelectedCategoriesRev[index].filter(item => item !== valueToRemove);
                 dictSelectedCategories[index] = dictSelectedCategories[index].filter(item => item !== valueToRemove);
             }
-
 
             //highlight the selected button category
             for (var i = 0; i < dictSelectedCategories[index].length; i++) {
