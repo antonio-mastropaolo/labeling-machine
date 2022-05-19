@@ -16,8 +16,8 @@
                         <tr>
                             <th></th>
                             <th><span class="badge1"/> #Of Java Classes Labeled</th>
-{#                            <th><span class="badge2"/> Sentences</th>#}
                             <th><span class="badge3"/> #Of Java Classes Reviewed</th>
+                            <th><span class="badge2"/> #Of Java Classes Solved</th>
                         </tr>
                         <tr>
                             <td style="padding-top: 10px;"></td>
@@ -27,6 +27,7 @@
                                 <td><b>{{ labelingStatDict['username'] }}</b></td>
                                 <td>{{ labelingStatDict['total_n_labeled'] }} </td>
                                 <td>{{ labelingStatDict['total_n_reviewed'] }} </td>
+                                <td>{{ labelingStatDict['total_n_solved'] }} </td>
                             </tr>
                         {% endfor %}
                     </table>
@@ -58,6 +59,18 @@
                                  aria-valuemax="100">?
                             </div>
                         </div>
+
+                        Conflicting
+                        <span style="float: right"><b>{{ s_info['n_artifacts_solved'] }}</b> out of <b>{{ s_info['n_artifacts_to_be_solved'] }}</b></span>
+
+                        <div class="progress progress-bar-striped bg-warning">
+                            <div id="source-pb-{{ source_id }}-conflict" class="progress-bar" role="progressbar"
+                                 style="width: 0%;"
+                                 aria-valuenow="0"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">?
+                            </div>
+                        </div>
                         <br>
                     {% endfor %}
                 </div>
@@ -77,6 +90,13 @@
             reviewingProgressPercentage = Math.ceil(reviewingProgressPercentage);
             document.getElementById("source-pb-{{ source_id }}-review").style.width = reviewingProgressPercentage + '%';
             document.getElementById("source-pb-{{ source_id }}-review").innerHTML = reviewingProgressPercentage + '%';
+
+
+            var conflictingProgressPercentage = {{ s_info['n_artifacts_already_solved'] }} *100 / {{ s_info['n_artifacts_to_be_solved'] }};
+            conflictingProgressPercentage = Math.ceil(conflictingProgressPercentage);
+            document.getElementById("source-pb-{{ source_id }}-conflict").style.width = conflictingProgressPercentage + '%';
+            document.getElementById("source-pb-{{ source_id }}-conflict").innerHTML = conflictingProgressPercentage + '%';
+
         {% endfor %}
 
         document.getElementById('navbar-stat').classList.add('active');
