@@ -43,7 +43,7 @@ def get_total_number_of_solved_artefacts():
 def get_total_number_of_artefacts_to_be_solved():
     all_artefacts = {row[0] for row in db.session.query(Conflict.artifact_id).all()}
     #print(len(all_artefacts))
-    to_be_solved = all_artefacts - get_total_number_of_solved_artefacts()
+    #to_be_solved = all_artefacts - get_total_number_of_solved_artefacts()
     #print("here ",len(to_be_solved))
     return set(to_be_solved)
 
