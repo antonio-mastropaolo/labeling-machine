@@ -45,7 +45,7 @@ def get_total_number_of_artefacts_to_be_solved():
     #print(len(all_artefacts))
     #to_be_solved = all_artefacts - get_total_number_of_solved_artefacts()
     #print("here ",len(to_be_solved))
-    return set(to_be_solved)
+    return set(all_artefacts)
 
 def get_overall_conflicting_progress():
     conflicting_status = {'source_id': 0,
