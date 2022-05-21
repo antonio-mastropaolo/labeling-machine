@@ -135,7 +135,7 @@ def conflicting_with_artifact(target_artifact_id):
                     lab_commentSpan[classification] = eval(labeler_classification.__dict__['commentSpan'])[classification]
                     lab_selectedCode[classification] = eval(labeler_classification.__dict__['code'])[classification]
                 except Exception:
-                    with open('/home/antonio/broken-instances.txt','a+') as f:
+                    with open('broken-instances.txt','a+') as f:
                         f.write("{}  @ {}\n".format(target_artifact_id,classification))
                         (selected_artifact_id, instanceObject) = choose_next_instance_to_be_solved()
                         # print('Att: ',selected_artifact_id)
