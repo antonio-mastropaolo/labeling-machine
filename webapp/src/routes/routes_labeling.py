@@ -69,6 +69,10 @@ def conflicting_with_artifact(target_artifact_id):
             #Add conflicts object to conflictList
             conflictList = []
             conflicts = {}
+
+            to_be_updated_true_conflicts = []
+            to_be_updated_false_conflicts = []
+
             for q in db.session.query(Conflict).filter(Conflict.artifact_id == target_artifact_id).all():
 
                 isAConflictOnCategory = 0
@@ -81,22 +85,48 @@ def conflicting_with_artifact(target_artifact_id):
                              'conflict_comment': q.__dict__['conflict_comment']
                              }
 
+                # //////////////////////////////////////////////////////
                 if q.__dict__['conflict_categories'] == 1:
                     isAConflictOnCategory = 1
 
-                if q.__dict__['conflict_code'] == 1:
-                    isAConflictOnCode = 1
+                # //////////////////////////////////////////////////////
 
+                # we make sure of the conflicts on the code since [-1] created troubles.
+                cls = q.__dict__['classification']
+
+                rev_code = eval(reviewer_classification.__dict__['code'])[str(cls)]
+                lab_code = eval(labeler_classification.__dict__['code'])[str(cls)]
+                rev_selection = ''
+                for item in rev_code:
+                    rev_selection += ''.join(str(item).split())
+
+                lab_selection = ''
+                for item in lab_code:
+                    lab_selection += ''.join(str(item).split())
+
+                if q.__dict__['conflict_code'] == 1:
+                    if rev_selection == lab_selection:
+                        isAConflictOnCode = 1
+                    else:
+                        to_be_updated_false_conflicts.append(q.__dict__['conflict_id'])
+                        isAConflictOnCode = 0
+                else:
+                    if rev_selection != lab_selection:
+                        to_be_updated_true_conflicts.append(q.__dict__['conflict_id'])
+                        isAConflictOnCode = 1
+
+                # //////////////////////////////////////////////////////
 
                 if  q.__dict__['conflict_comment'] == 1:
                     isAConflictOnComment = 1
+
+                # //////////////////////////////////////////////////////
+
 
                 conflicts[q.__dict__['classification']] = {"conflict_categories":isAConflictOnCategory, "conflict_code":isAConflictOnCode, "conflict_comment":isAConflictOnComment};
 
                 if isAConflictOnCategory or isAConflictOnCode or isAConflictOnComment:
                     conflictList.append(newObject)
-
-            moveSelectionButtonList = {}
 
 
             # Preparing dictionaries to be returned to the html page
@@ -117,10 +147,7 @@ def conflicting_with_artifact(target_artifact_id):
 
             moveSelectionButtonList = eval(labeler_classification.__dict__['moveSelectionButton'])
 
-
             for conflictItem in conflictList:
-                #try:
-
                 classification = str(conflictItem['classification'])
                 rev_commentPositionList[classification] = eval(reviewer_classification.__dict__['commentPosition'])[classification]
                 rev_codeSpan[classification] = eval(reviewer_classification.__dict__['codeSpan'])[classification]
@@ -130,11 +157,9 @@ def conflicting_with_artifact(target_artifact_id):
 
                 # handling emad's problem with the category selection
                 try:
-                    rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[
-                        classification]
-                except Excpetion:
-                    rev_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[
-                        classification]
+                    rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
+                except Exception:
+                    rev_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[classification]
 
                 lab_commentPositionList[classification] = eval(labeler_classification.__dict__['commentPosition'])[classification]
                 lab_codeSpan[classification] = eval(labeler_classification.__dict__['codeSpan'])[classification]
@@ -144,22 +169,31 @@ def conflicting_with_artifact(target_artifact_id):
 
                 # handling emad's problem with the category selection
                 try:
-                    lab_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[
-                        classification]
-
+                    lab_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[classification]
                 except Exception:
                     lab_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
-                # except Exception:
-                #     with open('broken-instances.txt','a+') as f:
-                #         f.write("{}  @ {}\n".format(target_artifact_id, classification))
-                #         continue
-                        # (selected_artifact_id, instanceObject) = choose_next_instance_to_be_solved()
-                        # print('Att: ',selected_artifact_id)
-                        # if selected_artifact_id == None and instanceObject == None:
-                        #     return "It seems no more conflicts can be resolved on your side. Well Done!"
-                        # else:
-                        #     return redirect(
-                        #         url_for('conflicting_with_artifact', target_artifact_id=selected_artifact_id))
+
+            # here we fix the Conflict Table if needed
+
+            # update conflict
+            flagUpdate = False
+            for itemToBeUpdate in to_be_updated_true_conflicts:
+                db.session.query(Conflict). \
+                    filter(Conflict.conflict_id == itemToBeUpdate). \
+                    update({'conflict_code': 1})
+                flagUpdate = True
+                db.session.flush()
+
+            # update conflict
+            for itemToBeUpdate in to_be_updated_false_conflicts:
+                db.session.query(Conflict). \
+                    filter(Conflict.conflict_id == itemToBeUpdate). \
+                    update({'conflict_code': 0})
+                flagUpdate = True
+                db.session.flush()
+
+            if flagUpdate:
+                db.session.commit()
 
 
             #################### the dictionaries are filled ####################
