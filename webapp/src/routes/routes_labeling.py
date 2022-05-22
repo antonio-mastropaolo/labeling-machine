@@ -136,14 +136,15 @@ def conflicting_with_artifact(target_artifact_id):
                     lab_selectedCode[classification] = eval(labeler_classification.__dict__['code'])[classification]
                 except Exception:
                     with open('broken-instances.txt','a+') as f:
-                        f.write("{}  @ {}\n".format(target_artifact_id,classification))
-                        (selected_artifact_id, instanceObject) = choose_next_instance_to_be_solved()
+                        f.write("{}  @ {}\n".format(target_artifact_id, classification))
+                        continue
+                        # (selected_artifact_id, instanceObject) = choose_next_instance_to_be_solved()
                         # print('Att: ',selected_artifact_id)
-                        if selected_artifact_id == None and instanceObject == None:
-                            return "It seems no more conflicts can be resolved on your side. Well Done!"
-                        else:
-                            return redirect(
-                                url_for('conflicting_with_artifact', target_artifact_id=selected_artifact_id))
+                        # if selected_artifact_id == None and instanceObject == None:
+                        #     return "It seems no more conflicts can be resolved on your side. Well Done!"
+                        # else:
+                        #     return redirect(
+                        #         url_for('conflicting_with_artifact', target_artifact_id=selected_artifact_id))
 
 
             #################### the dictionaries are filled ####################

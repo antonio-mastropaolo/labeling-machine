@@ -139,7 +139,8 @@ def choose_next_instance_to_be_solved():
     instances -= flagged_artefacts
 
     candidate_artifact_ids = list(instances)
-
+    #print(candidate_artifact_ids)
+    #print(len(candidate_artifact_ids))
     #print("Candidate list: ", candidate_artifact_ids)
 
     if len(candidate_artifact_ids) == 0:
