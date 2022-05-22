@@ -140,14 +140,14 @@ def choose_next_instance_to_be_solved():
 
     candidate_artifact_ids = list(instances)
     #print(candidate_artifact_ids)
-    print(len(candidate_artifact_ids))
-    print("Candidate list: ", candidate_artifact_ids)
+    # print(len(candidate_artifact_ids))
+    # print("Candidate list: ", candidate_artifact_ids)
 
     if len(candidate_artifact_ids) == 0:
         return None,None
 
     result = []
-
+    picked_artifact = None
     for item in candidate_artifact_ids:
         canBreak = False
         for q in db.session.query(Conflict).filter(Conflict.artifact_id == item).all():
@@ -170,35 +170,10 @@ def choose_next_instance_to_be_solved():
             picked_artifact = item
             break
 
+    #print('Here ', picked_artifact)
     return picked_artifact, result
 
 
-    # while True:
-    #     print("stucked?")
-    #     picked_artifact = random.choice(candidate_artifact_ids)
-    #
-    #     canBreak = False
-    #     for q in db.session.query(Conflict).filter(Conflict.artifact_id == picked_artifact).all():
-    #
-    #         newObject = {'classification':q.__dict__['classification'],
-    #                      'conflict_categories':q.__dict__['conflict_categories'],
-    #                      'conflict_code':q.__dict__['conflict_code'],
-    #                      'conflict_comment': q.__dict__['conflict_comment']
-    #                      }
-    #
-    #         #print("Classification: {}".format(q.__dict__['classification']))
-    #         #print("\t Conflict categories: {}".format(q.__dict__['conflict_categories']))
-    #         #print("\t Conflict code: {}".format(q.__dict__['conflict_code']))
-    #         #print("\t Conflict comment: {}".format(q.__dict__['conflict_comment']))
-    #         if q.__dict__['conflict_categories'] == 1 or q.__dict__['conflict_code'] == 1 or q.__dict__['conflict_comment']==1:
-    #             canBreak = True
-    #             result.append(newObject)
-    #
-    #     if canBreak:
-    #         break
-    #
-    #
-    # return picked_artifact, result
 
 
 

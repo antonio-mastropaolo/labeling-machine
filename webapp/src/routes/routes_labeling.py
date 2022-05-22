@@ -40,10 +40,9 @@ def conflicting():
         if is_signed_in():
             (selected_artifact_id, instanceObject) = choose_next_instance_to_be_solved()
             #print('Att: ',selected_artifact_id)
-            if selected_artifact_id is None and instanceObject is None:
-                return "It seems no more conflicts can be resolved on your side. Well Done!"
+            if selected_artifact_id is None and instanceObject == []:
+                return "It seems no more conflicts can be solved on your side. Well Done!"
             else:
-                print("are we in?")
                 return redirect(url_for('conflicting_with_artifact', target_artifact_id=selected_artifact_id))
         else:
             return "Please Sign-in first."
