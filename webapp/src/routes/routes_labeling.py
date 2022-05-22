@@ -123,30 +123,32 @@ def conflicting_with_artifact(target_artifact_id):
 
                 classification = str(conflictItem['classification'])
                 rev_commentPositionList[classification] = eval(reviewer_classification.__dict__['commentPosition'])[classification]
-
-                #handling emad's problem with the category selection
-                try:
-                    rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
-                except Excpetion:
-                    rev_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[classification]
-
                 rev_codeSpan[classification] = eval(reviewer_classification.__dict__['codeSpan'])[classification]
                 rev_selectedComments[classification] = eval(reviewer_classification.__dict__['comments'])[classification]
                 rev_commentSpan[classification] = eval(reviewer_classification.__dict__['commentSpan'])[classification]
                 rev_selectedCode[classification] = eval(reviewer_classification.__dict__['code'])[classification]
 
-                lab_commentPositionList[classification] = eval(labeler_classification.__dict__['commentPosition'])[classification]
-                lab_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[classification]
-
                 # handling emad's problem with the category selection
                 try:
-                    lab_codeSpan[classification] = eval(labeler_classification.__dict__['codeSpan'])[classification]
-                except Exception:
-                    rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
+                    rev_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[
+                        classification]
+                except Excpetion:
+                    rev_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[
+                        classification]
 
+                lab_commentPositionList[classification] = eval(labeler_classification.__dict__['commentPosition'])[classification]
+                lab_codeSpan[classification] = eval(labeler_classification.__dict__['codeSpan'])[classification]
                 lab_selectedComments[classification] = eval(labeler_classification.__dict__['comments'])[classification]
                 lab_commentSpan[classification] = eval(labeler_classification.__dict__['commentSpan'])[classification]
                 lab_selectedCode[classification] = eval(labeler_classification.__dict__['code'])[classification]
+
+                # handling emad's problem with the category selection
+                try:
+                    lab_selectedCategories[classification] = eval(labeler_classification.__dict__['categories'])[
+                        classification]
+
+                except Exception:
+                    lab_selectedCategories[classification] = eval(reviewer_classification.__dict__['categories'])[classification]
                 # except Exception:
                 #     with open('broken-instances.txt','a+') as f:
                 #         f.write("{}  @ {}\n".format(target_artifact_id, classification))
